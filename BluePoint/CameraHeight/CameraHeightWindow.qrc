@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/CameraHeightWindow">
+        <file>resources/schema.png</file>
+    </qresource>
+</RCC>

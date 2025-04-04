@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CameraHeight", "CameraHeight\CameraHeight.vcxproj", "{66DE3604-48B5-47CA-9380-43B653BD019C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CameraAcquisition", "CameraAcquisition\CameraAcquisition.vcxproj", "{5CFE6E9C-FB19-4D21-9589-80E509367BBF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{66DE3604-48B5-47CA-9380-43B653BD019C}.Debug|x64.ActiveCfg = Debug|x64
+		{66DE3604-48B5-47CA-9380-43B653BD019C}.Debug|x64.Build.0 = Debug|x64
+		{66DE3604-48B5-47CA-9380-43B653BD019C}.Release|x64.ActiveCfg = Release|x64
+		{66DE3604-48B5-47CA-9380-43B653BD019C}.Release|x64.Build.0 = Release|x64
+		{5CFE6E9C-FB19-4D21-9589-80E509367BBF}.Debug|x64.ActiveCfg = Debug|x64
+		{5CFE6E9C-FB19-4D21-9589-80E509367BBF}.Debug|x64.Build.0 = Debug|x64
+		{5CFE6E9C-FB19-4D21-9589-80E509367BBF}.Release|x64.ActiveCfg = Release|x64
+		{5CFE6E9C-FB19-4D21-9589-80E509367BBF}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5284AFC9-CD41-45AD-A711-52FCDF65DCE2}
+	EndGlobalSection
+EndGlobal
