@@ -76,7 +76,7 @@ void CameraController::deleteCameraProcessor()
 	const CameraProcessor* cp = m_model->getCameraProcessor();
 	if (cp)
 	{
-		delete cp;
 		m_model->setCameraProcessor(nullptr);
+		delete cp;
 	}
 }
