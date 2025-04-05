@@ -112,20 +112,20 @@
   <ItemGroup>
     <ClCompile Include="CameraController.cpp" />
     <ClCompile Include="CameraModel.cpp" />
-    <ClCompile Include="OpenCvCameraReader.cpp" />
+    <ClCompile Include="WebcamProcessor.cpp" />
     <ClCompile Include="ViewFactory.cpp" />
     <QtRcc Include="CameraWindow.qrc" />
     <QtUic Include="CameraWindow.ui" />
     <QtMoc Include="CameraWindow.h" />
-    <ClCompile Include="CameraReader.cpp" />
+    <ClCompile Include="CameraProcessor.cpp" />
     <ClCompile Include="CameraWindow.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="CameraReader.h" />
+    <QtMoc Include="CameraProcessor.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="OpenCvCameraReader.h" />
+    <QtMoc Include="WebcamProcessor.h" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="CameraModel.h" />

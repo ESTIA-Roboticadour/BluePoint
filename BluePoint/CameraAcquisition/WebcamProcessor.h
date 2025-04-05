@@ -1,24 +1,24 @@
 #pragma once
-#include "CameraReader.h"
+#include "CameraProcessor.h"
 #include <QObject>
 #include <QString>
 #include <QPixmap>
-#include <QThread>
 #include <QFuture>
 #include <QFutureWatcher>
 
+#include <atomic>
 #include "opencv2/opencv.hpp"
 
-class OpenCvCameraReader : public CameraReader
+class WebcamProcessor : public CameraProcessor
 {
 	Q_OBJECT
 
 public:
-	explicit OpenCvCameraReader(int device = 0, QObject* parent = nullptr);
-	~OpenCvCameraReader();
+	explicit WebcamProcessor(QObject* parent = nullptr);
+	~WebcamProcessor();
 
 private slots:
-	// Inherited via CameraReader
+	// Inherited via CameraProcessor
 	void open() override;
 	void close() override;
 	void startRecording(const QString& filename) override;
@@ -40,5 +40,6 @@ private:
 	QFuture<void>* m_task;
 	QFutureWatcher<void>* m_watcher;
 
-	bool m_recording;
+	std::atomic<bool> m_notCreatingWriter;
+	std::atomic<bool> m_recording;
 };

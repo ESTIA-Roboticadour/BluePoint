@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>900</width>
+    <width>902</width>
     <height>696</height>
    </rect>
   </property>
@@ -104,7 +104,21 @@
             </widget>
            </item>
            <item>
-            <widget class="QSpinBox" name="deviceSpinBox"/>
+            <widget class="QComboBox" name="deviceComboBox">
+             <property name="currentIndex">
+              <number>0</number>
+             </property>
+             <item>
+              <property name="text">
+               <string>Webcam</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Basler</string>
+              </property>
+             </item>
+            </widget>
            </item>
           </layout>
          </item>

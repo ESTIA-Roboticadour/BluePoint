@@ -21,6 +21,18 @@
       <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
       <Extensions>ts</Extensions>
     </Filter>
+    <Filter Include="Header Files\MVC">
+      <UniqueIdentifier>{803df1ab-46ff-48d7-9baf-2b2f8afa464c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Processors">
+      <UniqueIdentifier>{896574dc-08e6-4e26-a542-e0f92b451a33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MVC">
+      <UniqueIdentifier>{6e07f236-649b-44bf-9dd3-d1b761670d57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Processors">
+      <UniqueIdentifier>{47377c54-692c-497a-90e7-c9016809263e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="CameraWindow.qrc">
@@ -29,45 +41,45 @@
     <QtUic Include="CameraWindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtMoc Include="CameraWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <ClCompile Include="CameraWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CameraReader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OpenCvCameraReader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CameraModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CameraController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ViewFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CameraController.cpp">
+      <Filter>Source Files\MVC</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraModel.cpp">
+      <Filter>Source Files\MVC</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraWindow.cpp">
+      <Filter>Source Files\MVC</Filter>
+    </ClCompile>
+    <ClCompile Include="WebcamProcessor.cpp">
+      <Filter>Source Files\Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraProcessor.cpp">
+      <Filter>Source Files\Processors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="CameraReader.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="OpenCvCameraReader.h">
-      <Filter>Header Files</Filter>
+    <QtMoc Include="CameraController.h">
+      <Filter>Header Files\MVC</Filter>
     </QtMoc>
     <QtMoc Include="CameraModel.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\MVC</Filter>
     </QtMoc>
-    <QtMoc Include="CameraController.h">
-      <Filter>Header Files</Filter>
+    <QtMoc Include="CameraWindow.h">
+      <Filter>Header Files\MVC</Filter>
+    </QtMoc>
+    <QtMoc Include="CameraProcessor.h">
+      <Filter>Header Files\Processors</Filter>
+    </QtMoc>
+    <QtMoc Include="WebcamProcessor.h">
+      <Filter>Header Files\Processors</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

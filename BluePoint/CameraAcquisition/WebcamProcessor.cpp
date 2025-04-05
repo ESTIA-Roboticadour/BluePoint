@@ -1,39 +1,43 @@
-#include "OpenCvCameraReader.h"
+#include "WebcamProcessor.h"
 #include <exception>
 #include <QtConcurrent>
-#include <QDebug>
 #include <QCoreApplication>
 
-OpenCvCameraReader::OpenCvCameraReader(int device, QObject* parent) :
-	CameraReader(device, parent),
+WebcamProcessor::WebcamProcessor(QObject* parent) :
+	CameraProcessor(parent),
 	m_cap(nullptr),
 	m_writer(nullptr),
-	m_recording(false),
 	m_task(nullptr),
-	m_watcher(nullptr)
+	m_watcher(nullptr),
+	m_recording(false),
+	m_notCreatingWriter(true)
 {
 }
 
-OpenCvCameraReader::~OpenCvCameraReader()
+WebcamProcessor::~WebcamProcessor()
 {
 	close();
+	if (m_watcher)
+	{
+		m_watcher->waitForFinished();
+		QCoreApplication::processEvents(); // Ensure all events are processed before destruction, as CaptureEnded() may emit signals
+	}
 }
 
-void OpenCvCameraReader::getCameraSpecifications()
+void WebcamProcessor::getCameraSpecifications()
 {
 	if (m_cap)
 	{
 		setWidth(static_cast<int>(m_cap->get(cv::CAP_PROP_FRAME_WIDTH)));
 		setHeight(static_cast<int>(m_cap->get(cv::CAP_PROP_FRAME_HEIGHT)));
-		double fps = m_cap->get(cv::CAP_PROP_FPS);
-		setFps(static_cast<int>(fps));
+		setFps(static_cast<float>(m_cap->get(cv::CAP_PROP_FPS)));
 
 		emit dimensionsChanged(getWidth(), getHeight());
 		emit fpsChanged(getFps());
 	}
 }
 
-void OpenCvCameraReader::releaseCap()
+void WebcamProcessor::releaseCap()
 {
 	if (m_cap)
 	{
@@ -43,7 +47,7 @@ void OpenCvCameraReader::releaseCap()
 	}
 }
 
-void OpenCvCameraReader::releaseWriter()
+void WebcamProcessor::releaseWriter()
 {
 	if (m_writer)
 	{
@@ -53,7 +57,7 @@ void OpenCvCameraReader::releaseWriter()
 	}
 }
 
-void OpenCvCameraReader::releaseTask()
+void WebcamProcessor::releaseTask()
 {
 	if (m_watcher)
 	{
@@ -67,19 +71,19 @@ void OpenCvCameraReader::releaseTask()
 	}
 }
 
-void OpenCvCameraReader::open()
+void WebcamProcessor::open()
 {
 	if (!m_cap)
 	{
 		m_cap = new cv::VideoCapture();
-		if (m_cap->open(getDevice()))
+		if (m_cap->open(0))
 		{
 			getCameraSpecifications();
 			emit deviceConnected();
 
 			m_watcher = new QFutureWatcher<void>();
 
-			QObject::connect(m_watcher, &QFutureWatcher<void>::finished, this, &OpenCvCameraReader::captureEnded);
+			QObject::connect(m_watcher, &QFutureWatcher<void>::finished, this, &WebcamProcessor::captureEnded);
 
 			m_task = new QFuture<void>(QtConcurrent::run([this]()
 				{
@@ -95,16 +99,17 @@ void OpenCvCameraReader::open()
 	}
 }
 
-void OpenCvCameraReader::close()
+void WebcamProcessor::close()
 {
 	if (m_cap)
 	{
 		stopRecording();
-		m_watcher->cancel();
+		if (m_watcher && !m_watcher->isCanceled())
+			m_watcher->cancel();
 	}
 }
 
-bool OpenCvCameraReader::tryOpenWriter(const QString& filename)
+bool WebcamProcessor::tryOpenWriter(const QString& filename)
 {
 	bool success = false;
 	if (!m_writer)
@@ -120,35 +125,45 @@ bool OpenCvCameraReader::tryOpenWriter(const QString& filename)
 		}
 		catch (const std::exception& e)
 		{
+			releaseWriter();
 			emit errorThrown("Writer Error", "Failed to open the writer. " + QString(e.what()));
 		}
 	}
 	return success;
 }
 
-void OpenCvCameraReader::startRecording(const QString& filename)
+void WebcamProcessor::startRecording(const QString& filename)
 {
-	if (!m_writer && tryOpenWriter(filename))
+	if (!m_recording.load() && m_notCreatingWriter.load())
 	{
-		m_recording = true;
-		emit recordingStarted(filename);
-	}
-	else
-	{
-		emit errorThrown("Recording Error", "Failed to start recording.");
+		if (m_writer)
+		{
+			releaseWriter();
+		}
+		m_notCreatingWriter.store(false);
+		if (tryOpenWriter(filename))
+		{
+			m_recording.store(true);
+			emit recordingStarted(filename);
+		}
+		else
+		{
+			emit errorThrown("Recording Error", "Failed to start recording.");
+		}
+		m_notCreatingWriter.store(true);
 	}
 }
 
-void OpenCvCameraReader::stopRecording()
+void WebcamProcessor::stopRecording()
 {
-	if (m_recording)
+	if (m_recording.load())
 	{
-		m_recording = false;
+		m_recording.store(false);
 		emit recordingStopped();
 	}
 }
 
-void OpenCvCameraReader::captureLoop()
+void WebcamProcessor::captureLoop()
 {
 	try
 	{
@@ -165,7 +180,7 @@ void OpenCvCameraReader::captureLoop()
 				QImage img(frame.data, frame.cols, frame.rows, frame.step, QImage::Format_BGR888);
 				emit newFrameCaptured(QPixmap::fromImage(img));
 
-				if (m_recording)
+				if (m_recording.load())
 				{
 					if (m_writer && m_writer->isOpened())
 					{
@@ -175,6 +190,10 @@ void OpenCvCameraReader::captureLoop()
 					{
 						stopRecording();
 					}
+				}
+				else if (m_notCreatingWriter.load() && m_writer)
+				{
+					releaseWriter();
 				}
 			}
 			else
@@ -188,13 +207,14 @@ void OpenCvCameraReader::captureLoop()
 	{
 		emit errorThrown("Unknown Error", e.what());
 	}
+	stopRecording();
 	releaseWriter();
 }
 
-void OpenCvCameraReader::captureEnded()
+void WebcamProcessor::captureEnded()
 {
 	releaseWriter();
 	releaseTask();
-	emit deviceDisconnected();
 	releaseCap();
+	emit deviceDisconnected();
 }

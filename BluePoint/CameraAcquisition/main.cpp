@@ -1,14 +1,14 @@
 #include "ViewFactory.h"
-#include "OpenCvCameraReader.h"
+#include "WebcamProcessor.h"
 #include <QtWidgets/QApplication>
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+	QApplication a(argc, argv);
 
-    OpenCvCameraReader reader;
-    CameraWindow* view = ViewFactory::createCameraWindow(&reader);
+	WebcamProcessor* webcam = new WebcamProcessor();
+	CameraWindow* view = ViewFactory::createCameraWindow(webcam);
 
-    view->show();
-    return a.exec();
+	view->show();
+	return a.exec();
 }

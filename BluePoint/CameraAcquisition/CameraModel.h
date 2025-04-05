@@ -1,5 +1,5 @@
 #pragma once
-#include "CameraReader.h"
+#include "CameraProcessor.h"
 
 #include <QObject>
 #include <QString>
@@ -7,29 +7,35 @@
 
 class CameraModel : public QObject 
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit CameraModel(CameraReader* reader, QObject* parent = nullptr);
+	explicit CameraModel(CameraProcessor* cameraProcessor, QObject* parent = nullptr);
 
 public slots:
-    void openCamera();
-    void closeCamera();
-    void startRecording(const QString& filename);
-    void stopRecording();
-    void setDevice(int device);
+	void openCamera();
+	void closeCamera();
+	void startRecording(const QString& filename);
+	void stopRecording();
 
-signals:
-    void deviceConnected();
-    void deviceDisconnected();
-    void recordingStarted(const QString& filename);
-    void recordingStopped();
-    void newFrameCaptured(const QPixmap& pixmap);
-    void errorThrown(const QString& error, const QString& errorMessage);
-    void dimensionsChanged(int width, int height);
-    void fpsChanged(int fps);
-    void deviceChanged(int device);
+public:
+	const CameraProcessor* getCameraProcessor() const;
+	void setCameraProcessor(CameraProcessor* cameraProcessor);
 
 private:
-    CameraReader* m_cameraReader;
+	void setupCameraProcessorConnections() const;
+	void unsetupCameraProcessorConnections() const;
+
+signals:
+	void deviceConnected();
+	void deviceDisconnected();
+	void recordingStarted(const QString& filename);
+	void recordingStopped();
+	void newFrameCaptured(const QPixmap& pixmap);
+	void errorThrown(const QString& error, const QString& errorMessage);
+	void dimensionsChanged(int width, int height);
+	void fpsChanged(float fps);
+
+private:
+	CameraProcessor* m_cameraProcessor;
 };

@@ -1,9 +1,9 @@
 #pragma once
-#include "CameraReader.h"
+#include "CameraProcessor.h"
 #include "CameraWindow.h"
 
 class ViewFactory
 {
 public:
-	static CameraWindow* createCameraWindow(CameraReader* reader);
+	static CameraWindow* createCameraWindow(CameraProcessor* reader);
 };

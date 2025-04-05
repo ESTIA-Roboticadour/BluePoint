@@ -2,10 +2,10 @@
 #include "CameraController.h"
 #include "CameraModel.h"
 
-CameraWindow* ViewFactory::createCameraWindow(CameraReader* reader)
+CameraWindow* ViewFactory::createCameraWindow(CameraProcessor* cameraProcessor)
 {
-    auto* model = new CameraModel(reader);
-    auto* view = new CameraWindow();
-    auto* controller = new CameraController(view, model);
-    return view;
+	auto* model = new CameraModel(cameraProcessor);
+	auto* view = new CameraWindow();
+	auto* controller = new CameraController(view, model);
+	return view;
 }
