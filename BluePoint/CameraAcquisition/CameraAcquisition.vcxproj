@@ -110,6 +110,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BaslerAPI.cpp" />
+    <ClCompile Include="BaslerProcessor.cpp" />
     <ClCompile Include="CameraController.cpp" />
     <ClCompile Include="CameraModel.cpp" />
     <ClCompile Include="WebcamProcessor.cpp" />
@@ -134,7 +136,12 @@
     <QtMoc Include="CameraController.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="BaslerProcessor.h" />
+    <ClInclude Include="BaslerAPI.h" />
     <ClInclude Include="ViewFactory.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

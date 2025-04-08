@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QPixmap>
+#include <QSize>
 
 class CameraModel : public QObject 
 {
@@ -17,6 +18,7 @@ public slots:
 	void closeCamera();
 	void startRecording(const QString& filename);
 	void stopRecording();
+	void setWorkDimensions(const QSize& size);
 
 public:
 	const CameraProcessor* getCameraProcessor() const;
@@ -31,7 +33,7 @@ signals:
 	void deviceDisconnected();
 	void recordingStarted(const QString& filename);
 	void recordingStopped();
-	void newFrameCaptured(const QPixmap& pixmap);
+	void newFrameCaptured(const QImage& image);
 	void errorThrown(const QString& error, const QString& errorMessage);
 	void dimensionsChanged(int width, int height);
 	void fpsChanged(float fps);

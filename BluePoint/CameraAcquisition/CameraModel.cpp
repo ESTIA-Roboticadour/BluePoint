@@ -73,3 +73,8 @@ void CameraModel::stopRecording()
 {
 	m_cameraProcessor->stopRecording();
 }
+
+void CameraModel::setWorkDimensions(const QSize& size)
+{
+	m_cameraProcessor->setWorkDimensions(size);
+}

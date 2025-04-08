@@ -64,6 +64,12 @@
     <ClCompile Include="CameraProcessor.cpp">
       <Filter>Source Files\Processors</Filter>
     </ClCompile>
+    <ClCompile Include="BaslerProcessor.cpp">
+      <Filter>Source Files\Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="BaslerAPI.cpp">
+      <Filter>Source Files\Processors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="CameraController.h">
@@ -81,10 +87,19 @@
     <QtMoc Include="WebcamProcessor.h">
       <Filter>Header Files\Processors</Filter>
     </QtMoc>
+    <QtMoc Include="BaslerProcessor.h">
+      <Filter>Header Files\Processors</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ViewFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BaslerAPI.h">
+      <Filter>Header Files\Processors</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
   </ItemGroup>
 </Project>

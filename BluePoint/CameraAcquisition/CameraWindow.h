@@ -4,6 +4,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QCloseEvent>
 #include <QString>
+#include <QSize>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class CameraWindowClass; };
@@ -19,11 +20,13 @@ public:
 
 	void setDimensionsLabel(const QString& dimensions);
 	void setFpsLabel(const QString& fps);
-	void setFrameLabel(const QPixmap& pixmap);
+	void setFrameLabel(const QImage& image);
+
 	void log(const QString& message);
 	void logError(const QString& error, const QString& errorMessage);
 
 	QString getVideoFilename() const;
+	QSize getFrameLabelSize() const;
 
 protected:
 	void closeEvent(QCloseEvent* event) override;
@@ -31,12 +34,18 @@ protected:
 private:
 	void resetUi();
 	void setupShortcuts();
+	void internalSetFrame(const QImage& image);
+	
+	static QImage resizeFrame(const QImage& image);
 
 public slots:
 	void onRecordingStarted(const QString& filename);
 	void onRecordingStopped();
 	void onDeviceConnected();
 	void onDeviceDisconnected();
+
+private slots:
+	void onStartOrStopAction();
 
 signals:
 	void closing();

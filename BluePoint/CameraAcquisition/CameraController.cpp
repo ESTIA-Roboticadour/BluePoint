@@ -1,5 +1,6 @@
 #include "CameraController.h"
 #include "WebcamProcessor.h"
+#include "BaslerProcessor.h"
 
 CameraController::CameraController(CameraWindow* view, CameraModel* model, QObject* parent) :
 	QObject(parent),
@@ -21,6 +22,8 @@ CameraController::CameraController(CameraWindow* view, CameraModel* model, QObje
 	connect(m_model, &CameraModel::errorThrown, m_view, &CameraWindow::logError);
 	connect(m_model, &CameraModel::dimensionsChanged, this, &CameraController::onDimensionsChanged);
 	connect(m_model, &CameraModel::fpsChanged, this, &CameraController::onFpsChanged);
+
+	m_model->setWorkDimensions(m_view->getFrameLabelSize());
 }
 
 CameraController::~CameraController()
@@ -57,6 +60,7 @@ void CameraController::onFpsChanged(float fps)
 
 void CameraController::setDevice(int deviceIndex)
 {
+	QSize size = m_model->getCameraProcessor()->getWorkDimensions();
 	deleteCameraProcessor();
 	switch (deviceIndex)
 	{
@@ -64,11 +68,12 @@ void CameraController::setDevice(int deviceIndex)
 		m_model->setCameraProcessor(new WebcamProcessor());
 		break;
 	case 1:
-		//m_model->setCameraProcessor(new BaslerProcessor());
+		m_model->setCameraProcessor(new BaslerProcessor());
 		break;
 	default:
 		break;
 	}
+	m_model->setWorkDimensions(size);
 }
 
 void CameraController::deleteCameraProcessor()

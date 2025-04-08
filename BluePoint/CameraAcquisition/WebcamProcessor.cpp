@@ -101,12 +101,9 @@ void WebcamProcessor::open()
 
 void WebcamProcessor::close()
 {
-	if (m_cap)
-	{
-		stopRecording();
-		if (m_watcher && !m_watcher->isCanceled())
-			m_watcher->cancel();
-	}
+	stopRecording();
+	if (m_watcher && !m_watcher->isCanceled())
+		m_watcher->cancel();
 }
 
 bool WebcamProcessor::tryOpenWriter(const QString& filename)
@@ -177,8 +174,7 @@ void WebcamProcessor::captureLoop()
 					break;
 				}
 
-				QImage img(frame.data, frame.cols, frame.rows, frame.step, QImage::Format_BGR888);
-				emit newFrameCaptured(QPixmap::fromImage(img));
+				emit newFrameCaptured(QImage(frame.data, frame.cols, frame.rows, frame.step, QImage::Format_BGR888));
 
 				if (m_recording.load())
 				{
