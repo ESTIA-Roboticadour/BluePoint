@@ -4,14 +4,12 @@
 #include <exception>
 #include <chrono>
 
-#include <QtConcurrent>
 #include <QCoreApplication>
 #include <QtConcurrent>
 #include <QFuture>
 
-static QString baseName;
-
 #include "pylondataprocessing/PylonDataProcessingIncludes.h"
+#include "GenApi/GenApi.h"
 
 BaslerProcessor::BaslerProcessor(QObject* parent) :
 	CameraProcessor(parent),
@@ -38,9 +36,26 @@ BaslerProcessor::~BaslerProcessor()
 
 void BaslerProcessor::configureCamera()
 {
-	BaslerAPI::setWhiteBalanceOnce(m_camera);
-	BaslerAPI::setFps(m_camera, 30.); // 30 fps
-	BaslerAPI::setExposureTime(m_camera, 30000.); // 30 000 µs (environ 30 fps)
+	if (!BaslerAPI::maximizeAOI(m_camera))
+	{
+		emit errorThrown("Basler Configuration Error", "Failed to maximize AOI.");
+	}
+	if (!BaslerAPI::setPixelFormatBayerRG8(m_camera))
+	{
+		emit errorThrown("Basler Configuration Error", "Failed to set pixel format.");
+	}
+	if (!BaslerAPI::setWhiteBalanceOnce(m_camera))
+	{
+		emit errorThrown("Basler Configuration Error", "Failed to set white balance.");
+	}
+	if (!BaslerAPI::setFps(m_camera, 30.)) // 30 fps
+	{
+		emit errorThrown("Basler Configuration Error", "Failed to set frame rate.");
+	}
+	if (!BaslerAPI::setExposureTime(m_camera, 30000.)) // 30 000 µs (environ 30 fps)
+	{
+		emit errorThrown("Basler Configuration Error", "Failed to set exposure time.");
+	}
 }
 
 void BaslerProcessor::getCameraSpecifications()
@@ -121,18 +136,18 @@ void BaslerProcessor::open()
 			m_camera->Open();
 			if (m_camera->IsOpen())
 			{
+				configureCamera();
+				getCameraSpecifications();
+				if (getWorkWidth() == 0 || getWorkHeight() == 0)
+				{
+					setWorkDimensions(getWidth(), getHeight());
+				}
+				emit deviceConnected();
+
+				// start the capture loop
 				m_camera->StartGrabbing();
 				if (m_camera->IsGrabbing())
 				{
-					configureCamera();
-					getCameraSpecifications();
-					if (getWorkWidth() == 0 || getWorkHeight() == 0)
-					{
-						setWorkDimensions(getWidth(), getHeight());
-					}
-
-					emit deviceConnected();
-
 					m_watcher = new QFutureWatcher<void>();
 					connect(m_watcher, &QFutureWatcher<void>::finished, this, &BaslerProcessor::captureEnded);
 
@@ -145,6 +160,11 @@ void BaslerProcessor::open()
 				{
 					emit errorThrown("Basler Error", "Can not start grabbing frame");
 				}
+
+				if (!m_task)
+				{
+					releaseCamera();
+				}
 			}
 			else
 			{
@@ -154,11 +174,6 @@ void BaslerProcessor::open()
 		else
 		{
 			emit errorThrown("Basler Error", "No camera found");
-		}
-
-		if (!m_task)
-		{
-			releaseCamera();
 		}
 	}
 	catch (const Pylon::GenericException& e)
@@ -206,11 +221,6 @@ void BaslerProcessor::startRecording(const QString& filename)
 			releaseWriter();
 		}
 		m_notCreatingWriter.store(false);
-		QStringList list = filename.split('.');
-		for (int i = 0; i < list.size() - 1; i++)
-		{
-			baseName += list[i];
-		}
 
 		if (tryOpenWriter(filename))
 		{

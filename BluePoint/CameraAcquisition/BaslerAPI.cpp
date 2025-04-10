@@ -34,7 +34,7 @@ bool BaslerAPI::getHeight(Pylon::CInstantCamera* camera, int& height)
 bool BaslerAPI::setFps(Pylon::CInstantCamera* camera, double fps)
 {
 	GenApi::INodeMap& nodemap = camera->GetNodeMap();
-	
+
 	// Activer le contrôle manuel du framerate
 	GenApi::CBooleanPtr frameRateEnable = nodemap.GetNode("AcquisitionFrameRateEnable");
 	if (IsWritable(frameRateEnable))
@@ -72,5 +72,47 @@ bool BaslerAPI::setWhiteBalanceOnce(Pylon::CInstantCamera* camera)
 	bool success = IsWritable(whiteBalanceNode);
 	if (success)
 		whiteBalanceNode->SetIntValue(whiteBalanceNode->GetEntryByName("Once")->GetValue());
+	return success;
+}
+
+bool BaslerAPI::setPixelFormatBayerRG8(Pylon::CInstantCamera* camera)
+{
+	bool success = true;
+	try
+	{
+		// Set the pixel data format.
+		GenApi::INodeMap& nodemap = camera->GetNodeMap();
+		Pylon::CEnumParameter(nodemap, "PixelFormat").SetValue("BayerRG8");
+	}
+	catch (const Pylon::GenericException& e)
+	{
+		success = false;
+	}
+	return success;
+}
+
+bool BaslerAPI::maximizeAOI(Pylon::CInstantCamera* camera)
+{
+	bool success = true;
+	try
+	{
+		GenApi::INodeMap& nodemap = camera->GetNodeMap();
+
+		// Get the parameters for setting the image area of interest (Image AOI).
+		Pylon::CIntegerParameter width(nodemap, "Width");
+		Pylon::CIntegerParameter height(nodemap, "Height");
+		Pylon::CIntegerParameter offsetX(nodemap, "OffsetX");
+		Pylon::CIntegerParameter offsetY(nodemap, "OffsetY");
+
+		// Maximize the Image AOI.
+		success &= offsetX.TrySetToMinimum(); // Set to minimum if writable.
+		success &= offsetY.TrySetToMinimum(); // Set to minimum if writable.
+		width.SetToMaximum();
+		height.SetToMaximum();
+	}
+	catch (const Pylon::GenericException& e)
+	{
+		success = false;
+	}
 	return success;
 }
