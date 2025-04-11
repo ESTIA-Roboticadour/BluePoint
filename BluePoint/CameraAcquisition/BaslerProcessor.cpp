@@ -244,13 +244,14 @@ void BaslerProcessor::stopRecording()
 	}
 }
 
-//void BaslerProcessor::captureLoop()
+//void BaslerProcessor::captureLoop() // version debug pour comparer les performances
 //{
 //	try
 //	{
 //		Pylon::CGrabResultPtr ptrGrabResult;
 //		Pylon::CImageFormatConverter converter;
 //		converter.OutputPixelFormat = Pylon::PixelType_BGR8packed;
+//
 //		Pylon::CPylonImage image;
 //
 //		// pour le debug
@@ -279,8 +280,8 @@ void BaslerProcessor::stopRecording()
 //		bool hasToResize = workWidth != frameWidth || workHeight != frameHeight;
 //		findNewSizeToKeepAspectRatio(frameWidth, frameHeight, newWidth, newHeight);
 //
-//		cv::Size workSize(workWidth, workHeight);	// 640x480
 //		cv::Size newSize(newWidth, newHeight);		// 574x480 (issue de 2448x2048)
+//		cv::Size workSize(workWidth, workHeight);	// 640x480
 //
 //		cv::Mat frame;
 //		cv::Mat workFrame = cv::Mat::zeros(workSize, CV_8UC3);
@@ -295,12 +296,13 @@ void BaslerProcessor::stopRecording()
 //
 //			if (ptrGrabResult->GrabSucceeded())
 //			{
-//				// avant : convertion vers OpenCV puis redimensionnement, puis centrage, puis conversion vers QImage
+//				// avant : conversion RG8 en BGR8, puis conversion vers OpenCV puis redimensionnement, puis centrage, puis conversion vers QImage
 //				start = std::chrono::high_resolution_clock::now();
 //				if (hasToResize)
 //				{
-//					// Conversion vers OpenCV
+//					// Convertir la frame de BayerRG8 en RGB8
 //					converter.Convert(image, ptrGrabResult);
+//					// Conversion OpenCV
 //					frame = cv::Mat(ptrGrabResult->GetHeight(), ptrGrabResult->GetWidth(), CV_8UC3, (uint8_t*)image.GetBuffer());
 //					// Redimensionnement
 //					cv::resize(frame, resizedFrame, newSize); // resize the frame with the best dimensions and keep the aspect ratio
@@ -320,9 +322,9 @@ void BaslerProcessor::stopRecording()
 //				end = std::chrono::high_resolution_clock::now();
 //				durationMs = (std::chrono::duration<double>(end - start).count() * 1000.0);
 //
-//				// version GPT : conversion, redimensionnement et centrage vers OpenCV et QImage
+//				// version 1 : conversion, redimensionnement et centrage vers OpenCV et QImage
 //				start2 = std::chrono::high_resolution_clock::now();
-//				//convertAndResizeGPT(ptrGrabResult, workFrame, outImage, newWidth, newHeight);
+//				//convertAndResize1(ptrGrabResult, workFrame, outImage, newWidth, newHeight);
 //				end2 = std::chrono::high_resolution_clock::now();
 //				durationMs2 = (std::chrono::duration<double>(end2 - start2).count() * 1000.0);
 //
@@ -344,11 +346,6 @@ void BaslerProcessor::stopRecording()
 //
 //				if (m_recording.load() && m_writer && m_writer->isOpened())
 //				{
-//					QString name = baseName + QString("_") + QString::number(++count) + ".jpg";
-//					if (!cv::imwrite(name.toStdString(), workFrame))
-//					{
-//						emit errorThrown("Writer Error", "Failed to save the image.");
-//					}
 //					m_writer->write(workFrame);
 //				}
 //				else if (m_notCreatingWriter.load() && m_writer)
@@ -386,7 +383,6 @@ void BaslerProcessor::captureLoop()
 		int newHeight = 0;
 		int count = 0;
 
-		//bool hasToResize = workWidth != frameWidth || workHeight != frameHeight;
 		findNewSizeToKeepAspectRatio(frameWidth, frameHeight, newWidth, newHeight);
 
 		cv::Size workSize(workWidth, workHeight);	// 640x480
@@ -440,7 +436,7 @@ void BaslerProcessor::captureEnded()
 }
 
 // Fonction pour estimer B, G, R à partir du Bayer
-//void BaslerProcessor::demosaicPixelGPT(const uint8_t* bayer, int x, int y, int width, int height, int stride, uint8_t& B, uint8_t& G, uint8_t& R)
+//void BaslerProcessor::demosaicPixel1(const uint8_t* bayer, int x, int y, int width, int height, int stride, uint8_t& B, uint8_t& G, uint8_t& R)
 //{
 //	int index = y * stride + x;
 //	uint8_t center = bayer[index];
@@ -487,8 +483,8 @@ void BaslerProcessor::captureEnded()
 //		}
 //	}
 //}
-//
-//void BaslerProcessor::convertAndResizeGPT(const Pylon::CGrabResultPtr& ptrGrabResult, cv::Mat& outFrame, QImage& outImage, int newWidth, int newHeight)
+
+//void BaslerProcessor::convertAndResize1(const Pylon::CGrabResultPtr& ptrGrabResult, cv::Mat& outFrame, QImage& outImage, int newWidth, int newHeight)
 //{
 //	const int srcWidth = ptrGrabResult->GetWidth();
 //	const int srcHeight = ptrGrabResult->GetHeight();
@@ -511,7 +507,7 @@ void BaslerProcessor::captureEnded()
 //			int srcX = dstX * srcWidth / newWidth;
 //
 //			uint8_t B, G, R;
-//			demosaicPixelGPT(srcBuffer, srcX, srcY, srcWidth, srcHeight, stride, B, G, R);
+//			demosaicPixel1(srcBuffer, srcX, srcY, srcWidth, srcHeight, stride, B, G, R);
 //
 //			// Écriture OpenCV
 //			cv::Vec3b& pixel = outFrame.at<cv::Vec3b>(dstY + offsetY, dstX + offsetX);
@@ -719,9 +715,6 @@ void BaslerProcessor::convertAndResize3Task(const Pylon::CGrabResultPtr& ptrGrab
 			qPixel[0] = R;
 			qPixel[1] = G;
 			qPixel[2] = B;
-
-			colEven = !colEven;
 		}
-		rowEven = !rowEven;
 	}
 }
