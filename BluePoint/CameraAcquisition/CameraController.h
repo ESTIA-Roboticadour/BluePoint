@@ -15,10 +15,12 @@ public:
 
 private slots:
 	void onViewClosing();
+	void onCameraClosed();
 	void onStartRecordingCamera();
 	void onDimensionsChanged(int width, int height);
 	void onFpsChanged(float fps);
 	void setDevice(int deviceIndex);
+	void onCurrentFpsChanged(float fps);
 
 private:
 	void deleteCameraProcessor();
@@ -26,4 +28,5 @@ private:
 private:
 	CameraWindow* m_view;
 	CameraModel* m_model;
+	bool m_closing;
 };

@@ -49,6 +49,9 @@ signals:
 	void workDimensionsChanged(int width, int height);
 	void fpsChanged(float fps);
 
+	void currentFpsChanged(float fps);
+	void recordingTimeChanged(int seconds);
+
 private:
 	int m_width;
 	int m_height;

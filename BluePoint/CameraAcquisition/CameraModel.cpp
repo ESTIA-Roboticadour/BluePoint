@@ -18,6 +18,8 @@ void CameraModel::setupCameraProcessorConnections() const
 	connect(m_cameraProcessor, &CameraProcessor::errorThrown, this, &CameraModel::errorThrown);
 	connect(m_cameraProcessor, &CameraProcessor::dimensionsChanged, this, &CameraModel::dimensionsChanged);
 	connect(m_cameraProcessor, &CameraProcessor::fpsChanged, this, &CameraModel::fpsChanged);
+	connect(m_cameraProcessor, &CameraProcessor::recordingTimeChanged, this, &CameraModel::recordingTimeChanged);
+	connect(m_cameraProcessor, &CameraProcessor::currentFpsChanged, this, &CameraModel::currentFpsChanged);
 }
 
 void CameraModel::unsetupCameraProcessorConnections() const
@@ -30,6 +32,8 @@ void CameraModel::unsetupCameraProcessorConnections() const
 	disconnect(m_cameraProcessor, &CameraProcessor::errorThrown, this, &CameraModel::errorThrown);
 	disconnect(m_cameraProcessor, &CameraProcessor::dimensionsChanged, this, &CameraModel::dimensionsChanged);
 	disconnect(m_cameraProcessor, &CameraProcessor::fpsChanged, this, &CameraModel::fpsChanged);
+	disconnect(m_cameraProcessor, &CameraProcessor::recordingTimeChanged, this, &CameraModel::recordingTimeChanged);
+	disconnect(m_cameraProcessor, &CameraProcessor::currentFpsChanged, this, &CameraModel::currentFpsChanged);
 }
 
 const CameraProcessor* CameraModel::getCameraProcessor() const

@@ -37,12 +37,15 @@ private:
 	void internalSetFrame(const QImage& image);
 	
 	static QImage resizeFrame(const QImage& image);
+	static QString formatTime(int seconds);
 
 public slots:
 	void onRecordingStarted(const QString& filename);
 	void onRecordingStopped();
 	void onDeviceConnected();
 	void onDeviceDisconnected();
+	void onRecordingTimeChanged(int seconds);
+	void onCurrentFpsChanged(float fps);
 
 private slots:
 	void onStartOrStopAction();

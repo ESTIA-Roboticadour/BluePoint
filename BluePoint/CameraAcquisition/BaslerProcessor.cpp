@@ -18,7 +18,9 @@ BaslerProcessor::BaslerProcessor(QObject* parent) :
 	m_task(nullptr),
 	m_watcher(nullptr),
 	m_recording(false),
-	m_notCreatingWriter(true)
+	m_notCreatingWriter(true),
+	m_startTime(std::chrono::steady_clock::now()),
+	currentFps(0.f)
 {
 	Pylon::PylonInitialize();
 }
@@ -225,6 +227,7 @@ void BaslerProcessor::startRecording(const QString& filename)
 		if (tryOpenWriter(filename))
 		{
 			m_recording.store(true);
+			m_startTime = std::chrono::high_resolution_clock::now();
 			emit recordingStarted(filename);
 		}
 		else
@@ -373,6 +376,15 @@ void BaslerProcessor::captureLoop()
 {
 	try
 	{
+		// to update the recording time
+		std::chrono::steady_clock::time_point currentTime = std::chrono::high_resolution_clock::now();
+		int recordDuration = 0;
+		int newRecordDuration;
+
+		// to update the current fps
+		int currentFps = 0;
+		int newCurrentFps;
+
 		Pylon::CGrabResultPtr ptrGrabResult;
 
 		int workWidth = getWorkWidth();
@@ -395,6 +407,14 @@ void BaslerProcessor::captureLoop()
 		{
 			m_camera->RetrieveResult(5000, ptrGrabResult, Pylon::TimeoutHandling_ThrowException);
 
+			newCurrentFps = 1.f / std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - currentTime).count();
+			currentTime = std::chrono::high_resolution_clock::now();
+			if (newCurrentFps != currentFps)
+			{
+				currentFps = newCurrentFps;
+				emit currentFpsChanged(currentFps);
+			}
+
 			if (ptrGrabResult->GrabSucceeded())
 			{
 				// version Optimisé Multi thread
@@ -405,6 +425,14 @@ void BaslerProcessor::captureLoop()
 				if (m_recording.load() && m_writer && m_writer->isOpened())
 				{
 					m_writer->write(workFrame);
+
+					newRecordDuration = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - m_startTime).count();
+					if (newRecordDuration != recordDuration)
+					{
+						recordDuration = newRecordDuration;
+						emit recordingTimeChanged(recordDuration);
+					}
+
 				}
 				else if (m_notCreatingWriter.load() && m_writer)
 				{

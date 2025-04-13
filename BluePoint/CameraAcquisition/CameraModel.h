@@ -37,6 +37,8 @@ signals:
 	void errorThrown(const QString& error, const QString& errorMessage);
 	void dimensionsChanged(int width, int height);
 	void fpsChanged(float fps);
+	void recordingTimeChanged(int seconds);
+	void currentFpsChanged(float fps);
 
 private:
 	CameraProcessor* m_cameraProcessor;

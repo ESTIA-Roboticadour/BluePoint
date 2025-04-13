@@ -10,7 +10,9 @@ WebcamProcessor::WebcamProcessor(QObject* parent) :
 	m_task(nullptr),
 	m_watcher(nullptr),
 	m_recording(false),
-	m_notCreatingWriter(true)
+	m_notCreatingWriter(true),
+	m_startTime(std::chrono::steady_clock::now()),
+	currentFps(0.f)
 {
 }
 
@@ -20,8 +22,8 @@ WebcamProcessor::~WebcamProcessor()
 	if (m_watcher)
 	{
 		m_watcher->waitForFinished();
-		QCoreApplication::processEvents(); // Ensure all events are processed before destruction, as CaptureEnded() may emit signals
 	}
+	QCoreApplication::processEvents(); // Ensure all events are processed before destruction, as CaptureEnded() may emit signals
 }
 
 void WebcamProcessor::getCameraSpecifications()
@@ -141,6 +143,7 @@ void WebcamProcessor::startRecording(const QString& filename)
 		if (tryOpenWriter(filename))
 		{
 			m_recording.store(true);
+			m_startTime = std::chrono::steady_clock::now();
 			emit recordingStarted(filename);
 		}
 		else
@@ -164,11 +167,34 @@ void WebcamProcessor::captureLoop()
 {
 	try
 	{
+		// to update the recording time
+		int recordDuration = 0;
+		int newRecordDuration;
+
+		// to update the current fps
+		std::chrono::steady_clock::time_point now = std::chrono::high_resolution_clock::now();
+		std::chrono::steady_clock::time_point prevTime = now;
+		std::chrono::duration<double> delta;
+		float currentFps = 0;
+		float newCurrentFps = 0;
+
 		cv::Mat frame;
 		while (!m_watcher->isCanceled() && m_cap && m_cap->isOpened())
 		{
 			if (m_cap->read(frame))
 			{
+				now = std::chrono::high_resolution_clock::now();
+				delta = now - prevTime;
+				prevTime = now;
+				if (delta.count() > 0.0)
+					newCurrentFps = 1.0f / static_cast<float>(delta.count());
+
+				if (newCurrentFps != currentFps)
+				{
+					currentFps = newCurrentFps;
+					emit currentFpsChanged(currentFps);
+				}
+
 				if (m_watcher->isCanceled())
 				{
 					break;
@@ -181,6 +207,12 @@ void WebcamProcessor::captureLoop()
 					if (m_writer && m_writer->isOpened())
 					{
 						m_writer->write(frame);
+						newRecordDuration = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - m_startTime).count();
+						if (newRecordDuration != recordDuration)
+						{
+							recordDuration = newRecordDuration;
+							emit recordingTimeChanged(recordDuration);
+						}
 					}
 					else
 					{

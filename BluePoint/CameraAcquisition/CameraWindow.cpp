@@ -45,6 +45,9 @@ void CameraWindow::resetUi()
 	m_ui->dimensionsLabel->clear();
 	m_ui->fpsLabel->clear();
 	m_ui->frameLabel->clear();
+	m_ui->currentFpsLabel->clear();
+
+	m_ui->statusBar->clearMessage();
 }
 
 void CameraWindow::setupShortcuts()
@@ -85,25 +88,21 @@ void CameraWindow::internalSetFrame(const QImage& image)
 
 QImage CameraWindow::resizeFrame(const QImage& image)
 {
-	int originalWidth = image.width();
-	int originalHeight = image.height();
+	return image.scaled(640, 480, Qt::KeepAspectRatio, Qt::FastTransformation);
+}
 
-	int newWidth;
-	int newHeight;
+QString CameraWindow::formatTime(int seconds)
+{
+	int hours = seconds / (60 * 60);
+	seconds -= 60 * 60 * hours;
 
-	if (originalWidth > originalHeight)
-	{
-		// Width is the dominant dimension
-		newWidth = 640;
-		newHeight = (int)((float)originalHeight * (640.f / (float)originalWidth));
-	}
-	else
-	{
-		// Height is the dominant dimension
-		newHeight = 480;
-		newWidth = (int)((float)originalWidth * (480.f / (float)originalHeight));
-	}
-	return image.scaled(newWidth, newHeight, Qt::IgnoreAspectRatio, Qt::FastTransformation);
+	int minutes = seconds / 60;
+	seconds -= 60 * minutes;
+
+	return QString("%1:%2:%3")
+		.arg(hours, 2, 10, QChar('0'))
+		.arg(minutes, 2, 10, QChar('0'))
+		.arg(seconds, 2, 10, QChar('0'));
 }
 
 void CameraWindow::onDeviceConnected()
@@ -122,6 +121,16 @@ void CameraWindow::onDeviceDisconnected()
 	resetUi();
 }
 
+void CameraWindow::onRecordingTimeChanged(int seconds)
+{
+	m_ui->statusBar->showMessage("Recording: " + formatTime(seconds));
+}
+
+void CameraWindow::onCurrentFpsChanged(float fps)
+{
+	m_ui->currentFpsLabel->setText(QString::number(fps));
+}
+
 void CameraWindow::onRecordingStarted(const QString& filename)
 {
 	log("Device recording started at: " + filename);
@@ -135,6 +144,7 @@ void CameraWindow::onRecordingStopped()
 	log("Device recording stopped");
 	m_ui->startButton->setEnabled(true);
 	m_ui->stopButton->setEnabled(false);
+	m_ui->statusBar->clearMessage();
 }
 
 void CameraWindow::log(const QString& message)
@@ -167,11 +177,11 @@ QSize CameraWindow::getFrameLabelSize() const
 
 void CameraWindow::onStartOrStopAction()
 {
-	if (m_ui->startButton->isEnabled()) 
+	if (m_ui->startButton->isEnabled())
 	{
 		emit startButtonClicked();
 	}
-	else 
+	else
 	{
 		emit stopButtonClicked();
 	}

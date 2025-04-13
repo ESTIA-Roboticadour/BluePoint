@@ -9,6 +9,7 @@
 #include <QFutureWatcher>
 
 #include <atomic>
+#include <chrono>
 #include "pylon/PylonIncludes.h"
 #include "opencv2/opencv.hpp"
 
@@ -56,4 +57,6 @@ private:
 
 	std::atomic<bool> m_notCreatingWriter;
 	std::atomic<bool> m_recording;
+	std::chrono::steady_clock::time_point m_startTime;
+	float currentFps;
 };
