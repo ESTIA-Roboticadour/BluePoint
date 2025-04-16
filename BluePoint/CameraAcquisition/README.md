@@ -1,5 +1,5 @@
 # CameraAcquisition
-A C++ (with Qt 6.8.2 and OpenCV 4.11.0) to open a camera device and record it.
+A C++ (with Qt, OpenCV and Pylon) application to open a laptop webcam and Basler cameras and record it.
 
 ## Required libraries
 - Qt (We used Qt 6.8.2)
@@ -7,6 +7,7 @@ A C++ (with Qt 6.8.2 and OpenCV 4.11.0) to open a camera device and record it.
 - Pylon SDK (We used Pylon 8.1.0)
 
 ## Setup
+- Use `git clone https://github.com/ESTIA-Roboticadour/BluePoint` to clone this project. You need to be a contributor to modify this repo.
 - Install `OpenCV` for Windows (https://opencv.org/releases/)
 - Add the `bin` and `lib` folder to the PATH. (e.g.: `C:\opencv\build\x64\vc16\bin` and `C:\opencv\build\x64\vc16\lib`). Reboot your computer to apply the changes.
 - Install Qt.
