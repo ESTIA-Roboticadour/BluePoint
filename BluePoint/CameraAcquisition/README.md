@@ -8,11 +8,10 @@ A C++ (with Qt, OpenCV and Pylon) application to open a laptop webcam and Basler
 
 ## Setup
 - Use `git clone https://github.com/ESTIA-Roboticadour/BluePoint` to clone this project. You need to be a contributor to modify this repo.
-- Install `OpenCV` for Windows (https://opencv.org/releases/)
-- Add the `bin` and `lib` folder to the PATH. (e.g.: `C:\opencv\build\x64\vc16\bin` and `C:\opencv\build\x64\vc16\lib`). Reboot your computer to apply the changes.
+- Install `OpenCV` for Windows (https://opencv.org/releases/). Add the `bin` and `lib` folder to the PATH. (e.g.: `C:\opencv\build\x64\vc16\bin` and `C:\opencv\build\x64\vc16\lib`). Reboot your computer to apply the changes.
 - Install Qt.
 - Install the `Qt Visual Studio Tools` extension for Visual Studio.
-- Install the `Pylon Suite Tools for Windows` from Basler (https://www.baslerweb.com/fr-fr/downloads/software/2012599532/?downloadCategory.values.label.data=pylon) that includes the software Pylon Viewer (to test your Basler camera) and the Pylon SDK.
+- Install the `Pylon Suite Tools for Windows` from Basler (https://www.baslerweb.com/fr-fr/downloads/software/2012599532/?downloadCategory.values.label.data=pylon) that includes the software Pylon Viewer (to test your Basler camera) and the Pylon SDK. Check that Pylon folders have well been added to the PATH. Reboot your computer.
 
 ### Setup Visual Studio
 Development was carried out using Visual Studio 2022.
