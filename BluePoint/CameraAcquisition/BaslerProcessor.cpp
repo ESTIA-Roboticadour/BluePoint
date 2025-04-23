@@ -247,6 +247,11 @@ void BaslerProcessor::stopRecording()
 	}
 }
 
+bool BaslerProcessor::isOpened() const
+{
+	return m_camera && m_camera->IsOpen();
+}
+
 //void BaslerProcessor::captureLoop() // version debug pour comparer les performances
 //{
 //	try

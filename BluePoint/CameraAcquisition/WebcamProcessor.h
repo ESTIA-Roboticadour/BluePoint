@@ -18,13 +18,15 @@ public:
 	explicit WebcamProcessor(QObject* parent = nullptr);
 	~WebcamProcessor();
 
-private slots:
+public slots:
 	// Inherited via CameraProcessor
 	void open() override;
 	void close() override;
 	void startRecording(const QString& filename) override;
 	void stopRecording() override;
+	bool isOpened() const override;
 
+private slots:
 	void captureLoop();
 	void captureEnded();
 

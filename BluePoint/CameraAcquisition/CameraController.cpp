@@ -40,7 +40,14 @@ CameraController::~CameraController()
 void CameraController::onViewClosing()
 {
 	m_closing = true;
-	m_model->closeCamera();
+	if (m_model->isCameraOpened())
+	{
+		m_model->closeCamera();
+	}
+	else
+	{
+		onCameraClosed();
+	}
 }
 
 void CameraController::onCameraClosed()

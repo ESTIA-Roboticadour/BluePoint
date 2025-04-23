@@ -82,3 +82,8 @@ void CameraModel::setWorkDimensions(const QSize& size)
 {
 	m_cameraProcessor->setWorkDimensions(size);
 }
+
+bool CameraModel::isCameraOpened() const
+{
+	return m_cameraProcessor->isOpened();
+}

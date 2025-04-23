@@ -30,6 +30,7 @@ public slots:
 	virtual void close() = 0;
 	virtual void startRecording(const QString& filename) = 0;
 	virtual void stopRecording() = 0;
+	virtual bool isOpened() const = 0;
 
 protected:
 	void setWidth(int width);

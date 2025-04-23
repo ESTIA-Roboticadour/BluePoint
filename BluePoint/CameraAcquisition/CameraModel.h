@@ -19,6 +19,7 @@ public slots:
 	void startRecording(const QString& filename);
 	void stopRecording();
 	void setWorkDimensions(const QSize& size);
+	bool isCameraOpened() const;
 
 public:
 	const CameraProcessor* getCameraProcessor() const;

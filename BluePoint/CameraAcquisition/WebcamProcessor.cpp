@@ -163,6 +163,11 @@ void WebcamProcessor::stopRecording()
 	}
 }
 
+bool WebcamProcessor::isOpened() const
+{
+	return m_cap && m_cap->isOpened();
+}
+
 void WebcamProcessor::captureLoop()
 {
 	try
