@@ -35,3 +35,6 @@ GCBase_MD_VC141_v3_1_Basler_pylon_v3.lib
 GenApi_MD_VC141_v3_1_Basler_pylon_v3.lib
 PylonDataProcessing_v3.lib
 ```
+
+### Note
+If you have any problem with the lib during the compilation, check your libs folder. You are probably using a different version with different libs (eg: `PylonBase_v10.lib` or `PylonBase_v11.lib`).
