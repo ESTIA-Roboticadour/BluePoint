@@ -84,7 +84,7 @@ bool BaslerAPI::setPixelFormatBayerRG8(Pylon::CInstantCamera* camera)
 		GenApi::INodeMap& nodemap = camera->GetNodeMap();
 		Pylon::CEnumParameter(nodemap, "PixelFormat").SetValue("BayerRG8");
 	}
-	catch (const Pylon::GenericException& e)
+	catch (const Pylon::GenericException&)
 	{
 		success = false;
 	}
@@ -110,7 +110,7 @@ bool BaslerAPI::maximizeAOI(Pylon::CInstantCamera* camera)
 		width.SetToMaximum();
 		height.SetToMaximum();
 	}
-	catch (const Pylon::GenericException& e)
+	catch (const Pylon::GenericException&)
 	{
 		success = false;
 	}
