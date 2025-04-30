@@ -2,6 +2,7 @@
 
 #include <QtWidgets/QMainWindow>
 #include "ui_VisionWindow.h"
+#include "BoolParameter.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class VisionWindowClass; };
@@ -17,4 +18,5 @@ public:
 
 private:
     Ui::VisionWindowClass *m_ui;
+	BoolParameter m_boolParameter;
 };

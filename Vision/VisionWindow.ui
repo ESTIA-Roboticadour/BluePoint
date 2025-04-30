@@ -1,10 +1,8 @@
-<UI version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>VisionWindowClass</class>
- <widget class="QMainWindow" name="VisionWindowClass" >
-  <property name="objectName" >
-   <string notr="true">VisionWindowClass</string>
-  </property>
-  <property name="geometry" >
+ <widget class="QMainWindow" name="VisionWindowClass">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -12,17 +10,106 @@
     <height>400</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>VisionWindow</string>
-  </property>  <widget class="QMenuBar" name="menuBar" />
-  <widget class="QToolBar" name="mainToolBar" />
-  <widget class="QWidget" name="centralWidget" />
-  <widget class="QStatusBar" name="statusBar" />
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="ListParameterWidget" name="listParameterWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>50</y>
+      <width>174</width>
+      <height>42</height>
+     </rect>
+    </property>
+    <property name="options">
+     <stringlist>
+      <string>Toto</string>
+      <string>Tata</string>
+      <string>Tonton</string>
+     </stringlist>
+    </property>
+   </widget>
+   <widget class="BoolParameterWidget" name="boolParameterWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>100</y>
+      <width>124</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="value">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="NumericalParameterWidget" name="numericalParameterWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>150</y>
+      <width>168</width>
+      <height>65</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="StringParameterWidget" name="stringParameterWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>230</y>
+      <width>223</width>
+      <height>42</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>600</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
  </widget>
- <layoutDefault spacing="6" margin="11" />
- <pixmapfunction></pixmapfunction>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>NumericalParameterWidget</class>
+   <extends>QWidget</extends>
+   <header>NumericalParameterWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>BoolParameterWidget</class>
+   <extends>QWidget</extends>
+   <header>BoolParameterWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>StringParameterWidget</class>
+   <extends>QWidget</extends>
+   <header>StringParameterWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ListParameterWidget</class>
+   <extends>QWidget</extends>
+   <header>ListParameterWidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
-   <include location="VisionWindow.qrc"/>
+  <include location="VisionWindow.qrc"/>
  </resources>
  <connections/>
-</UI>
+</ui>
