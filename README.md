@@ -13,7 +13,7 @@ They provide reusable widgets and logic that are dynamically loaded by other app
 - `ParametersCustomWidgets`: Builds dynamic UI widgets to control various parameter types (numbers, booleans, strings...).  
   👉 **Required to be compiled**, as it provides headers, `.lib` and `.dll` files used by other projects.
 
-A helper script is provided to **prepare and install these libraries** correctly (see [Setup section](#setup)).
+A helper script is provided to **prepare and install these libraries** correctly (see `Setup section`).
 
 ### 🖥️ Visual Studio Projects
 
@@ -31,9 +31,9 @@ All projects rely on the following libraries. Make sure they are correctly insta
 
 ### ✅ Requirements
 
-- **Qt** – [We use Qt 6.8.2](https://www.qt.io/download)
+- **Qt** – [We use Qt 6.8.2](https://www.qt.io/download-dev)
 - **OpenCV** – [We use OpenCV 4.11.0](https://opencv.org/releases/)
-- **Pylon SDK** – [We use Pylon 8.1.0](https://www.baslerweb.com/en/products/software/basler-pylon-camera-software-suite/)
+- **Pylon SDK** – [We use Pylon 8.1.0](https://www.baslerweb.com/en/downloads/software/?downloadCategory.values.label.data=pylon)
 
 ### 🧰 Setup Instructions
 
@@ -42,7 +42,7 @@ All projects rely on the following libraries. Make sure they are correctly insta
 git clone https://github.com/ESTIA-Roboticadour/BluePoint
 ```
 
-2. Install OpenCV:
+2. Install `OpenCV`:
 - Download from: https://opencv.org/releases/
 - Extract and set system PATH to include:
 ```
@@ -51,16 +51,17 @@ C:\opencv\build\x64\vc16\lib
 ```
 - Restart your computer if needed.
 
-3. Install Qt
-- Download Qt 6.8.2 via the Qt online installer.
+3. Install `Qt`
+- Download `Qt 6.8.2` via the [Qt online installer](https://www.qt.io/download-dev).
 - Install `Qt Visual Studio Tools` (from the Visual Studio extension manager).
 - Set the appropriate Qt Kit in Qt Creator to compile Qt-based libraries.
 
-4. Install Balser Pylon SDK
-- Download and install from: https://www.baslerweb.com/fr-fr/downloads/software/2012599532/?downloadCategory.values.label.data=pylon
-- This includes Pylon Viewer and the SDK.
+4. Install `Balser Pylon SDK`
+- Download and install via the [Basler software website](https://www.baslerweb.com/en/downloads/software/?downloadCategory.values.label.data=pylon).
+- This includes `Pylon Viewer` and the `SDK`.
 - Make sure the `pylon` `bin` and `lib` folders are in your `PATH`.
 - Restart your computer if needed.
+- We recommend you to test your camera with `Pylon Viewer`. Make sure you have plugged your camera into a **USB 3 port**. 
 
 ---
 
@@ -72,7 +73,7 @@ C:\opencv\build\x64\vc16\lib
 - Compile the projects in `Debug` then in `Release` to generate debug and release `.lib` and `.dll` files.
 
 ### 📁 Library Setup Script
-**After compiled all plugins**, run the following script to automatically prepare the required folders and copy headers, libs, and DLLs for the shared libraries:
+**After compiled all plugins**, run the following script to automatically prepare the required folders and files:
 
 ```bash
 ./setup_solution.sh
@@ -115,7 +116,7 @@ BluePoint/
 A: Run setup_solution.sh after compiling CustomWidgets projects.
 
 **Q: My Basler camera is not readable.**
-A: Ensure you plugged it on the USB 3 port. You can also install `Pylon Viewer` to test your camera.
+A: Ensure you plugged it on the **USB 3 port**. You can also install `Pylon Viewer` (if it's not already done) to test your camera.
 
 **Q: How do I debug Qt UIs in Visual Studio?**
 A: Use `Qt Visual Studio Tools` to integrate Qt Designer, or test the UI in Qt Creator first.
