@@ -48,6 +48,7 @@ For **Release**:
 ```
 opencv_world4110.lib
 ```
+
 Adapt with the libs you have, depending on your installed version.
 
 ### Pylon
@@ -68,6 +69,8 @@ GCBase_MD_VC141_v3_1_Basler_pylon_v3.lib
 GenApi_MD_VC141_v3_1_Basler_pylon_v3.lib
 ```
 Adapt with the libs you have, depending on your installed version.
+
+
 ---
 
 ## Notes
