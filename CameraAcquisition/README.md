@@ -1,39 +1,75 @@
 # CameraAcquisition
-A C++ (with Qt, OpenCV and Pylon) application to open a laptop webcam and Basler cameras and record it.
 
-## Required libraries
-- Qt (We used Qt 6.8.2)
-- OpenCV (We used OpenCV 4.11.0)
-- Pylon SDK (We used Pylon 8.1.0)
+A C++ application using Qt, OpenCV, and the Pylon SDK to capture and record video streams from:
+- Laptop webcams
+- Basler industrial cameras
 
-## Setup
-- Use `git clone https://github.com/ESTIA-Roboticadour/BluePoint` to clone this project. You need to be a contributor to modify this repo.
-- Install `OpenCV` for Windows (https://opencv.org/releases/). Add the `bin` and `lib` folder to the PATH. (e.g.: `C:\opencv\build\x64\vc16\bin` and `C:\opencv\build\x64\vc16\lib`). Reboot your computer to apply the changes.
-- Install Qt.
-- Install the `Qt Visual Studio Tools` extension for Visual Studio.
-- Install the `Pylon Suite Tools for Windows` from Basler (https://www.baslerweb.com/fr-fr/downloads/software/2012599532/?downloadCategory.values.label.data=pylon) that includes the software Pylon Viewer (to test your Basler camera) and the Pylon SDK. Check that Pylon folders have well been added to the PATH. Reboot your computer.
+## Overview
 
-### Setup Visual Studio
-Development was carried out using Visual Studio 2022.
-Check the following parameters are correct / added:
+This application provides an interface to:
+- Select a camera (USB or Basler)
+- Visualize the live stream
+- Record the video
 
-#### OpenCV
+---
 
-- C/C++ > General > Additional Include Directories : `C:\opencv\build\include`
-- Linker > General > Additional Library Directories : `C:\opencv\build\x64\vc16\lib`
-- Linker > Input > Additional Dependencies : `opencv_world4110d.lib` (for Debug) and `opencv_world4110.lib` (for Release). Adapte the version according yours.
+## Requirements
 
-#### Pylon
+This project uses the same dependencies as the main BluePoint repository:
 
-- C/C++ > General > Additional Include Directories : `C:\Program Files\Basler\pylon 8\Development\include`
-- Linker > General > Additional Library Directories : `C:\Program Files\Basler\pylon 8\Development\lib\x64`
-- Linker > Input > Additional Dependencies :
+- **Qt 6.8.2**
+- **OpenCV 4.11.0**
+- **Pylon SDK 8.1.0**
+
+You can find installation instructions and environment configuration in the [root README](../README.md).
+
+---
+
+## Visual Studio Setup
+
+Ensure the following settings in your Visual Studio project:
+
+### OpenCV
+
+- `C/C++ > General > Additional Include Directories`
+```
+C:\opencv\build\include
+```
+- `Linker > General > Additional Library Directories`
+```
+C:\opencv\build\x64\vc16\lib
+```
+- `Linker > Input > Additional Dependencies`
+For **Debug**:
+```
+opencv_world4110d.lib
+```
+For **Release**:
+```
+opencv_world4110.lib
+```
+Adapt with the libs you have, depending on your installed version.
+
+### Pylon
+
+- `C/C++ > General > Additional Include Directories`
+```
+C:\Program Files\Basler\pylon 8\Development\include
+```
+- `Linker > General > Additional Library Directories`
+```
+C:\Program Files\Basler\pylon 8\Development\lib\x64
+```
+- `Linker > Input > Additional Dependencies`
 ```
 PylonBase_v10.lib
 PylonC_v10.lib
 GCBase_MD_VC141_v3_1_Basler_pylon_v3.lib
 GenApi_MD_VC141_v3_1_Basler_pylon_v3.lib
 ```
+Adapt with the libs you have, depending on your installed version.
+---
 
-### Note
-If you have any problem with the lib during the compilation, check your libs folder. You are probably using a different version with different libs (eg: `PylonBase_v10.lib` can be replaced by `PylonBase_v9.lib` if you're using an older version).
+## Notes
+
+- If you face issues with `.lib` files or unresolved symbols, double-check the library versions and adjust accordingly.
