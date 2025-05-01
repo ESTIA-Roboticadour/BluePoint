@@ -104,7 +104,10 @@ BluePoint/
 ### 🧱 Build Visual Studio Applications
 - Open the `.sln` file in Visual Studio.
 - Make sure the `Libraries/` folder is correctly filled (via setup script).
-- Set configuration to `Release` or `Debug` as needed. If you're not using same version of external librairies (OpenCV, Pylon SDK), projects `Input` (e.g. `opencv4110_world.lib` could not exist).
+- For each project, make sure you check its configuration. Check the values:
+  - `C/C++ > General > Additional include directories`
+  - `Linker > General > Additional libraries directories`
+  - `Linker > Input > Additional Dependencies` for **Debug** and **Release** configurations (**libs are not the same!**)
 - Build and run.
 
 #### 📌 Notes
