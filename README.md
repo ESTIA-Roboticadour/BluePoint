@@ -69,8 +69,9 @@ C:\opencv\build\x64\vc16\lib
 
 ### 🔌 Compile Qt Plugins and Libraries
 
-- Open all projects in `CustomWidgets` folder in Qt Creator.
-- Compile the projects in `Debug` then in `Release` to generate debug and release `.lib` and `.dll` files.
+For all projects in `CustomWidgets`:
+1. Open a project in folder in Qt Creator.
+2. Compile the project in `Debug` then in `Release` to generate debug and release `.lib` and `.dll` files.
 
 ### 📁 Library Setup Script
 **After compiled all plugins**, run the following script to automatically prepare the required folders and files:
@@ -105,13 +106,16 @@ BluePoint/
 ```
 
 ### 🧱 Build Visual Studio Applications
-- Open the `.sln` file in Visual Studio.
-- Make sure the `Libraries/` folder is correctly filled (via setup script).
-- For each project, make sure you check its configuration. Check the values:
-  - `C/C++ > General > Additional include directories`
-  - `Linker > General > Additional libraries directories`
-  - `Linker > Input > Additional Dependencies` for **Debug** and **Release** configurations (**libs are not the same!**)
-- Build and run.
+
+1. Open the `.sln` file in **Visual Studio**.
+2. Make sure the `Libraries/` folder is properly filled (use `setup_solution.sh` to generate it if needed).
+3. For each project, check the following in **Configuration Properties**:
+   - `C/C++ > General > Additional Include Directories`
+   - `Linker > General > Additional Library Directories`
+   - `Linker > Input > Additional Dependencies`  
+     ⚠️ Make sure to use the correct `.lib` files depending on the configuration (**Debug** or **Release**).
+4. Build and run the application.
+
 
 #### 📌 Notes
 
