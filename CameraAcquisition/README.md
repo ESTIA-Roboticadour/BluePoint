@@ -29,47 +29,46 @@ You can find installation instructions and environment configuration in the [roo
 
 Ensure the following settings in your Visual Studio project:
 
-### OpenCV
-
-- `C/C++ > General > Additional Include Directories`
+1. `C/C++ > General > Additional Include Directories`
+- For OpenCV:
 ```
 C:\opencv\build\include
 ```
-- `Linker > General > Additional Library Directories`
-```
-C:\opencv\build\x64\vc16\lib
-```
-- `Linker > Input > Additional Dependencies`
-For **Debug**:
-```
-opencv_world4110d.lib
-```
-For **Release**:
-```
-opencv_world4110.lib
-```
-
-Adapt with the libs you have, depending on your installed version.
-
-### Pylon
-
-- `C/C++ > General > Additional Include Directories`
+- For Pylon:
 ```
 C:\Program Files\Basler\pylon 8\Development\include
 ```
-- `Linker > General > Additional Library Directories`
+
+2. `Linker > General > Additional Library Directories`
+- For OpenCV:
+```
+C:\opencv\build\x64\vc16\lib
+```
+- For Pylon:
 ```
 C:\Program Files\Basler\pylon 8\Development\lib\x64
 ```
-- `Linker > Input > Additional Dependencies`
+
+3. `Linker > Input > Additional Dependencies`
+
+- For OpenCV:
+  - For **Debug**:
+```
+opencv_world4110d.lib
+```
+  - For **Release**:
+```
+opencv_world4110.lib
+```
+- For Pylon:
 ```
 PylonBase_v10.lib
 PylonC_v10.lib
 GCBase_MD_VC141_v3_1_Basler_pylon_v3.lib
 GenApi_MD_VC141_v3_1_Basler_pylon_v3.lib
 ```
-Adapt with the libs you have, depending on your installed version.
 
+Adapt with the libs you have, depending on your installed version.
 
 ---
 
