@@ -52,12 +52,12 @@ C:\opencv\build\x64\vc16\lib
 - Restart your computer if needed.
 
 3. Install `Qt`
-- Download `Qt 6.8.2` via the [Qt online installer](https://www.qt.io/download-dev).
+- Download `Qt 6.8.2` from: https://www.qt.io/download-dev.
 - Install `Qt Visual Studio Tools` (from the Visual Studio extension manager).
 - Set the appropriate Qt Kit in Qt Creator to compile Qt-based libraries.
 
 4. Install `Balser Pylon SDK`
-- Download and install via the [Basler software website](https://www.baslerweb.com/en/downloads/software/?downloadCategory.values.label.data=pylon).
+- Download and install from: https://www.baslerweb.com/en/downloads/software/?downloadCategory.values.label.data=pylon
 - This includes `Pylon Viewer` and the `SDK`.
 - Make sure the `pylon` `bin` and `lib` folders are in your `PATH`.
 - Restart your computer if needed.
