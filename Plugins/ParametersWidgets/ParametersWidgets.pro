@@ -1,0 +1,64 @@
+# Project declaration
+TEMPLATE = lib
+CONFIG += debug_and_release
+
+# Target name
+TARGET = $$qtLibraryTarget(ParametersWidgets)
+
+# Qt modules required
+QT += widgets designer
+
+# Files declaration
+HEADERS += \
+    ParametersWidgetCollection_global.h \
+    ParameterBase.h \
+    ListParameterBase.h \
+    BoolParameter.h \
+    BoolParameterWidget.h \
+    NumericalParameter.h \
+    NumericalParameterWidget.h \
+    StringParameter.h \
+    StringParameterWidget.h \
+    ListParameter.h \
+    ListParameterWidget.h \
+    ParameterGroup.h \
+    ParametersView.h \
+    ParametersWidgetCollection.h \
+    BoolParameterWidgetPlugin.h \
+    NumericalParameterWidgetPlugin.h \
+    StringParameterWidgetPlugin.h \
+    ListParameterWidgetPlugin.h \
+    ParametersViewPlugin.h
+
+SOURCES += \
+    ParameterBase.cpp \
+    BoolParameter.cpp \
+    BoolParameterWidget.cpp \
+    NumericalParameter.cpp \
+    NumericalParameterWidget.cpp \
+    StringParameter.cpp \
+    StringParameterWidget.cpp \
+    ListParameterWidget.cpp \
+    ParameterGroup.cpp \
+    ParametersView.cpp \
+    ParametersWidgetCollection.cpp \
+    BoolParameterWidgetPlugin.cpp \
+    NumericalParameterWidgetPlugin.cpp \
+    StringParameterWidgetPlugin.cpp \
+    ListParameterWidgetPlugin.cpp \
+    ParametersViewPlugin.cpp
+
+RESOURCES += icons.qrc
+#LIBS        += -L. -lListParameterWidget -lParametersView -lBoolParameterWidget -lStringParameterWidget -lNumericalParameterWidget
+
+# For installation as a Qt Designer plugin
+target.path = $$[QT_INSTALL_PLUGINS]/designer
+INSTALLS += target
+
+# Exporting symbols to Windows (required with MSVC)
+DEFINES += PARAMETERSWIDGETCOLLECTION_LIBRARY
+
+# For installation as a Qt Designer plugin in the Designer of Qt Qt Creator
+CONFIG(ReleaseBuild) {
+    QMAKE_POST_LINK += $$quote(cmd /C copy /Y \"$$OUT_PWD\\release\\$${TARGET}.dll\" \"C:\\Qt\\Tools\\QtCreator\\bin\\plugins\\designer\\\")
+}

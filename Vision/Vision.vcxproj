@@ -66,7 +66,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)Librairies\ParametersWidgets\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ParametersWidgetCollectionPlugind.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ParametersWidgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)Librairies\ParametersWidgets\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -79,7 +79,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)Librairies\ParametersWidgets\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ParametersWidgetCollectionPlugin.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ParametersWidgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)Librairies\ParametersWidgets\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
