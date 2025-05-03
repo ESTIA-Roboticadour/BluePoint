@@ -107,8 +107,8 @@ Run the script `installer.sh`. Admin role may be required.
 ./installer.sh
 ```
 This script will:
-- Compile all plugin projects (from `Plugins` folder) in `debug` and `release`.
-- Install the plugins for Qt Designer.  ⚠️ Make sure you have the following folder: **C:\Qt\Tools\QtCreator\bin\plugins\designer**. This is the plugin folder of the Designer when it's installed with Qt Creator. `.dll` files are copied into this. If this folder does not exist, you have to modify last line of each `.pro` to disable the copy or modify the path.
+- **Compile** all plugin projects (from `Plugins` folder) in `debug` and `release`.
+- Install the plugins for Qt Designer.  ⚠️ Make sure you have the following folder: **C:\Qt\Tools\QtCreator\bin\plugins\designer**. This is the plugin folder of the Designer when it's installed with Qt Creator. `.dll` files are copied into this. If this folder does not exist, you have to modify last line of each `.pro` file (in plugin project folder) to disable the copy or modify the path.
 - Create the `Librairies` folder for shared librairies. It will also create folders for each plugin, and `bin`, `lib` and `include` subfolders for each of them. These subfolders will be feed with `.h`, `.lib` and `.dll` files.
 - Creates the `x64\Debug` and `x64\Release` folders and copy `debug` and `release` `dll` files.
 
