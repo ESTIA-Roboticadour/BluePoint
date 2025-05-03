@@ -124,7 +124,7 @@ For all projects in `CustomWidgets`:
 2. Create the config. You need to select `msvc2022_64` compilator. Then check the compiler steps. By default you have **2 steps** for both configuration `debug` and `release`. You need to add an additional step for `release`: add a `Make` with `install` as argument.
 3. Compile the project in `Debug` then in `Release` to generate debug and release `.lib` and `.dll` files.
 4. Copy `.dll` (release only) to you designer plugin folder (e.g.: `C:\Qt\Tools\QtCreator\bin\plugins\designer`).
-5. Create folder `Librairies` and project subfolder, and `include`, `lib` and `bin` folders. → Create the architure showed above.
+5. Create folder `Librairies` and project subfolder, and `include`, `lib` and `bin` folders → **Create the structure showed above**.
 6. Copy `debug` and `release` `lib` generated files and past into `lib` folder.
 7. Copy `debug` and `release` `dll` generated files and past into `bin` folder. Copy them into `x64/Debug` and `x64/Release` folders as well.
 8. Copy `.h` files into `include`. You don't have to copy header file that ends with `Plugin.h`. 
