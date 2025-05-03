@@ -10,6 +10,7 @@ QT += widgets designer
 
 # Files declaration
 HEADERS += \
+    ParametersWidgetCollectionPlugin.h \
     ParametersWidgetCollection_global.h \
     ParameterBase.h \
     ListParameterBase.h \
@@ -23,7 +24,6 @@ HEADERS += \
     ListParameterWidget.h \
     ParameterGroup.h \
     ParametersView.h \
-    ParametersWidgetCollection.h \
     BoolParameterWidgetPlugin.h \
     NumericalParameterWidgetPlugin.h \
     StringParameterWidgetPlugin.h \
@@ -36,12 +36,12 @@ SOURCES += \
     BoolParameterWidget.cpp \
     NumericalParameter.cpp \
     NumericalParameterWidget.cpp \
+    ParametersWidgetCollectionPlugin.cpp \
     StringParameter.cpp \
     StringParameterWidget.cpp \
     ListParameterWidget.cpp \
     ParameterGroup.cpp \
     ParametersView.cpp \
-    ParametersWidgetCollection.cpp \
     BoolParameterWidgetPlugin.cpp \
     NumericalParameterWidgetPlugin.cpp \
     StringParameterWidgetPlugin.cpp \

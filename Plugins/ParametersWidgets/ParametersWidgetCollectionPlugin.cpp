@@ -1,4 +1,4 @@
-#include "ParametersWidgetCollection.h"
+#include "ParametersWidgetCollectionPlugin.h"
 #include "BoolParameterWidgetPlugin.h"
 #include "ListParameterWidgetPlugin.h"
 #include "NumericalParameterWidgetPlugin.h"
