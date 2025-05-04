@@ -14,7 +14,7 @@
    <string>VisionWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="ListParameterWidget" name="listParameterWidget">
+   <widget class="ListParameterWidget" name="listParameterWidget" native="true">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -23,7 +23,7 @@
       <height>42</height>
      </rect>
     </property>
-    <property name="options">
+    <property name="options" stdset="0">
      <stringlist>
       <string>Toto</string>
       <string>Tata</string>
@@ -31,7 +31,7 @@
      </stringlist>
     </property>
    </widget>
-   <widget class="BoolParameterWidget" name="boolParameterWidget">
+   <widget class="BoolParameterWidget" name="boolParameterWidget" native="true">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -40,11 +40,11 @@
       <height>40</height>
      </rect>
     </property>
-    <property name="value">
+    <property name="value" stdset="0">
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="NumericalParameterWidget" name="numericalParameterWidget">
+   <widget class="NumericalParameterWidget" name="numericalParameterWidget" native="true">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -54,7 +54,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="StringParameterWidget" name="stringParameterWidget">
+   <widget class="StringParameterWidget" name="stringParameterWidget" native="true">
     <property name="geometry">
      <rect>
       <x>20</x>

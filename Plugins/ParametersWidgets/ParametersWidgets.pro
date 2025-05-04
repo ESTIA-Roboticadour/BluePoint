@@ -59,6 +59,7 @@ INSTALLS += target
 DEFINES += PARAMETERSWIDGETCOLLECTION_LIBRARY
 
 # For installation as a Qt Designer plugin in the Designer of Qt Qt Creator
-CONFIG(ReleaseBuild) {
-    QMAKE_POST_LINK += $$quote(cmd /C copy /Y \"$$OUT_PWD\\release\\$${TARGET}.dll\" \"C:\\Qt\\Tools\\QtCreator\\bin\\plugins\\designer\\\")
-}
+# Not do here. Let the installer doing it
+#CONFIG(ReleaseBuild) {
+#    QMAKE_POST_LINK += $$quote(cmd /C copy /Y \"$$OUT_PWD\\release\\$${TARGET}.dll\" \"C:\\Qt\\Tools\\QtCreator\\bin\\plugins\\designer\\\")
+#}
