@@ -96,13 +96,15 @@ BluePoint/
 │   ├── Release/
 │   │   ├── ParametersWidgets.dll
 │   │   ├── other release dll...
-├── installer.sh             # Script to setup shared libs
+├── scripts/
+│   │   ├── installer.sh            # Script to setup shared libs
+├── installer.sh.lnk                # Link to execute
 └── README.md                     # This file
 ```
 
 ### 🪄 installer.sh
 
-Run the script `installer.sh`. Admin role may be required.
+Run the script `installer.sh` (the link). Admin role may be required.
 ```bash
 ./installer.sh
 ```
