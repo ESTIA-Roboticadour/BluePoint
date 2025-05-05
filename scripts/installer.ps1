@@ -38,7 +38,60 @@ function Normalize-Path($path) {
     return $path -replace '/', '\'
 }
 
-function Init-Environment {
+function Create-Directory {
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]$Path
+    )
+
+    if (Test-Path $Path) {
+        Write-Host "Directory already exists: $Path`n"
+        return $true
+    } 
+    else {
+        try {
+            New-Item -ItemType Directory -Force -Path $Path | Out-Null
+            if (Test-Path $Path) {
+                Write-Host "Directory created: $Path`n" -ForegroundColor Green
+                return $true
+            } 
+            else {
+                Write-Host "Failed to create directory: $Path`n" -ForegroundColor Red
+            }
+        } 
+        catch {
+            Write-Error "Exception while creating directory: $Path - $_`n" -ForegroundColor Red
+        }
+        return $false
+    }
+}
+
+function Copy-File {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Source,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Destination
+    )
+
+    if (-not (Test-Path $Source)) {
+        Write-Host "Source file does not exist: $Source`n" -ForegroundColor Red
+        return $false
+    }
+
+    try {
+        Copy-Item -Path $Source -Destination $Destination -Force
+        Write-Host "Copy: $Source to $Destination`n" -ForegroundColor Green
+        return $true
+    } 
+    catch {
+        Write-Host "Failed to copy file: $_`n" -ForegroundColor Red
+        return $false
+    }
+}
+
+function Initialize-Environment() {
     # Check if 'cl' compiler is available
     if (-not (Get-Command cl -ErrorAction SilentlyContinue)) {
         Write-Host "`ncl compiler is not available`n" -ForegroundColor Yellow
@@ -53,7 +106,7 @@ function Init-Environment {
         }
 
         # restart PowerShell with Visual Studio environment initialized
-        cmd /c "`"$vcvars`" && powershell -ExecutionPolicy Bypass -File `"$PSCommandPath`" $args"
+        cmd /c "`"$vcvars`" && powershell -ExecutionPolicy Bypass -File `"$PSCommandPath`" $global:args"
         exit
     }
     else {
@@ -64,20 +117,23 @@ function Init-Environment {
 function Compile-Plugin($plugin) {
     $global:compilationFailed++
 
+    $qt_version = ([regex]::Match($QMAKE_EXE, "\\Qt\\(\d+\.\d+\.\d+)\\").Groups[1].Value).Replace('.', '_')
+
     $plugin_dir = Join-Path $PLUGINS_DIR $plugin
     $pro_file = Join-Path $plugin_dir "$plugin.pro"
-    $build_debug = Join-Path $plugin_dir "build\Desktop_Qt_6_8_2_MSVC2022_64bit-Debug"
-    $build_release = Join-Path $plugin_dir "build\Desktop_Qt_6_8_2_MSVC2022_64bit-Release"
+    $build_folder_base = "Desktop_Qt_${qt_version}_MSVC2022_64bit"
+    $build_debug = Join-Path $plugin_dir "build\$build_folder_base-Debug"
+    $build_release = Join-Path $plugin_dir "build\$build_folder_base-Release"
 
     Write-Host "`n[*] Building plugin: $plugin`n" -ForegroundColor Magenta
 
     if (-Not (Test-Path -Path $plugin_dir -PathType Container)) {
-        Write-Host "Error: Folder '$plugin_dir' not found." -ForegroundColor Red
+        Write-Host "Error: Folder $plugin_dir not found." -ForegroundColor Red
         return
     }
 
     if (-Not (Test-Path -Path $pro_file -PathType Leaf)) {
-        Write-Host "Error: File '$pro_file' not found." -ForegroundColor Red
+        Write-Host "Error: File $pro_file not found." -ForegroundColor Red
         return
     }
     
@@ -85,7 +141,10 @@ function Compile-Plugin($plugin) {
     # Debug build
     # ---------------------
     Write-Host "`n[*] Debug build..." -ForegroundColor Cyan
-    New-Item -ItemType Directory -Force -Path $build_debug | Out-Null
+    if (-not (Create-Directory -Path $build_debug)) {
+        return
+    }
+
     Push-Location $build_debug
 
     Write-Host ("`n> $QMAKE_EXE " + (Normalize-Path $pro_file) + " -spec $QT_SPEC CONFIG+=debug CONFIG+=qml_debug") -ForegroundColor Green
@@ -116,7 +175,10 @@ function Compile-Plugin($plugin) {
     # Release build
     # ---------------------
     Write-Host "`n[*] Release build..." -ForegroundColor Cyan
-    New-Item -ItemType Directory -Force -Path $build_release | Out-Null
+    if (-not (Create-Directory -Path $build_release)) {
+        return
+    }
+
     Push-Location $build_release
 
     Write-Host ("`n> $QMAKE_EXE " + (Normalize-Path $pro_file) + " -spec $QT_SPEC CONFIG+=qtquickcompiler") -ForegroundColor Green
@@ -151,33 +213,61 @@ function Compile-Plugin($plugin) {
     # ---------------------
     Write-Host "`n[*] Copying compiled files to Libraries/" -ForegroundColor Cyan
     $lib_dir = Join-Path $LIBRARIES_DIR $plugin
-    New-Item -ItemType Directory -Force -Path (Join-Path $lib_dir "include") | Out-Null
-    New-Item -ItemType Directory -Force -Path (Join-Path $lib_dir "lib") | Out-Null
-    New-Item -ItemType Directory -Force -Path (Join-Path $lib_dir "bin") | Out-Null
+    
+    if (-not (Create-Directory -Path (Join-Path $lib_dir "include"))) {
+        return
+    }
+    if (-not (Create-Directory -Path (Join-Path $lib_dir "lib"))) {
+        return
+    }
+    if (-not (Create-Directory -Path (Join-Path $lib_dir "bin"))) {
+        return
+    }
 
-    Copy-Item -Path (Join-Path $build_debug "debug\$($plugin)d.dll") -Destination (Join-Path $lib_dir "bin") -Force
-    Copy-Item -Path (Join-Path $build_release "release\$plugin.dll") -Destination (Join-Path $lib_dir "bin") -Force
-    Copy-Item -Path (Join-Path $build_debug "debug\$($plugin)d.lib") -Destination (Join-Path $lib_dir "lib") -Force
-    Copy-Item -Path (Join-Path $build_release "release\$plugin.lib") -Destination (Join-Path $lib_dir "lib") -Force
+    if (-not (Copy-File -Source (Join-Path $build_debug "debug\$($plugin)d.dll") -Destination (Join-Path $lib_dir "bin"))) {
+        return
+    }
+    if (-not (Copy-File -Source (Join-Path $build_release "release\$($plugin).dll") -Destination (Join-Path $lib_dir "bin"))) {
+        return
+    }
+    if (-not (Copy-File -Source (Join-Path $build_debug "debug\$($plugin)d.lib") -Destination (Join-Path $lib_dir "lib"))) {
+        return
+    }
+    if (-not (Copy-File -Source (Join-Path $build_release "release\$($plugin).lib") -Destination (Join-Path $lib_dir "lib"))) {
+        return
+    }
 
     Get-ChildItem -Path $plugin_dir -Recurse -Filter *.h | Where-Object { $_.Name -notlike '*Plugin.h' } | ForEach-Object {
-        Copy-Item $_.FullName -Destination (Join-Path $lib_dir "include") -Force
+        if (-not (Copy-File -Source ($_.FullName) -Destination (Join-Path $lib_dir "include"))) {
+            return
+        }
     }
 
     # ---------------------
     # Copy to x64/
     # ---------------------
     Write-Host "`n[*] Copying DLLs to x64 directory..." -ForegroundColor Cyan
-    New-Item -ItemType Directory -Force -Path (Join-Path $X64_DIR "Debug") | Out-Null
-    New-Item -ItemType Directory -Force -Path (Join-Path $X64_DIR "Release") | Out-Null
-    Copy-Item -Path (Join-Path $build_debug "debug\$($plugin)d.dll") -Destination (Join-Path $X64_DIR "Debug") -Force
-    Copy-Item -Path (Join-Path $build_release "release\$plugin.dll") -Destination (Join-Path $X64_DIR "Release") -Force
+
+    if (-not (Create-Directory -Path (Join-Path $X64_DIR "Debug"))) {
+        return
+    }
+    if (-not (Create-Directory -Path (Join-Path $X64_DIR "Release"))) {
+        return
+    }
+    if (-not (Copy-File -Source (Join-Path $build_debug "debug\$($plugin)d.dll") -Destination (Join-Path $X64_DIR "Debug"))) {
+        return
+    }
+    if (-not (Copy-File -Source (Join-Path $build_release "release\$($plugin).dll") -Destination (Join-Path $X64_DIR "Release"))) {
+        return
+    }
 
     # ---------------------
     # Copy outputs to Designer Plugins/
     # ---------------------
     Write-Host "`n[*] Copying release DLLs to Qt Designer Plugins directory..." -ForegroundColor Cyan
-    Copy-Item -Path (Join-Path $build_release "release\$plugin.dll") -Destination $QT_DESIGNER_PLUGIN_DIR -Force
+    if (-not (Copy-File -Source (Join-Path $build_release "release\$plugin.dll") -Destination $QT_DESIGNER_PLUGIN_DIR)) {
+        return
+    }
 
     Write-Host "`nDone: $plugin`n" -ForegroundColor Magenta
 
@@ -185,7 +275,7 @@ function Compile-Plugin($plugin) {
     $global:compilationSucceeded++
 }
 
-function Print-Configuration {
+function Show-Configuration {
     Write-Host "Installer Configuration" -Foreground Cyan
     Write-Host "======================="
     Write-Host "qmake.exe: $QMAKE_EXE" -ForegroundColor Yellow
@@ -200,7 +290,7 @@ function Print-Configuration {
     Write-Host " "
 }
 
-function Print-Menu {
+function Show-Menu {
     Write-Host "Plugin Installer" -Foreground Cyan
     Write-Host "================"
     Write-Host "0. All"
@@ -210,13 +300,16 @@ function Print-Menu {
 
     Write-Host "`nYou can select multiple plugins using space (e.g. '1 2 3')"
     Write-Host "Use '0' to compile all plugins"
-    Write-Host "Use '-h' or '--help' for usage"
+    Write-Host "Use '-h' or '--help' for usage`n"
+}
 
-    $choice = Read-Host "`nEnter your choice(s)"
+function Select-Plugins {
+    Show-Menu
+    $choice = Read-Host "Enter your choice(s)"
     return $choice
 }
 
-function Print-Usage {
+function Show-Usage {
     Write-Host "Usage:" -Foreground Cyan
     Write-Host "------"
     Write-Host ".\installer.ps1              # Interactive mode"
@@ -224,6 +317,7 @@ function Print-Usage {
     Write-Host ".\installer.ps1 1            # Compile selected plugin: 1"
     Write-Host ".\installer.ps1 1 2 3        # Compile selected plugins: 1, 2 and 3"
     Write-Host ".\installer.ps1 -h | --help  # Show this help message"
+    Write-Host ".\installer.ps1 -l | --list  # Show plugins list"
     Write-Host ""
 }
 
@@ -231,22 +325,26 @@ function Print-Usage {
 # Main entry point
 # ==============================
 
-Init-Environment
-Print-Configuration
+if ($args.Count -gt 0 -and ($args -contains "-h" -or $args -contains "--help")) {
+    Show-Usage
+    exit
+}
+
+if ($args.Count -gt 0 -and ($args -contains "-l" -or $args -contains "--list")) {
+    Show-Menu
+    exit
+}
+
+Initialize-Environment
+Show-Configuration
 
 $pluginChoices = @()
-
 # Handle arguments
 if ($args.Count -gt 0) {
-    if ($args -contains "-h" -or $args -contains "--help") {
-        Print-Usage
-        exit
-    }
-
     $pluginChoices = $args
 }
 else {
-    $pluginChoices = (Print-Menu).Split(" ", [System.StringSplitOptions]::RemoveEmptyEntries)
+    $pluginChoices = (Select-Plugins).Split(" ", [System.StringSplitOptions]::RemoveEmptyEntries)
 }
 
 # Analyse choices
