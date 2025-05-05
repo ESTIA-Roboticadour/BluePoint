@@ -1,0 +1,12 @@
+#ifndef FRAMEVIEWER_GLOBAL_H
+#define FRAMEVIEWER_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(FRAMEVIEWER_LIBRARY)
+#  define FRAMEVIEWER_API Q_DECL_EXPORT
+#else
+#  define FRAMEVIEWER_API Q_DECL_IMPORT
+#endif
+
+#endif // FRAMEVIEWER_GLOBAL_H
