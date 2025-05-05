@@ -26,7 +26,6 @@ $X64_DIR = Join-Path $ROOT_DIR "x64"
 
 $PLUGINS = @(
     "ParametersWidgets",
-    "Toto",
     "FrameViewer"
     # Add other plugin directories here...
 )
