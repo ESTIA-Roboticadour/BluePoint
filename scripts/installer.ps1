@@ -25,8 +25,9 @@ $X64_DIR = Join-Path $ROOT_DIR "x64"
 # ==============================
 
 $PLUGINS = @(
-    "ParametersWidgets"
-    # "FrameViewer"
+    "ParametersWidgets",
+    "Toto",
+    "FrameViewer"
     # Add other plugin directories here...
 )
 
@@ -39,9 +40,9 @@ function Normalize-Path($path) {
 }
 
 function Init-Environment {
-    # Check if 'cl' compilator is available
+    # Check if 'cl' compiler is available
     if (-not (Get-Command cl -ErrorAction SilentlyContinue)) {
-        Write-Host "cl compilator is not available" -ForegroundColor Yellow
+        Write-Host "cl compiler is not available" -ForegroundColor Yellow
 
         Write-Host "Initializing Visual Studio environment..." -ForegroundColor Cyan
 
@@ -57,16 +58,28 @@ function Init-Environment {
         exit
     }
     else {
-        Write-Host "cl compilator is available" -ForegroundColor Green
+        Write-Host "cl compiler is available" -ForegroundColor Green
     }
 }
 
 function Compile-Plugin($plugin) {
+    $global:compilationFailed++ # failed by default
+
     $plugin_dir = Join-Path $PLUGINS_DIR $plugin
     $pro_file = Join-Path $plugin_dir "$plugin.pro"
     $build_debug = Join-Path $plugin_dir "build\Desktop_Qt_6_8_2_MSVC2022_64bit-Debug"
     $build_release = Join-Path $plugin_dir "build\Desktop_Qt_6_8_2_MSVC2022_64bit-Release"
 
+    if (-Not (Test-Path -Path $plugin_dir -PathType Container)) {
+        Write-Host "Error: Folder '$plugin_dir' not found." -ForegroundColor Red
+        return
+    }
+
+    if (-Not (Test-Path -Path $pro_file -PathType Leaf)) {
+        Write-Host "Error: File '$pro_file' not found." -ForegroundColor Red
+        return
+    }
+    
     Write-Host " "
     Write-Host "Compiling plugin: $plugin" -ForegroundColor Cyan
 
@@ -159,6 +172,24 @@ function Compile-Plugin($plugin) {
 
     Write-Host " "
     Write-Host "Done: $plugin`n" -ForegroundColor Cyan
+
+    $global:compilationFailed-- # cancel failed
+    $global:compilationSucceeded++
+}
+
+function Print-Configuration {
+    Write-Host "Installer Configuration" -Foreground Cyan
+    Write-Host "======================="
+    Write-Host "qmake.exe: " $QMAKE_EXE
+    Write-Host "make.exe: " $MAKE_EXE
+    Write-Host "Qt Designer Plugins Dir: " $QT_DESIGNER_PLUGIN_DIR
+    Write-Host " "
+    Write-Host "Compilation spec: " $QT_SPEC
+    Write-Host "Root dir: " $ROOT_DIR
+    Write-Host "Plugins dir: " $PLUGINS_DIR
+    Write-Host "Libraries dir: " $LIBRARIES_DIR
+    Write-Host "x64 dir: " $X64_DIR
+    Write-Host " "
 }
 
 function Print-Menu {
@@ -173,22 +204,6 @@ function Print-Menu {
     return $choice
 }
 
-function Print-Configuration {
-    Write-Host "Installer Configuration" -Foreground Cyan
-    Write-Host "======================="
-    Write-Host "qmake.exe: " $QMAKE_EXE
-    Write-Host "make.exe: " $MAKE_EXE
-    Write-Host "Qt Designer Plugins Dir: " $QT_DESIGNER_PLUGIN_DIR
-    Write-Host "Compilation spec: " $QT_SPEC
-    Write-Host " "
-
-    Write-Host "Root dir: " $ROOT_DIR
-    Write-Host "Plugins dir: " $PLUGINS_DIR
-    Write-Host "Libraries dir: " $LIBRARIES_DIR
-    Write-Host "x64 dir: " $X64_DIR
-    Write-Host " "
-}
-
 # ==============================
 # Main entry point
 # ==============================
@@ -197,27 +212,36 @@ Init-Environment
 
 Print-Configuration
 
-$PluginToCompile = $args[0]
+$pluginToCompile = $args[0]
+$pluginsToCompile = 1
+$compilationSucceeded = 0
+$compilationFailed = 0
 
-if (-not $PluginToCompile) {
-    $PluginToCompile = Print-Menu
+if (-not $pluginToCompile) {
+    $pluginToCompile = Print-Menu
 }
 
 Write-Host " "
 $compileAll = $false
-if ($PluginToCompile -eq "0") {
+if ($pluginToCompile -eq "0") {
     $compileAll = $true
+    $pluginsToCompile = $PLUGINS.Count
     Write-Host "Full install" -Foreground Cyan
 }
 else {
-    Write-Host ("Install plugin: " + $PLUGINS[$PluginToCompile - 1]) -Foreground Cyan
+    Write-Host ("Install plugin: " + $PLUGINS[$pluginToCompile - 1]) -Foreground Cyan
 }
 
 for ($i = 0; $i -lt $PLUGINS.Count; $i++) {
-    if ($compileAll -or ($PluginToCompile -eq "$($i + 1)")) {
+    if ($compileAll -or ($pluginToCompile -eq "$($i + 1)")) {
         Compile-Plugin $PLUGINS[$i]
     }
 }
 
 Write-Host " "
-Read-Host "Press Enter to exit"
+Write-Host "Result" -Foreground Cyan
+Write-Host "======"
+Write-Host ("Plugins to compile: " + $pluginsToCompile) -ForegroundColor Yellow
+Write-Host ("Plugins succeeded: " + $compilationSucceeded) -ForegroundColor Green
+Write-Host ("Plugins failed: " + $compilationFailed) -ForegroundColor Red
+Write-Host " "
