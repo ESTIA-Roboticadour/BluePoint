@@ -12,8 +12,9 @@
 class FRAMEVIEWER_API FrameViewer : public QWidget
 {
     Q_OBJECT
-    Q_PROPERTY(QString source READ source WRITE setSource)
-    Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor)
+    Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
+    Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor NOTIFY backgroundColorChanged)
+    Q_PROPERTY(Qt::TransformationMode transformationMode READ transformationMode WRITE setTransformationMode NOTIFY transformationModeChanged)
 
 public:
     explicit FrameViewer(QWidget *parent = nullptr);
@@ -36,6 +37,14 @@ protected:
 private:
     QSize findScaledSizeKeepingAspectRatio(const QSize& original, const QSize& maxSize);
     void updateScaledImage();
+
+signals:
+    void beforeUpdateImage();
+    void afterUpdateImage();
+
+    void sourceChanged(const QString& source);
+    void backgroundColorChanged(const QColor& color);
+    void transformationModeChanged(Qt::TransformationMode mode);
 
 private:
     QImage m_image;

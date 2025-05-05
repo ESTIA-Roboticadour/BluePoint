@@ -108,6 +108,7 @@ QSize FrameViewer::findScaledSizeKeepingAspectRatio(const QSize& original, const
 
 void FrameViewer::updateScaledImage()
 {
+    emit beforeUpdateImage();
     if (m_image.isNull())
     {
         m_scaledImage = QImage();
@@ -118,6 +119,7 @@ void FrameViewer::updateScaledImage()
         return;
 
     m_scaledImage = m_image.scaled(scaledSize, Qt::IgnoreAspectRatio, m_transformationMode);
+    emit afterUpdateImage();
 }
 
 void FrameViewer::paintEvent(QPaintEvent *event)
