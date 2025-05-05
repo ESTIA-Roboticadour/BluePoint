@@ -42,7 +42,7 @@ function Normalize-Path($path) {
 function Init-Environment {
     # Check if 'cl' compiler is available
     if (-not (Get-Command cl -ErrorAction SilentlyContinue)) {
-        Write-Host "cl compiler is not available" -ForegroundColor Yellow
+        Write-Host "`ncl compiler is not available`n" -ForegroundColor Yellow
 
         Write-Host "Initializing Visual Studio environment..." -ForegroundColor Cyan
 
@@ -54,21 +54,23 @@ function Init-Environment {
         }
 
         # restart PowerShell with Visual Studio environment initialized
-        cmd /c "`"$vcvars`" && powershell -ExecutionPolicy Bypass -NoExit -File `"$PSCommandPath`" $args"
+        cmd /c "`"$vcvars`" && powershell -ExecutionPolicy Bypass -File `"$PSCommandPath`" $args"
         exit
     }
     else {
-        Write-Host "cl compiler is available" -ForegroundColor Green
+        Write-Host "`ncl compiler is available`n" -ForegroundColor Green
     }
 }
 
 function Compile-Plugin($plugin) {
-    $global:compilationFailed++ # failed by default
+    $global:compilationFailed++
 
     $plugin_dir = Join-Path $PLUGINS_DIR $plugin
     $pro_file = Join-Path $plugin_dir "$plugin.pro"
     $build_debug = Join-Path $plugin_dir "build\Desktop_Qt_6_8_2_MSVC2022_64bit-Debug"
     $build_release = Join-Path $plugin_dir "build\Desktop_Qt_6_8_2_MSVC2022_64bit-Release"
+
+    Write-Host "`n[*] Building plugin: $plugin`n" -ForegroundColor Magenta
 
     if (-Not (Test-Path -Path $plugin_dir -PathType Container)) {
         Write-Host "Error: Folder '$plugin_dir' not found." -ForegroundColor Red
@@ -80,56 +82,67 @@ function Compile-Plugin($plugin) {
         return
     }
     
-    Write-Host " "
-    Write-Host "Compiling plugin: $plugin" -ForegroundColor Cyan
-
     # ---------------------
     # Debug build
     # ---------------------
-    Write-Host " "
-    Write-Host "[*] Debug build..." -ForegroundColor Cyan
+    Write-Host "`n[*] Debug build..." -ForegroundColor Cyan
     New-Item -ItemType Directory -Force -Path $build_debug | Out-Null
     Push-Location $build_debug
 
-    Write-Host ("> " + $QMAKE_EXE + " " + (Normalize-Path $pro_file) + " -spec $QT_SPEC CONFIG+=debug CONFIG+=qml_debug") -ForegroundColor Green
+    Write-Host ("`n> $QMAKE_EXE " + (Normalize-Path $pro_file) + " -spec $QT_SPEC CONFIG+=debug CONFIG+=qml_debug") -ForegroundColor Green
     & $QMAKE_EXE (Normalize-Path $pro_file) -spec $QT_SPEC "CONFIG+=debug" "CONFIG+=qml_debug"
     
-    Write-Host ("> " + $MAKE_EXE + " qmake_all") -ForegroundColor Green
+    Write-Host "`n> $MAKE_EXE qmake_all" -ForegroundColor Green
     & $MAKE_EXE qmake_all
-    if (-not $?) { Write-Host "Debug build failed for $plugin" -ForegroundColor Red; Pop-Location; return }
+    if (-not $?) {
+        Write-Host "Debug build failed for $plugin" -ForegroundColor Red
+        Pop-Location
+        return
+    }
 
-    Write-Host ("> " + $MAKE_EXE) -ForegroundColor Green
+    Write-Host "`n> $MAKE_EXE" -ForegroundColor Green
     & $MAKE_EXE
-    if (-not $?) { Write-Host "Debug build failed for $plugin" -ForegroundColor Red; Pop-Location; return }
+    if (-not $?) {
+        Write-Host "Debug build failed for $plugin" -ForegroundColor Red
+        Pop-Location
+        return
+    }
     
     & $MAKE_EXE clean
-    Write-Host ("> " + $MAKE_EXE + " clean") -ForegroundColor Green
+    Write-Host "`n> $MAKE_EXE clean" -ForegroundColor Green
 
     Pop-Location
 
     # ---------------------
     # Release build
     # ---------------------
-    Write-Host " "
-    Write-Host "[*] Release build..." -ForegroundColor Cyan
+    Write-Host "`n[*] Release build..." -ForegroundColor Cyan
     New-Item -ItemType Directory -Force -Path $build_release | Out-Null
     Push-Location $build_release
 
-    Write-Host ("> " + $QMAKE_EXE + " " + (Normalize-Path $pro_file) + " -spec $QT_SPEC CONFIG+=qtquickcompiler") -ForegroundColor Green
+    Write-Host ("`n> $QMAKE_EXE " + (Normalize-Path $pro_file) + " -spec $QT_SPEC CONFIG+=qtquickcompiler") -ForegroundColor Green
     & $QMAKE_EXE (Normalize-Path $pro_file) -spec $QT_SPEC "CONFIG+=qtquickcompiler"
 
-    Write-Host ("> " + $MAKE_EXE + " qmake_all") -ForegroundColor Green
+    Write-Host "`n> $MAKE_EXE qmake_all" -ForegroundColor Green
     & $MAKE_EXE qmake_all
-    if (-not $?) { Write-Host "Release build failed for $plugin" -ForegroundColor Red; Pop-Location; return }
+    if (-not $?) {
+        Write-Host "Release build failed for $plugin" -ForegroundColor Red
+        Pop-Location
+        return
+    }
     
-    Write-Host ("> " + $MAKE_EXE) -ForegroundColor Green
+    Write-Host "`n> $MAKE_EXE" -ForegroundColor Green
     & $MAKE_EXE
-    if (-not $?) { Write-Host "Release build failed for $plugin" -ForegroundColor Red; Pop-Location; return }
+    if (-not $?) {
+        Write-Host "Release build failed for $plugin" -ForegroundColor Red
+        Pop-Location
+        return
+    }
     
-    Write-Host ("> " + $MAKE_EXE + " install") -ForegroundColor Green
+    Write-Host "`n> $MAKE_EXE install" -ForegroundColor Green
     & $MAKE_EXE install
 
-    Write-Host ("> " + $MAKE_EXE + " clean") -ForegroundColor Green
+    Write-Host "`n> $MAKE_EXE clean" -ForegroundColor Green
     & $MAKE_EXE clean
 
     Pop-Location
@@ -137,8 +150,7 @@ function Compile-Plugin($plugin) {
     # ---------------------
     # Copy outputs to Libraries/
     # ---------------------
-    Write-Host " "
-    Write-Host "[*] Copying compiled files to Libraries/" -ForegroundColor Cyan
+    Write-Host "`n[*] Copying compiled files to Libraries/" -ForegroundColor Cyan
     $lib_dir = Join-Path $LIBRARIES_DIR $plugin
     New-Item -ItemType Directory -Force -Path (Join-Path $lib_dir "include") | Out-Null
     New-Item -ItemType Directory -Force -Path (Join-Path $lib_dir "lib") | Out-Null
@@ -156,8 +168,7 @@ function Compile-Plugin($plugin) {
     # ---------------------
     # Copy to x64/
     # ---------------------
-    Write-Host " "
-    Write-Host "[*] Copying DLLs to x64 directory..." -ForegroundColor Cyan
+    Write-Host "`n[*] Copying DLLs to x64 directory..." -ForegroundColor Cyan
     New-Item -ItemType Directory -Force -Path (Join-Path $X64_DIR "Debug") | Out-Null
     New-Item -ItemType Directory -Force -Path (Join-Path $X64_DIR "Release") | Out-Null
     Copy-Item -Path (Join-Path $build_debug "debug\$($plugin)d.dll") -Destination (Join-Path $X64_DIR "Debug") -Force
@@ -166,23 +177,21 @@ function Compile-Plugin($plugin) {
     # ---------------------
     # Copy outputs to Designer Plugins/
     # ---------------------
-    Write-Host " "
-    Write-Host "[*] Copying release DLLs to Qt Designer Plugins directory..." -ForegroundColor Cyan
+    Write-Host "`n[*] Copying release DLLs to Qt Designer Plugins directory..." -ForegroundColor Cyan
     Copy-Item -Path (Join-Path $build_release "release\$plugin.dll") -Destination $QT_DESIGNER_PLUGIN_DIR -Force
 
-    Write-Host " "
-    Write-Host "Done: $plugin`n" -ForegroundColor Cyan
+    Write-Host "`nDone: $plugin`n" -ForegroundColor Magenta
 
-    $global:compilationFailed-- # cancel failed
+    $global:compilationFailed--
     $global:compilationSucceeded++
 }
 
 function Print-Configuration {
     Write-Host "Installer Configuration" -Foreground Cyan
     Write-Host "======================="
-    Write-Host "qmake.exe: " $QMAKE_EXE
-    Write-Host "make.exe: " $MAKE_EXE
-    Write-Host "Qt Designer Plugins Dir: " $QT_DESIGNER_PLUGIN_DIR
+    Write-Host "qmake.exe: $QMAKE_EXE" -ForegroundColor Yellow
+    Write-Host "make.exe: $MAKE_EXE" -ForegroundColor Yellow
+    Write-Host "Qt Designer Plugins Dir: $QT_DESIGNER_PLUGIN_DIR" -ForegroundColor Yellow
     Write-Host " "
     Write-Host "Compilation spec: " $QT_SPEC
     Write-Host "Root dir: " $ROOT_DIR
@@ -195,13 +204,28 @@ function Print-Configuration {
 function Print-Menu {
     Write-Host "Plugin Installer" -Foreground Cyan
     Write-Host "================"
-    Write-Host "0. Compile and install all plugins"
+    Write-Host "0. All"
     for ($i = 0; $i -lt $PLUGINS.Count; $i++) {
-        Write-Host "$($i + 1). Compile and install plugin: $($PLUGINS[$i])"
+        Write-Host "$($i + 1). $($PLUGINS[$i])"
     }
 
-    $choice = Read-Host "`nEnter your choice (number only)"
+    Write-Host "`nYou can select multiple plugins using space (e.g. '1 2 3')"
+    Write-Host "Use '0' to compile all plugins"
+    Write-Host "Use '-h' or '--help' for usage"
+
+    $choice = Read-Host "`nEnter your choice(s)"
     return $choice
+}
+
+function Print-Usage {
+    Write-Host "Usage:" -Foreground Cyan
+    Write-Host "------"
+    Write-Host ".\installer.ps1              # Interactive mode"
+    Write-Host ".\installer.ps1 0            # Compile all plugins"
+    Write-Host ".\installer.ps1 1            # Compile selected plugin: 1"
+    Write-Host ".\installer.ps1 1 2 3        # Compile selected plugins: 1, 2 and 3"
+    Write-Host ".\installer.ps1 -h | --help  # Show this help message"
+    Write-Host ""
 }
 
 # ==============================
@@ -209,39 +233,63 @@ function Print-Menu {
 # ==============================
 
 Init-Environment
-
 Print-Configuration
 
-$pluginToCompile = $args[0]
-$pluginsToCompile = 1
-$compilationSucceeded = 0
-$compilationFailed = 0
+$pluginChoices = @()
 
-if (-not $pluginToCompile) {
-    $pluginToCompile = Print-Menu
-}
+# Handle arguments
+if ($args.Count -gt 0) {
+    if ($args -contains "-h" -or $args -contains "--help") {
+        Print-Usage
+        exit
+    }
 
-Write-Host " "
-$compileAll = $false
-if ($pluginToCompile -eq "0") {
-    $compileAll = $true
-    $pluginsToCompile = $PLUGINS.Count
-    Write-Host "Full install" -Foreground Cyan
+    $pluginChoices = $args
 }
 else {
-    Write-Host ("Install plugin: " + $PLUGINS[$pluginToCompile - 1]) -Foreground Cyan
+    $pluginChoices = (Print-Menu).Split(" ", [System.StringSplitOptions]::RemoveEmptyEntries)
 }
 
-for ($i = 0; $i -lt $PLUGINS.Count; $i++) {
-    if ($compileAll -or ($pluginToCompile -eq "$($i + 1)")) {
-        Compile-Plugin $PLUGINS[$i]
+# Analyse choices
+$pluginsToCompile = @()
+
+if ($pluginChoices -contains "0") {
+    $pluginsToCompile = $PLUGINS
+}
+else {
+    foreach ($choice in $pluginChoices) {
+        if ($choice -match '^\d+$') {
+            $index = [int]$choice - 1
+            if ($index -ge 0 -and $index -lt $PLUGINS.Count) {
+                $pluginsToCompile += $PLUGINS[$index]
+            }
+        }
     }
 }
 
+# Remove duplicates
+$pluginsToCompile = $pluginsToCompile | Select-Object -Unique
+
+# Status
 Write-Host " "
-Write-Host "Result" -Foreground Cyan
-Write-Host "======"
-Write-Host ("Plugins to compile: " + $pluginsToCompile) -ForegroundColor Yellow
+Write-Host "Selected plugins to compile:" -Foreground Cyan
+Write-Host "============================"
+foreach ($p in $pluginsToCompile) {
+    Write-Host " - $p" -ForegroundColor Gray
+}
+
+# Compile loop
+$compilationSucceeded = 0
+$compilationFailed = 0
+
+foreach ($plugin in $pluginsToCompile) {
+    Compile-Plugin $plugin
+}
+
+# Result
+Write-Host "`nResult" -Foreground Cyan
+Write-Host "======" 
+Write-Host ("Plugins to compile: " + $pluginsToCompile.Count) -ForegroundColor Yellow
 Write-Host ("Plugins succeeded: " + $compilationSucceeded) -ForegroundColor Green
 Write-Host ("Plugins failed: " + $compilationFailed) -ForegroundColor Red
-Write-Host " "
+Write-Host ""
