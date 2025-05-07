@@ -1,0 +1,12 @@
+#ifndef TOGGLEPANEL_GLOBAL_H
+#define TOGGLEPANEL_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(TOGGLEPANEL_LIBRARY)
+#  define TOGGLEPANEL_API Q_DECL_EXPORT
+#else
+#  define TOGGLEPANEL_API Q_DECL_IMPORT
+#endif
+
+#endif // TOGGLEPANEL_GLOBAL_H
