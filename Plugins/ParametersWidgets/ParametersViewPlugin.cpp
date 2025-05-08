@@ -61,7 +61,13 @@ bool ParametersViewPlugin::isContainer() const
 QString ParametersViewPlugin::domXml() const
 {
     return QLatin1String(R"(<widget class="ParametersView" name="parametersView">
-</widget>)");
+    <property name="minimumSize">
+        <size>
+            <width>60</width>
+            <height>40</height>
+        </size>
+    </property>
+</widget>)");   
 }
 
 QString ParametersViewPlugin::includeFile() const

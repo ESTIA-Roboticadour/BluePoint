@@ -26,6 +26,7 @@ $X64_DIR = Join-Path $ROOT_DIR "x64"
 
 $PLUGINS = @(
     "FrameViewer",
+    "NavigationWidgets",
     "ParametersWidgets",
     "TogglePanel"
     # Add other plugin directories here...
