@@ -10,7 +10,11 @@ They provide reusable widgets and logic that are dynamically loaded by other app
 
 ### 🔧 Qt Creator Projects (Plugins & Libraries)
 
-- `ParametersCustomWidgets`: Builds dynamic UI widgets to control various parameter types (numbers, booleans, strings...).  
+- `FrameViewer`: Widget to display an image. Display as large as possible on a customisable background, keeping the aspect ratio.
+- `NavigationWidgets`: Widgets for navigation. Navigation is done through a tree of nodes.
+- `ParametersCustomWidgets`: Builds dynamic UI widgets to control various parameter types (numbers, booleans, strings...).
+- `TogglePanel`: A widget for an openable and closeable panel. Ideal for sidebar menus.
+
   👉 **Required to be compiled**, as it provides headers, `.lib` and `.dll` files used by other projects.
 
 A helper script is provided to **prepare and install these libraries** correctly (see `Setup section`).
