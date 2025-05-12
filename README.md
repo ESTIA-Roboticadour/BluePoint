@@ -72,7 +72,7 @@ C:\opencv\build\x64\vc16\lib
 ## 🏗️ Building Projects
 
 To build the project, you first need to setup all plugins and shared librairies. To do that, there is 2 ways.
-1) Use the `installer.sh` script to do everything automatically.
+1) Use the `installer.ps1` script to do everything automatically.
 2) Do it manually.
 
 After the setup done, the project structure would be as bellow:
@@ -101,8 +101,8 @@ BluePoint/
 │   │   ├── ParametersWidgets.dll
 │   │   ├── other release dll...
 ├── scripts/                          # Scripts folder
-│   │   ├── installer.sh              # Script to setup shared libs
-├── installer.sh.lnk                  # Link to use to execute the script: scripts/installer.sh
+│   │   ├── installer.ps1             # Script to setup shared libs
+├── installer-?.ps1.lnk               # Links to use to execute the script: scripts/installer.sh with specified options
 └── README.md                         # This file
 ```
 
@@ -110,7 +110,7 @@ BluePoint/
 
 #### ⚙️ Configuration
 
-Open the script `scripts/installer.sh` in a text editor, then edit / check the configurations paths (in the editable section).
+Open the script `scripts/installer.ps1` in a text editor, then edit / check the configurations paths (in the editable section).
 
 Default values are:
 ```bash
@@ -123,9 +123,9 @@ You still have to select a `qmake.exe` from an `msvc` compiler.
 
 #### ▶️ Run
 
-Run the script `installer-plugins.sh.lnk` (the link).
+Run the script `installer-plugins.ps1.lnk` (the link).
 ```bash
-./installer-plugins.sh.lnk
+./installer-plugins.ps1.lnk
 ```
 
 This script will:
@@ -173,7 +173,7 @@ Once you have compiled the Visual Studio projects you want (**Release compilatio
 
 ## ❓ FAQ
 **Q: I get missing .lib or .dll errors when building in Visual Studio.**
-A: If the missing file is related to our librairies, run `installer.sh`. If not, check the configuration of your project (include directories, lib directories, input lib).
+A: If the missing file is related to our librairies, run `installer-plugins.ps1.lnk`. If not, check the configuration of your project (include directories, lib directories, input lib).
 
 **Q: My Basler camera is not readable.**
 A: Ensure you plugged it on the **USB 3 port**. You can also install `Pylon Viewer` (if it's not already done) to test your camera.
