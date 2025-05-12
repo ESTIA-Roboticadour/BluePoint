@@ -17,7 +17,7 @@ They provide reusable widgets and logic that are dynamically loaded by other app
 
   👉 **Required to be compiled**, as it provides headers, `.lib` and `.dll` files used by other projects.
 
-A helper script is provided to **prepare and install these libraries** correctly (see `Setup section`).
+A helper script is provided to **prepare and install these libraries** correctly (see `🧰 Setup Instructions > 🏗️ Building Projects` section).
 
 ### 🖥️ Visual Studio Projects
 
@@ -106,7 +106,7 @@ BluePoint/
 └── README.md                         # This file
 ```
 
-### 🪄 installer.sh
+### 🪄 installer.ps1
 
 #### ⚙️ Configuration
 
@@ -165,7 +165,7 @@ For all projects in `Plugins` folder:
 
 ### 🚀 Qt Deployment
 
-Once you have compiled the Visual Studio projects you want (**Release compilation more specifically**, Debug compilation is not necessarily mandatory), you can run the script `installer-qtdeploy.ps1.lnk` to easily deploy the Qt libraries and have an application ready to deploy.
+Once you have compiled the Visual Studio projects you want (**especially Release compilation**, Debug compilation is not necessarily mandatory), you can run the script `installer-qtdeploy.ps1.lnk` to easily deploy the Qt libraries and have an application ready to deploy.
 
 #### 📌 Notes
 
