@@ -72,8 +72,8 @@ C:\opencv\build\x64\vc16\lib
 ## 🏗️ Building Projects
 
 To build the project, you first need to setup all plugins and shared librairies. To do that, there is 2 ways.
-- 1) Use the `installer.sh` script to do everything automatically.
-- 2) Do it manually.
+1) Use the `installer.sh` script to do everything automatically.
+2) Do it manually.
 
 After the setup done, the project structure would be as bellow:
 
