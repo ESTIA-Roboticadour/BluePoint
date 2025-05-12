@@ -277,6 +277,60 @@ function Compile-Plugin($plugin) {
     $global:compilationSucceeded++
 }
 
+function Deploy-Qt {
+    param (
+        [ValidateSet("Debug","Release")]
+        [string]$Config
+    )
+
+    $qtBin        = Split-Path $QMAKE_EXE
+    $windeployqt  = Join-Path $qtBin "windeployqt.exe"
+    $destDir      = Join-Path $X64_DIR $Config
+
+    Write-Host " "
+    Write-Host "Win Qt Deploy" -Foreground Cyan
+    Write-Host "============="
+    Write-Host "windeployqt.exe: $windeployqt"
+    Write-Host " "
+
+    if (-not (Test-Path $windeployqt)) {
+        Write-Error "windeployqt.exe not found: $windeployqt"
+        return
+    }
+
+    if (-not (Create-Directory -Path $destDir)) {
+        return
+    }
+
+    $executables = Get-ChildItem -Path $destDir -Filter "*.exe"
+    if (-not $executables) {
+        Write-Host "No .exe found in $destDir" -ForegroundColor Yellow
+        return
+    }
+
+    foreach ($exe in $executables) {
+        Write-Host "`n[*]  Qt Deployment ($Config): $($exe.Name)..." -ForegroundColor Cyan
+
+        $args = @(
+            "--$($Config.ToLower())",      # --debug ou --release
+            "--compiler-runtime",
+            "--force",
+            "--dir=`"$destDir`"",
+            "`"$($exe.FullName)`""
+        )
+    }
+
+    Write-Host "`n> $windeployqt $($args -join ' ')`n" -ForegroundColor Green
+
+    & $windeployqt @args
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "$($exe.Name) deployed" -ForegroundColor Green
+    }
+    else {
+        Write-Host "windeployqt failed (code $LASTEXITCODE)" -ForegroundColor Red
+    }
+}
+
 function Show-Configuration {
     Write-Host "Installer Configuration" -Foreground Cyan
     Write-Host "======================="
@@ -314,12 +368,13 @@ function Select-Plugins {
 function Show-Usage {
     Write-Host "Usage:" -Foreground Cyan
     Write-Host "------"
-    Write-Host ".\installer.ps1              # Interactive mode"
-    Write-Host ".\installer.ps1 0            # Compile all plugins"
-    Write-Host ".\installer.ps1 1            # Compile selected plugin: 1"
-    Write-Host ".\installer.ps1 1 2 3        # Compile selected plugins: 1, 2 and 3"
-    Write-Host ".\installer.ps1 -h | --help  # Show this help message"
-    Write-Host ".\installer.ps1 -l | --list  # Show plugins list"
+    Write-Host ".\installer.ps1 -h  | --help  # Show this help message"
+    Write-Host ".\installer.ps1 -l  | --list  # Show plugins list"
+    Write-Host ".\installer.ps1 -qt | --qt    # Execute WIN DEPLOY QT - No plugin compiled"
+    Write-Host ".\installer.ps1               # Interactive mode"
+    Write-Host ".\installer.ps1 0             # Compile all plugins"
+    Write-Host ".\installer.ps1 1             # Compile selected plugin: 1"
+    Write-Host ".\installer.ps1 1 2 3         # Compile selected plugins: 1, 2 and 3"
     Write-Host ""
 }
 
@@ -334,6 +389,12 @@ if ($args.Count -gt 0 -and ($args -contains "-h" -or $args -contains "--help")) 
 
 if ($args.Count -gt 0 -and ($args -contains "-l" -or $args -contains "--list")) {
     Show-Menu
+    exit
+}
+
+if ($args.Count -gt 0 -and ($args -contains "-qt" -or $args -contains "--qt")) {
+    Deploy-Qt -Config "Debug"
+    Deploy-Qt -Config "Release"
     exit
 }
 

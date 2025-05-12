@@ -106,7 +106,7 @@ BluePoint/
 
 #### ⚙️ Configuration
 
-Open the script `scripts/installer.sh` in a text editor and edit/verify the configurations paths (in the editable section).
+Open the script `scripts/installer.sh` in a text editor, then edit / check the configurations paths (in the editable section).
 
 Default values are:
 ```bash
@@ -119,16 +119,16 @@ You still have to select a `qmake.exe` from an `msvc` compiler.
 
 #### ▶️ Run
 
-Run the script `installer.sh.lnk` (the link).
+Run the script `installer-plugins.sh.lnk` (the link).
 ```bash
-./installer.sh.lnk
+./installer-plugins.sh.lnk
 ```
 
 This script will:
 - **Compile** all plugin projects (from `Plugins` folder) in `debug` and `release`.
-- Install the plugins for Qt Designer.
-- Create the `Librairies` folder for shared librairies. It will also create folders for each plugin, and `bin`, `lib` and `include` subfolders for each of them. These subfolders will be feed with `.h`, `.lib` and `.dll` files.
-- Creates the `x64\Debug` and `x64\Release` folders and copy `debug` and `release` `dll` files.
+- **Install** the plugins for Qt Designer.
+- **Create** the `Librairies` folder for shared librairies. It will also create folders for each plugin, and `bin`, `lib` and `include` subfolders for each of them. These subfolders will be feed with `.h`, `.lib` and `.dll` files.
+- **Create** the `x64\Debug` and `x64\Release` folders and copy `debug` and `release` `dll` files.
 
 Then you can open the `.sln` solution and compile project you want. See `🧱 Build Visual Studio Applications` section.
 
@@ -158,6 +158,10 @@ For all projects in `Plugins` folder:
      ⚠️ Make sure to use the correct `.lib` files depending on your versions of extern libraires (OpenCV, Pylon, etc.) for both configuration (**Debug** or **Release**).
      E.g.: With `OpenCV 4.11.0`, used lib is `opencv_world4110d.lib` for `Debug` and `opencv_world4110.lib` for `Release`. It could change if you use another version.
 4. Build and run the application.
+
+### 🚀 Qt Deployment
+
+Once you have compiled the Visual Studio projects you want (**Release compilation more specifically**, Debug compilation is not necessarily mandatory), you can run the script `installer-qtdeploy.ps1.lnk` to easily deploy the Qt libraries and have an application ready to deploy.
 
 #### 📌 Notes
 
