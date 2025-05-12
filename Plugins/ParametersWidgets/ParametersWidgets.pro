@@ -1,6 +1,6 @@
 # Project declaration
 TEMPLATE = lib
-CONFIG += debug_and_release
+CONFIG += plugin debug_and_release
 
 # Target name
 TARGET = $$qtLibraryTarget(ParametersWidgets)
@@ -48,7 +48,7 @@ SOURCES += \
     ListParameterWidgetPlugin.cpp \
     ParametersViewPlugin.cpp
 
-RESOURCES += icons.qrc
+#RESOURCES +=
 #LIBS        += -L. -lListParameterWidget -lParametersView -lBoolParameterWidget -lStringParameterWidget -lNumericalParameterWidget
 
 # For installation as a Qt Designer plugin

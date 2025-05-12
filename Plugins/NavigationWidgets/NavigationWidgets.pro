@@ -13,7 +13,8 @@ SOURCES     = NavigationBranchWidgetPlugin.cpp NavigationBreadcrumbWidgetPlugin.
     NavigationBreadcrumbWidget.cpp \
     NavigationNode.cpp \
     NavigationTree.cpp
-RESOURCES   = icons.qrc
+
+#RESOURCES   =
 #LIBS        += -L. -lNavigationBreadcrumbWidget -lNavigationBranchWidget
 
 QT += widgets designer

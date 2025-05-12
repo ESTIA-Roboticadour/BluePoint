@@ -5,7 +5,7 @@ TEMPLATE    = lib
 HEADERS     = FrameViewer.h FrameViewerPlugin.h FrameViewer_global.h
 SOURCES     = FrameViewer.cpp FrameViewerPlugin.cpp
 
-RESOURCES   = icons.qrc
+#RESOURCES   =
 #LIBS        += -L. -lFrameViewer
 
 QT += designer widgets

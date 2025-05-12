@@ -4,7 +4,7 @@ TEMPLATE    = lib
 
 HEADERS     = TogglePanel.h TogglePanelPlugin.h TogglePanel_global.h
 SOURCES     = TogglePanel.cpp TogglePanelPlugin.cpp
-RESOURCES   = icons.qrc
+#RESOURCES   =
 #LIBS        += -L. -lTogglePanel
 
 QT += widgets designer
