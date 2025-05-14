@@ -4,11 +4,12 @@ NavigationNode::NavigationNode(const QString& name, NavigationNode* parentNode, 
     QObject(parent),
     m_name(name),
     m_selected(false),
-    m_parent(parentNode),
+    m_enabled(true),
+    m_parent(nullptr),
     m_children()
 {
-    if (m_parent)
-        m_parent->addChild(this);
+    if (parentNode)
+        parentNode->addChild(this);
 }
 
 NavigationNode* NavigationNode::createChild(const QString& name)
@@ -92,6 +93,15 @@ void NavigationNode::setSelected(bool selected)
     {
         m_selected = selected;
         emit selectionChanged(this, m_selected);
+    }
+}
+
+void NavigationNode::setEnabled(bool enabled)
+{
+    if (m_enabled != enabled)
+    {
+        m_enabled = enabled;
+        emit enabledChanged(this, m_enabled);
     }
 }
 

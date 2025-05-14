@@ -60,14 +60,25 @@ bool NavigationBranchWidgetPlugin::isContainer() const
 
 QString NavigationBranchWidgetPlugin::domXml() const
 {
-    return QLatin1String(R"(<widget class="NavigationBranchWidget" name="navigationBranchWidget">
+    return QLatin1String(R"(
+<widget class="NavigationBranchWidget" name="navigationBranchWidget">
     <property name="minimumSize">
         <size>
             <width>60</width>
             <height>40</height>
         </size>
     </property>
-</widget>)");
+    <property name="treeDef">
+        <string notr="true"><![CDATA[{
+    "name": "root",
+    "children": [
+        { "name": "Item 1" },
+        { "name": "Item 2", "enabled": false }
+    ]
+}]]></string>
+    </property>
+</widget>
+)");
 }
 
 QString NavigationBranchWidgetPlugin::includeFile() const

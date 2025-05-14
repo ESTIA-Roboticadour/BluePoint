@@ -10,12 +10,14 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QString>
+#include <QEvent> // pour QEvent, QEvent::DynamicPropertyChange
 
 class NAVIGATIONWIDGETS_API NavigationBranchWidget : public QWidget
 {
     Q_OBJECT
-    Q_PROPERTY(int nodeHeight READ nodeHeight WRITE setNodeHeight)
-    Q_PROPERTY(int nodeFontSize READ nodeFontSize WRITE setNodeFontSize)
+    Q_PROPERTY(int nodeHeight     READ nodeHeight   WRITE setNodeHeight)
+    Q_PROPERTY(int nodeFontSize   READ nodeFontSize WRITE setNodeFontSize)
 public:
     explicit NavigationBranchWidget(QWidget* parent = nullptr);
     explicit NavigationBranchWidget(NavigationTree* tree, QWidget* parent = nullptr);
@@ -29,6 +31,10 @@ public slots:
     void setTree(NavigationTree* tree);
     void setNodeHeight(int height);
     void setNodeFontSize(int size);
+    void setTreeDef(const QString& def);
+
+protected:
+    bool event(QEvent* e) override;
 
 private slots:
     void rebuild();
@@ -39,7 +45,7 @@ private:
 
     QFrame*      makeSeparator(QWidget* parent);
     QLabel*      makeLabel(const QString& text, QWidget* parent);
-    QPushButton* makeButton(const QString& text, QWidget* parent);
+    QPushButton* makeButton(const QString& text, QWidget* parent, bool enabled);
 
 private:
     bool m_isInitialized;
@@ -49,6 +55,7 @@ private:
     QScrollArea* m_scroll;
     QWidget* m_container;
     QVBoxLayout* m_layout;
+    QString m_treeDef;
 };
 
 #endif // NAVIGATIONBRANCHWIDGET_H

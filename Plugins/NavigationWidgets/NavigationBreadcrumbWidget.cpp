@@ -1,10 +1,13 @@
 #include "NavigationBreadcrumbWidget.h"
 #include "NavigationTree.h"
 #include "NavigationNode.h"
+#include "NavigationTreeParser.h"
 
 #include <QVariant>
 #include <QTimer>
 #include <QScrollBar>
+#include <QDynamicPropertyChangeEvent>
+#include <memory>
 
 static constexpr auto PROP_NODE = "navNode";
 
@@ -15,7 +18,8 @@ NavigationBreadcrumbWidget::NavigationBreadcrumbWidget(QWidget* parent) :
     m_scrollArea(new QScrollArea(this)),
     m_container(new QWidget(this)),
     m_layout(new QHBoxLayout),
-    m_nodeFontSize(12)
+    m_nodeFontSize(12),
+    m_treeDef()
 {
     initialize();
     rebuild();
@@ -28,7 +32,8 @@ NavigationBreadcrumbWidget::NavigationBreadcrumbWidget(NavigationTree* tree, QWi
     m_nodeFontSize(12),
     m_scrollArea(new QScrollArea(this)),
     m_container(new QWidget(this)),
-    m_layout(new QHBoxLayout)
+    m_layout(new QHBoxLayout),
+    m_treeDef()
 {
     initialize();
     setTree(tree);
@@ -61,6 +66,19 @@ void NavigationBreadcrumbWidget::initialize()
     }
 }
 
+bool NavigationBreadcrumbWidget::event(QEvent* e)
+{
+    // Designer : quand l'utilisateur modifie treeDef dans l'éditeur "..."
+    if (e->type() == QEvent::DynamicPropertyChange) {
+        auto *dp = static_cast<QDynamicPropertyChangeEvent*>(e);
+        if (dp->propertyName() == "treeDef") {
+            const QString val = property("treeDef").toString();
+            setTreeDef(val);
+        }
+    }
+    return QWidget::event(e);
+}
+
 NavigationTree* NavigationBreadcrumbWidget::tree() const
 {
     return m_tree;
@@ -77,7 +95,7 @@ void NavigationBreadcrumbWidget::setTree(NavigationTree* tree)
     m_tree = tree;
     if (m_tree)
     {
-        connect(m_tree, &NavigationTree::currentNodeChanged, this, &NavigationBreadcrumbWidget::rebuild);
+        connect(m_tree, &NavigationTree::currentNodeChanged, this, &NavigationBreadcrumbWidget::rebuild, Qt::UniqueConnection);
     }
     rebuild();
 }
@@ -95,10 +113,41 @@ void NavigationBreadcrumbWidget::setNodeFontSize(int size)
         rebuild();
     }
 }
-QPushButton* NavigationBreadcrumbWidget::makeButton(const QString& txt, QWidget* parent)
+
+void NavigationBreadcrumbWidget::setTreeDef(const QString& def)
+{
+    if (def == m_treeDef) {
+        return;
+    }
+
+    m_treeDef = def.trimmed();
+    setProperty("treeDef", m_treeDef);   // maintient la valeur dynamique à jour
+
+    if (m_treeDef.isEmpty()) {
+        return;
+    }
+
+    std::unique_ptr<NavigationTree> t;
+    QString err;
+
+    t = m_treeDef.startsWith('{') ?
+            NavigationTreeParser::fromJson(m_treeDef, &err) : // JSON inline
+            NavigationTreeParser::fromFile(m_treeDef, &err);  // chemin / ressource
+
+    if (t) {
+        setTree(t.release());
+    }
+    else {
+        qWarning() << "NavigationBreadcrumbWidget: treeDef invalid:" << err;
+    }
+}
+
+
+QPushButton* NavigationBreadcrumbWidget::makeButton(const QString& txt, QWidget* parent, bool enabled)
 {
     auto* b = new QPushButton(parent);
     b->setFont(QFont(b->font().family(), m_nodeFontSize, QFont::Normal));
+    b->setEnabled(enabled);
     b->setText(txt);
     b->setFlat(true);
     b->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
@@ -111,7 +160,7 @@ QLabel* NavigationBreadcrumbWidget::makeLabel(const QString& txt, QWidget* paren
     l->setFont(QFont(l->font().family(), m_nodeFontSize, QFont::Bold));
     l->setText(txt);
     l->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-    l->setContentsMargins(4, 0, 4, 0);         // petit espace autour du chevron
+    l->setContentsMargins(8, 0, 8, 0);         // petit espace autour du chevron
     return l;
 }
 
@@ -131,28 +180,34 @@ void NavigationBreadcrumbWidget::rebuild()
         delete item;
     }
 
-    if (m_tree == nullptr)
+    if (!m_tree)
         return;
 
-    const QList<const NavigationNode*> segs = m_tree->currentNode()->pathNodes();    // Racine -> Courant
+    NavigationNode* cur = m_tree->currentNode();
+    if (!cur)
+        return;
+
+    const QList<const NavigationNode*> segs = cur->pathNodes();    // Racine -> Courant
 
     for (int i = 0; i < segs.size(); ++i) {
         const NavigationNode* seg = segs.at(i);
 
         if (i != segs.size() - 1) {            // ancêtre => bouton cliquable
-            auto* btn = makeButton(seg->name(), this);
+            auto* btn = makeButton(seg->name(), this, seg->isEnabled());
             btn->setProperty(PROP_NODE, QVariant::fromValue<void*>(const_cast<NavigationNode*>(seg)));
             connect(btn, &QPushButton::clicked, this, &NavigationBreadcrumbWidget::onButtonClicked);
+            connect(seg, &NavigationNode::enabledChanged, btn, &QPushButton::setEnabled);
             m_layout->addWidget(btn);
         }
         else {                               // dernier segment = courant
+            //m_layout->addWidget(makeButton(seg->name(), this, false));
             m_layout->addWidget(makeLabel(seg->name(), this));
         }
 
         if (i != segs.size() - 1)
             m_layout->addWidget(makeSeparator(this));
     }
-    m_layout->addStretch();                    // pousse tout à gauche
+    m_layout->addStretch(); // pousse tout à gauche
 
     /* s'assurer que la fin du chemin est visible quand on plonge plus profond */
     QTimer::singleShot(0, m_scrollArea, [sa = m_scrollArea] {

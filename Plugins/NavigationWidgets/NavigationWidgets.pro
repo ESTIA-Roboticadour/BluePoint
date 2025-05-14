@@ -7,12 +7,14 @@ HEADERS     = NavigationBranchWidgetPlugin.h NavigationBreadcrumbWidgetPlugin.h 
     NavigationBreadcrumbWidget.h \
     NavigationNode.h \
     NavigationTree.h \
+    NavigationTreeParser.h \
     NavigationWidgets_global.h
 SOURCES     = NavigationBranchWidgetPlugin.cpp NavigationBreadcrumbWidgetPlugin.cpp NavigationWidgetsCollectionPlugin.cpp \
     NavigationBranchWidget.cpp \
     NavigationBreadcrumbWidget.cpp \
     NavigationNode.cpp \
-    NavigationTree.cpp
+    NavigationTree.cpp \
+    NavigationTreeParser.cpp
 
 #RESOURCES   =
 #LIBS        += -L. -lNavigationBreadcrumbWidget -lNavigationBranchWidget

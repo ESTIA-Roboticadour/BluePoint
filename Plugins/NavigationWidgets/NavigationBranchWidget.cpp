@@ -1,9 +1,11 @@
 #include "NavigationBranchWidget.h"
+#include "NavigationTreeParser.h"
 
 #include <QVBoxLayout>
 #include <QVector>
 #include <QPushButton>
 #include <QFrame>
+#include <QDynamicPropertyChangeEvent>
 
 static constexpr auto BTN_PROP_NODE = "navNode";
 
@@ -15,7 +17,8 @@ NavigationBranchWidget::NavigationBranchWidget(QWidget* parent) :
     m_container(new QWidget()),
     m_layout(new QVBoxLayout()),
     m_nodeHeight(40),
-    m_nodeFontSize(12)
+    m_nodeFontSize(12),
+    m_treeDef()
 {
     initialize();
     rebuild();
@@ -28,7 +31,8 @@ NavigationBranchWidget::NavigationBranchWidget(NavigationTree* tree, QWidget* pa
     m_container(new QWidget()),
     m_layout(new QVBoxLayout()),
     m_nodeHeight(40),
-    m_nodeFontSize(12)
+    m_nodeFontSize(12),
+    m_treeDef()
 {
     initialize();
     setTree(tree);
@@ -54,6 +58,19 @@ void NavigationBranchWidget::initialize()
     }
 }
 
+bool NavigationBranchWidget::event(QEvent* e)
+{
+    // Designer : quand l'utilisateur modifie treeDef dans l'éditeur "..."
+    if (e->type() == QEvent::DynamicPropertyChange) {
+        auto *dp = static_cast<QDynamicPropertyChangeEvent*>(e);
+        if (dp->propertyName() == "treeDef") {
+            const QString val = property("treeDef").toString();
+            setTreeDef(val);
+        }
+    }
+    return QWidget::event(e);
+}
+
 NavigationTree* NavigationBranchWidget::tree() const
 {
     return m_tree;
@@ -69,7 +86,7 @@ void NavigationBranchWidget::setTree(NavigationTree* tree)
 
     m_tree = tree;
     if (m_tree)
-        connect(m_tree, &NavigationTree::currentNodeChanged, this, &NavigationBranchWidget::rebuild);
+        connect(m_tree, &NavigationTree::currentNodeChanged, this, &NavigationBranchWidget::rebuild, Qt::UniqueConnection);
 
     rebuild();
 }
@@ -85,10 +102,11 @@ QLabel* NavigationBranchWidget::makeLabel(const QString& text, QWidget* parent)
     return l;
 }
 
-QPushButton* NavigationBranchWidget::makeButton(const QString& text, QWidget* parent)
+QPushButton* NavigationBranchWidget::makeButton(const QString& text, QWidget* parent, bool enabled)
 {
     auto* b = new QPushButton(parent);
     b->setFont(QFont(b->font().family(), m_nodeFontSize, QFont::Normal));
+    b->setEnabled(enabled);
     b->setText(text);
     b->setFlat(true);
     b->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -113,10 +131,17 @@ void NavigationBranchWidget::rebuild()
         delete item;
     }
 
-    if (m_tree == nullptr)
+    if (!m_tree)
+    {
         return;
+    }
 
     NavigationNode* cur = m_tree->currentNode();
+
+    if (!cur)
+    {
+        return;
+    }
 
     // ---------- 1. Label courant ----------
     m_layout->addWidget(makeLabel(cur->name(), m_container));
@@ -125,9 +150,10 @@ void NavigationBranchWidget::rebuild()
     // ---------- 2. Bouton Parent ----------
     if (cur->hasParent())
     {
-        auto* upBtn = makeButton(cur->parentNode()->name(), m_container);
+        auto* upBtn = makeButton(cur->parentNode()->name(), m_container, cur->isEnabled());
         upBtn->setProperty(BTN_PROP_NODE, QVariant::fromValue<void*>(cur->parentNode()));
         connect(upBtn, &QPushButton::clicked, this, &NavigationBranchWidget::onButtonClicked);
+        connect(cur, &NavigationNode::enabledChanged, upBtn, &QPushButton::setEnabled);
         m_layout->addWidget(upBtn);
         m_layout->addWidget(makeSeparator(m_container));
     }
@@ -138,10 +164,11 @@ void NavigationBranchWidget::rebuild()
         const auto& nodes = cur->children();
         for (NavigationNode* n : nodes)
         {
-            auto* btn = makeButton(n->name(), m_container);
+            auto* btn = makeButton(n->name(), m_container, n->isEnabled());
             btn->setProperty(BTN_PROP_NODE, QVariant::fromValue<void*>(n));
             btn->setChecked(n->isSelected());   // reflète la sélection
             connect(btn, &QPushButton::clicked, this, &NavigationBranchWidget::onButtonClicked);
+            connect(n, &NavigationNode::enabledChanged, btn, &QPushButton::setEnabled);
             m_layout->addWidget(btn);
         }
     }
@@ -151,10 +178,11 @@ void NavigationBranchWidget::rebuild()
         const auto& nodes = cur->parentNode()->children();
         for (NavigationNode* n : nodes)
         {
-            auto* btn = makeButton(n->name(), m_container);
+            auto* btn = makeButton(n->name(), m_container, n->isEnabled());
             btn->setProperty(BTN_PROP_NODE, QVariant::fromValue<void*>(n));
             btn->setChecked(n->isSelected());   // reflète la sélection
             connect(btn, &QPushButton::clicked, this, &NavigationBranchWidget::onButtonClicked);
+            connect(n, &NavigationNode::enabledChanged, btn, &QPushButton::setEnabled);
             m_layout->addWidget(btn);
         }
     }
@@ -186,6 +214,35 @@ void NavigationBranchWidget::setNodeFontSize(int size)
     {
         m_nodeFontSize = size;
         rebuild();
+    }
+}
+
+void NavigationBranchWidget::setTreeDef(const QString& def)
+{
+    if (def == m_treeDef) {
+        return;
+    }
+
+    m_treeDef = def.trimmed();
+    setProperty("treeDef", m_treeDef);   // maintient la valeur dynamique à jour
+
+    if (m_treeDef.isEmpty()) {
+        return;
+    }
+
+    std::unique_ptr<NavigationTree> t;
+    QString err;
+
+    t = m_treeDef.startsWith('{') ?
+            NavigationTreeParser::fromJson(m_treeDef, &err) : // JSON inline
+            NavigationTreeParser::fromFile(m_treeDef, &err);  // chemin / ressource
+
+    if (t) {
+        setTree(t.release());
+    }
+    else {
+
+        qWarning() << "NavigationBranchWidget: treeDef invalid:" << err;
     }
 }
 

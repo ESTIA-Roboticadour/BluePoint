@@ -12,7 +12,7 @@
 class NAVIGATIONWIDGETS_API NavigationNode : public QObject
 {
     Q_OBJECT
-
+    Q_PROPERTY(bool enabled READ isEnabled WRITE setEnabled NOTIFY enabledChanged)
 public:
     explicit NavigationNode(const QString& name, NavigationNode* parentNode = nullptr, QObject* parent = nullptr);
     ~NavigationNode() = default;
@@ -35,6 +35,7 @@ public:
 
     QString name() const { return m_name; }
     bool isSelected() const { return m_selected; }
+    bool isEnabled() const { return m_enabled; }
 
     bool containsSelectedDescendant() const;
 
@@ -44,14 +45,17 @@ public:
 public slots:
     void setName(const QString& name);
     void setSelected(bool selected);
+    void setEnabled(bool enabled);
 
 signals:
     void selectionChanged(NavigationNode* node, bool selected);
+    void enabledChanged(NavigationNode* node, bool enabled);
     void nodeChanged(NavigationNode* node);
 
 private:
     QString m_name;
     bool m_selected;
+    bool m_enabled;
     NavigationNode* m_parent;
     QVector<NavigationNode*> m_children;
 };

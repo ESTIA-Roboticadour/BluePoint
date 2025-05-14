@@ -60,14 +60,25 @@ bool NavigationBreadcrumbWidgetPlugin::isContainer() const
 
 QString NavigationBreadcrumbWidgetPlugin::domXml() const
 {
-    return QLatin1String(R"(<widget class="NavigationBreadcrumbWidget" name="navigationBreadcrumbWidget">
+    return QLatin1String(R"(
+<widget class="NavigationBreadcrumbWidget" name="navigationBreadcrumbWidget">
     <property name="minimumSize">
         <size>
             <width>60</width>
             <height>40</height>
         </size>
     </property>
-</widget>)");
+    <property name="treeDef">
+        <string notr="true"><![CDATA[{
+    "name": "root",
+    "children": [
+        { "name": "Item 1" },
+        { "name": "Item 2", "enabled": false }
+    ]
+}]]></string>
+    </property>
+</widget>
+)");
 }
 
 QString NavigationBreadcrumbWidgetPlugin::includeFile() const

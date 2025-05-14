@@ -10,6 +10,8 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QScrollArea>
+#include <QString>
+#include <QEvent> // pour QEvent, QEvent::DynamicPropertyChange
 
 class NAVIGATIONWIDGETS_API NavigationBreadcrumbWidget : public QWidget
 {
@@ -26,6 +28,10 @@ public:
 public slots:
     void setTree(NavigationTree* tree);
     void setNodeFontSize(int size);
+    void setTreeDef(const QString& def);
+
+protected:
+    bool event(QEvent* e) override;
 
 private slots:
     void rebuild();
@@ -33,7 +39,7 @@ private slots:
 
 private:
     void initialize();
-    QPushButton* makeButton(const QString& txt, QWidget* parent);
+    QPushButton* makeButton(const QString& txt, QWidget* parent, bool enabled);
     QLabel* makeLabel(const QString& txt, QWidget* parent);
     QLabel* makeSeparator(QWidget* parent);
 
@@ -44,6 +50,7 @@ private:
     QScrollArea* m_scrollArea;
     QWidget* m_container;
     QHBoxLayout* m_layout;
+    QString m_treeDef;
 };
 
 #endif // NAVIGATIONBREADCRUMBWIDGET_H
