@@ -29,7 +29,7 @@ NavigationLayoutWidget::NavigationLayoutWidget(QWidget* parent) :
     /* ─── Sidebar : on place la branche à l’intérieur du TogglePanel ─── */
     m_branch->setFixedWidth(200);
     m_sidebar->setButtonText("≡");                      // bouton hamburger
-    m_sidebar->setContentWidget(m_branch);              // ≡ → branche
+    m_sidebar->setContentWidget(m_branch);              // ≡ -> branche
 
     /* ─── Central & layout ─── */
     m_central->setObjectName("CentralPlaceholder");
@@ -49,6 +49,7 @@ NavigationLayoutWidget::NavigationLayoutWidget(QWidget* parent) :
 
 bool NavigationLayoutWidget::event(QEvent* e)
 {
+    bool ret = QWidget::event(e);
     // Designer : quand l'utilisateur modifie treeDef dans l'éditeur "..."
     if (e->type() == QEvent::DynamicPropertyChange) {
         auto *dp = static_cast<QDynamicPropertyChangeEvent*>(e);
@@ -57,28 +58,42 @@ bool NavigationLayoutWidget::event(QEvent* e)
             setTreeDef(val);
         }
     }
-    return QWidget::event(e);
+    return ret;
 }
 
 /* ─────────────── Public API ────────────────────────────────────────── */
+QWidget* NavigationLayoutWidget::centralWidget() const
+{
+    return (m_central && m_central->objectName() == "CentralPlaceholder") ? nullptr : m_central;
+}
 
-void NavigationLayoutWidget::setCentralWidget(QWidget* w)
+void NavigationLayoutWidget::clearCentralWidget()
+{
+    if (m_central)
+    {
+        m_mainArea->removeWidget(m_central);
+        m_central->setParent(nullptr);
+        m_central->deleteLater();
+
+        m_central = new QWidget(this);
+        m_central->setObjectName("CentralPlaceholder");
+        m_central->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        m_mainArea->addWidget(m_central, 1);
+    }
+}
+
+void NavigationLayoutWidget::setCentralWidget(QWidget *w)
 {
     if (!w || w == m_central)
-        return;                                 // rien à faire
+        return;
 
-    /* ─── 1. retirer l'ancien widget ─── */
-    m_mainArea->removeWidget(m_central);        // QHBoxLayout hérite de QLayout
+    m_mainArea->removeWidget(m_central);
     m_central->setParent(nullptr);
-    m_central->deleteLater();                   // ou conserve-le selon ton usage
+    m_central->deleteLater();
 
-    /* ─── 2. insérer le nouveau ─── */
     m_central = w;
-    m_central->setParent(this);                 // le layout le ré-adopte
     m_central->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    // stretch = 1 pour qu’il prenne tout l’espace libre
-    m_mainArea->addWidget(m_central, /*stretch=*/1);
+    m_mainArea->addWidget(m_central, 1);
 }
 
 void NavigationLayoutWidget::setTree(NavigationTree* tree)

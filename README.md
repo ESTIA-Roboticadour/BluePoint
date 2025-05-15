@@ -1,4 +1,4 @@
-# BluePoint
+# 🌊 BluePoint
 
 **BluePoint ToolKit** is a C++ solution developed with Visual Studio, Qt 6, OpenCV, and the Pylon SDK.  
 It contains all the components and tools for the BluePoint project, including Qt Designer plugins, libraries, and applications.
@@ -14,8 +14,9 @@ They provide reusable widgets and logic that are dynamically loaded by other app
 - `NavigationWidgets`: Widgets for navigation. Navigation is done through a tree of nodes.
 - `ParametersCustomWidgets`: Builds dynamic UI widgets to control various parameter types (numbers, booleans, strings...).
 - `TogglePanel`: A widget for an openable and closeable panel. Ideal for sidebar menus.
+- `NavigationLayout`: A Layout widget that includes a structure for building a multi-page application. Depends on the `NavigationWidgets` and `TogglePanel` plugins. They must have been compiled before.
 
-  👉 **Required to be compiled**, as it provides headers, `.lib` and `.dll` files used by other projects.
+👉 **Required to be compiled**, as they provide headers `.h`, `.lib` and `.dll` files used by other projects.
 
 A helper script is provided to **prepare and install these libraries** correctly (see `🧰 Setup Instructions > 🏗️ Building Projects` section).
 

@@ -28,7 +28,8 @@ $PLUGINS = @(
     "FrameViewer",
     "NavigationWidgets",
     "ParametersWidgets",
-    "TogglePanel"
+    "TogglePanel",
+    "XNavigationLayout"
     # Add other plugin directories here...
 )
 

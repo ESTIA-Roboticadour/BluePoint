@@ -38,11 +38,9 @@ public:
     TogglePanel*                sidebar()          const { return m_sidebar; }
     NavigationBranchWidget*     branchWidget()     const { return m_branch; }
     NavigationBreadcrumbWidget* breadcrumbWidget() const { return m_breadcrumb; }
-    QWidget*                    centralWidget()    const { return m_central; }
+    QWidget*                    centralWidget()    const;
 
     /* ─── public API — content & navigation ───────────────────────── */
-    void setCentralWidget(QWidget* w);
-    void setTree(NavigationTree* tree);
     NavigationTree* getTree() const;
 
     /* ─── Getters ───────────────────────────── */
@@ -72,6 +70,10 @@ public slots:
     void closeSidebar() const { m_sidebar->close(); }
 
     void clearLogoPixmap();
+
+    void clearCentralWidget();
+    void setCentralWidget(QWidget* w);
+    void setTree(NavigationTree* tree);
 
 protected:
     bool event(QEvent* e) override;

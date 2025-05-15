@@ -7,12 +7,10 @@ NavigationLayoutWidgetPlugin::NavigationLayoutWidgetPlugin(QObject *parent)
     : QObject(parent)
 {}
 
-void NavigationLayoutWidgetPlugin::initialize(QDesignerFormEditorInterface * /* core */)
+void NavigationLayoutWidgetPlugin::initialize(QDesignerFormEditorInterface* core)
 {
     if (m_initialized)
         return;
-
-    // Add extension registrations, etc. here
 
     m_initialized = true;
 }
@@ -55,7 +53,7 @@ QString NavigationLayoutWidgetPlugin::whatsThis() const
 
 bool NavigationLayoutWidgetPlugin::isContainer() const
 {
-    return true;
+    return false;
 }
 
 QString NavigationLayoutWidgetPlugin::domXml() const
