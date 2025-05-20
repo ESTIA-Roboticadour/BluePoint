@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/VisionWindow">
+        <file>Resources/bluepoint-vision.png</file>
+        <file>Resources/icon.ico</file>
+        <file>Resources/menu-icon.png</file>
+        <file>Resources/icon.png</file>
+    </qresource>
+</RCC>

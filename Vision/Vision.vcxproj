@@ -65,11 +65,11 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)Libraries\ParametersWidgets\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ParametersWidgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\opencv\build\x64\vc16\lib;C:\Program Files\Basler\pylon 8\Development\lib\x64;$(SolutionDir)Libraries\FrameViewer\lib;$(SolutionDir)Libraries\NavigationWidgets\lib;$(SolutionDir)Libraries\ParametersWidgets\lib;$(SolutionDir)Libraries\TogglePanel\lib;$(SolutionDir)Libraries\XNavigationLayout\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_world4110d.lib;PylonBase_v10.lib;PylonC_v10.lib;GCBase_MD_VC141_v3_1_Basler_pylon_v3.lib;GenApi_MD_VC141_v3_1_Basler_pylon_v3.lib;FrameViewerd.lib;ParametersWidgetsd.lib;NavigationWidgetsd.lib;TogglePaneld.lib;XNavigationLayoutd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)Libraries\ParametersWidgets\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\opencv\build\include;C:\Program Files\Basler\pylon 8\Development\include;$(SolutionDir)Libraries\FrameViewer\include;$(SolutionDir)Libraries\NavigationWidgets\include;$(SolutionDir)Libraries\ParametersWidgets\include;$(SolutionDir)Libraries\TogglePanel\include;$(SolutionDir)Libraries\XNavigationLayout\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <PostBuildEvent>
       <Command>
@@ -78,11 +78,11 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)Libraries\ParametersWidgets\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ParametersWidgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\opencv\build\x64\vc16\lib;C:\Program Files\Basler\pylon 8\Development\lib\x64;$(SolutionDir)Libraries\FrameViewer\lib;$(SolutionDir)Libraries\NavigationWidgets\lib;$(SolutionDir)Libraries\ParametersWidgets\lib;$(SolutionDir)Libraries\TogglePanel\lib;$(SolutionDir)Libraries\XNavigationLayout\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_world4110.lib;PylonBase_v10.lib;PylonC_v10.lib;GCBase_MD_VC141_v3_1_Basler_pylon_v3.lib;GenApi_MD_VC141_v3_1_Basler_pylon_v3.lib;FrameViewer.lib;ParametersWidgets.lib;NavigationWidgets.lib;TogglePanel.lib;XNavigationLayout.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)Libraries\ParametersWidgets\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\opencv\build\include;C:\Program Files\Basler\pylon 8\Development\include;$(SolutionDir)Libraries\FrameViewer\include;$(SolutionDir)Libraries\NavigationWidgets\include;$(SolutionDir)Libraries\ParametersWidgets\include;$(SolutionDir)Libraries\TogglePanel\include;$(SolutionDir)Libraries\XNavigationLayout\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <PostBuildEvent>
       <Command>
@@ -118,11 +118,47 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <QtRcc Include="VisionWindow.qrc" />
-    <QtUic Include="VisionWindow.ui" />
-    <QtMoc Include="VisionWindow.h" />
-    <ClCompile Include="VisionWindow.cpp" />
+    <ClCompile Include="AppStore.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ImageProvider.cpp" />
+    <ClCompile Include="ImageTransformer.cpp" />
+    <ClCompile Include="LogoWidget.cpp" />
+    <ClCompile Include="ModelBase.cpp" />
+    <ClCompile Include="RoiConfig.cpp" />
+    <ClCompile Include="RoiTransformer.cpp" />
+    <ClCompile Include="ViewFactory.cpp" />
+    <ClCompile Include="WindowBase.cpp" />
+    <ClCompile Include="WindowControllerBase.cpp" />
+    <QtRcc Include="MainWindow.qrc" />
+    <QtUic Include="MainWindow.ui" />
+    <QtMoc Include="MainWindow.h" />
+    <ClCompile Include="MainController.cpp" />
+    <ClCompile Include="MainModel.cpp" />
+    <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="MainController.h" />
+    <QtMoc Include="MainModel.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="ModelBase.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="WindowBase.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="WindowControllerBase.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AppStore.h" />
+    <QtMoc Include="LogoWidget.h" />
+    <QtMoc Include="ImageProvider.h" />
+    <QtMoc Include="Camera.h" />
+    <QtMoc Include="ImageTransformer.h" />
+    <QtMoc Include="RoiTransformer.h" />
+    <QtMoc Include="RoiConfig.h" />
+    <ClInclude Include="ViewFactory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

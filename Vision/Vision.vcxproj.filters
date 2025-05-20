@@ -21,24 +21,145 @@
       <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
       <Extensions>ts</Extensions>
     </Filter>
+    <Filter Include="Features">
+      <UniqueIdentifier>{76b1926d-421c-4655-bc9c-75b042b19d32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\MainWindow">
+      <UniqueIdentifier>{f0b4d563-c466-4a17-a56c-014c76747fe1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\MainWindow\Models">
+      <UniqueIdentifier>{1b35e682-eeb4-4a0a-94a2-f4bd4b57f4f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\MainWindow\Views">
+      <UniqueIdentifier>{50d601be-9b6b-48fe-8b87-7aa196d83137}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\MainWindow\Controllers">
+      <UniqueIdentifier>{dace246a-a05a-4e67-86af-f420967d1c48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\MVCBase">
+      <UniqueIdentifier>{91808525-be46-4420-98f3-e55769f08782}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Widgets">
+      <UniqueIdentifier>{498804c7-2d70-4323-b952-e66470393b65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Widgets\LogoWidget">
+      <UniqueIdentifier>{0adc132b-32d1-4498-8d93-32d68d2f98f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Services">
+      <UniqueIdentifier>{654be253-8ce1-423e-9db4-e6e15572e3a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Services\Camera">
+      <UniqueIdentifier>{53d1a5b5-b43a-400a-ac39-2e8a0acf2c7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Services\ImageTransformers">
+      <UniqueIdentifier>{e016c956-87b6-4123-862c-2799ebc695d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Services\ImageProviders">
+      <UniqueIdentifier>{76244760-0d22-4098-8fa3-4dd319cd8b83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Services\Config">
+      <UniqueIdentifier>{e388dd4c-a1b7-4b31-b34c-9b4a0c3d8737}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <QtRcc Include="VisionWindow.qrc">
+    <QtRcc Include="MainWindow.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
-    <QtUic Include="VisionWindow.ui">
+    <QtUic Include="MainWindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtMoc Include="VisionWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <ClCompile Include="VisionWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MainController.cpp">
+      <Filter>Features\MainWindow\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="MainWindow.cpp">
+      <Filter>Features\MainWindow\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="MainModel.cpp">
+      <Filter>Features\MainWindow\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelBase.cpp">
+      <Filter>Features\MVCBase</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowBase.cpp">
+      <Filter>Features\MVCBase</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowControllerBase.cpp">
+      <Filter>Features\MVCBase</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AppStore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LogoWidget.cpp">
+      <Filter>Widgets\LogoWidget</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageProvider.cpp">
+      <Filter>Services\ImageProviders</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Services\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageTransformer.cpp">
+      <Filter>Services\ImageTransformers</Filter>
+    </ClCompile>
+    <ClCompile Include="RoiTransformer.cpp">
+      <Filter>Services\ImageTransformers</Filter>
+    </ClCompile>
+    <ClCompile Include="RoiConfig.cpp">
+      <Filter>Services\Config</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="MainController.h">
+      <Filter>Features\MainWindow\Controllers</Filter>
+    </QtMoc>
+    <QtMoc Include="MainWindow.h">
+      <Filter>Features\MainWindow\Views</Filter>
+    </QtMoc>
+    <QtMoc Include="MainModel.h">
+      <Filter>Features\MainWindow\Models</Filter>
+    </QtMoc>
+    <QtMoc Include="ModelBase.h">
+      <Filter>Features\MVCBase</Filter>
+    </QtMoc>
+    <QtMoc Include="WindowBase.h">
+      <Filter>Features\MVCBase</Filter>
+    </QtMoc>
+    <QtMoc Include="WindowControllerBase.h">
+      <Filter>Features\MVCBase</Filter>
+    </QtMoc>
+    <QtMoc Include="LogoWidget.h">
+      <Filter>Widgets\LogoWidget</Filter>
+    </QtMoc>
+    <QtMoc Include="Camera.h">
+      <Filter>Services\Camera</Filter>
+    </QtMoc>
+    <QtMoc Include="ImageProvider.h">
+      <Filter>Services\ImageProviders</Filter>
+    </QtMoc>
+    <QtMoc Include="ImageTransformer.h">
+      <Filter>Services\ImageTransformers</Filter>
+    </QtMoc>
+    <QtMoc Include="RoiTransformer.h">
+      <Filter>Services\ImageTransformers</Filter>
+    </QtMoc>
+    <QtMoc Include="RoiConfig.h">
+      <Filter>Services\Config</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ViewFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AppStore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
