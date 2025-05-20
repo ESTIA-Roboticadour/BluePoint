@@ -14,6 +14,12 @@ void NavigationTree::setCurrentNode(NavigationNode* node)
     if (!node || node == m_current)
         return;
 
+    bool accept = true;
+    emit navigationRequest(node, m_current, &accept);
+
+    if (!accept)
+        return;
+
     if (m_current)
         m_current->setSelected(false);
 

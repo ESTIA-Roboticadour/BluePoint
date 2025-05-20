@@ -21,12 +21,12 @@ public slots:
     void navigateRoot();
 
 signals:
+    void navigationRequest(NavigationNode* newNode, NavigationNode* oldNode, bool* accept);
     void currentNodeChanged(NavigationNode* node);
 
 private:
     NavigationNode* m_root;
     NavigationNode* m_current;
 };
-
 
 #endif // NAVIGATIONTREE_H
