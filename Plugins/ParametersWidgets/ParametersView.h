@@ -10,7 +10,7 @@
 #include <QList>
 
 #include "ParameterBase.h"
-#include "ParameterGroup.h"
+#include "GroupParameter.h"
 #include "BoolParameter.h"
 #include "NumericalParameter.h"
 #include "StringParameter.h"
@@ -38,7 +38,7 @@ private:
 	void setParameters(const QList<const ParameterBase*>& parameters, QLayout* layout);
 
 	QWidget* createParameterWidget(const ParameterBase* parameter);
-	QWidget* createParameterGroupWidget(const ParameterGroup* parameter);
+	QWidget* createParameterGroupWidget(const GroupParameter* parameter);
 	QWidget* createBoolParameterWidget(const BoolParameter* parameter) const;
 	QWidget* createNumericalParameterWidget(const NumericalParameter* parameter) const;
 	QWidget* createStringParameterWidget(const StringParameter* parameter) const;

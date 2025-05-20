@@ -6,6 +6,8 @@
 
 #include <QObject>
 #include <QString>
+#include <QJsonObject>
+#include <memory>
 
 class PARAMETERS_WIDGETS_API NumericalParameter : public ParameterBase
 {
@@ -13,12 +15,17 @@ class PARAMETERS_WIDGETS_API NumericalParameter : public ParameterBase
 
 public:
 	explicit NumericalParameter(const QString& name, const double value=50., QObject* parent = nullptr);
+    NumericalParameter(const NumericalParameter& parameter, QObject* parent = nullptr);
+    NumericalParameter(const QString& name, const NumericalParameter& parameter, QObject* parent = nullptr);
 	~NumericalParameter() = default;
 
 	double getValue() const;
 	double getMinimum() const;
 	double getMaximum() const;
 	int	   getIncrement() const;
+
+    QJsonObject toJson() const override;
+    static std::unique_ptr<ParameterBase> fromJson(const QJsonObject& obj, QObject* parent = nullptr);
 
 public slots:
 	void setValue(double value);

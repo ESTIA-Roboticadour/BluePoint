@@ -17,6 +17,22 @@ public:
         ListParameterBase(name, parent)
     {}
 
+    ListParameter(const ListParameter<T>& other, QObject* parent) :
+        ListParameterBase(other.getName(), parent)
+    {
+        m_keys          = other.m_keys;
+        m_values        = other.m_values;
+        m_selectedIndex = other.m_selectedIndex;
+    }
+
+    ListParameter(const QString& name, const ListParameter<T>& other, QObject* parent) :
+        ListParameterBase(name, parent)
+    {
+        m_keys          = other.m_keys;
+        m_values        = other.m_values;
+        m_selectedIndex = other.m_selectedIndex;
+    }
+
     ~ListParameter() override = default;
 
     bool addItem(const QString& key, const T& value)

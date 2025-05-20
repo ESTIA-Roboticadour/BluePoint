@@ -5,6 +5,8 @@
 
 #include <QObject>
 #include <QString>
+#include <QJsonObject>
+#include <memory>
 
 class PARAMETERS_WIDGETS_API ParameterBase : public QObject
 {
@@ -15,6 +17,10 @@ public:
 
 	QString getName() const;
 	bool getIsEditable() const;
+
+    virtual QJsonObject toJson() const = 0;
+
+    static std::unique_ptr<ParameterBase> fromJson(const QJsonObject& obj, QObject* parent = nullptr);
 
 public slots:
 	virtual void setIsEditable(bool isEditable);

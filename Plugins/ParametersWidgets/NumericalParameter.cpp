@@ -1,4 +1,5 @@
 #include "NumericalParameter.h"
+#include <QJsonValue>
 
 NumericalParameter::NumericalParameter(const QString& name, const double value, QObject* parent) :
 	ParameterBase(name, parent),
@@ -15,6 +16,26 @@ NumericalParameter::NumericalParameter(const QString& name, const double value, 
 	{
 		m_maximum = m_value;
 	}
+}
+
+NumericalParameter::NumericalParameter(const NumericalParameter& parameter, QObject* parent) :
+    ParameterBase(parameter.getName(), parent),
+    m_value(0),
+    m_minimum(parameter.m_minimum),
+    m_maximum(parameter.m_maximum),
+    m_increment(parameter.m_increment)
+{
+    setValue(parameter.m_value);
+}
+
+NumericalParameter::NumericalParameter(const QString& name, const NumericalParameter& parameter, QObject* parent) :
+    ParameterBase(name, parent),
+    m_value(0),
+    m_minimum(parameter.m_minimum),
+    m_maximum(parameter.m_maximum),
+    m_increment(parameter.m_increment)
+{
+    setValue(parameter.m_value);
 }
 
 void NumericalParameter::setValue(double value)
@@ -110,4 +131,27 @@ double NumericalParameter::getMaximum() const
 int NumericalParameter::getIncrement() const
 {
 	return m_increment;
+}
+
+QJsonObject NumericalParameter::toJson() const
+{
+    return { {"type", "number"},
+            {"name",  getName()},
+            {"value", m_value},
+            {"min",   m_minimum},
+            {"max",   m_maximum},
+            {"inc",   m_increment} };
+}
+
+std::unique_ptr<ParameterBase> NumericalParameter::fromJson(const QJsonObject& o, QObject* parent)
+{
+    auto p = std::make_unique<NumericalParameter>(
+        o["name"].toString(),
+        0.,
+        parent);
+    p->setMinimum(o["min"].toDouble());
+    p->setMaximum(o["max"].toDouble());
+    p->setIncrement(o["inc"].toInt());
+    p->setValue(o["value"].toDouble());
+    return p;
 }

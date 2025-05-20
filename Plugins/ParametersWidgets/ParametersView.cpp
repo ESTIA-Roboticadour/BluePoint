@@ -102,7 +102,7 @@ void ParametersView::setParameters(const QList<const ParameterBase*>& parameters
 QWidget* ParametersView::createParameterWidget(const ParameterBase* parameter)
 {
 	// Group
-	if (auto groupParam = qobject_cast<const ParameterGroup*>(parameter))
+	if (auto groupParam = qobject_cast<const GroupParameter*>(parameter))
 	{
 		return createParameterGroupWidget(groupParam);
 	}
@@ -130,7 +130,7 @@ QWidget* ParametersView::createParameterWidget(const ParameterBase* parameter)
 	return createUnknowParameterWidget(parameter);
 }
 
-QWidget* ParametersView::createParameterGroupWidget(const ParameterGroup* parameter)
+QWidget* ParametersView::createParameterGroupWidget(const GroupParameter* parameter)
 {
 	auto* box = new QGroupBox(parameter->getName());
 	QVBoxLayout* layout = new QVBoxLayout();
@@ -257,7 +257,7 @@ QWidget* ParametersView::createListParameterWidget(const ListParameterBase* para
 		layout->addWidget(valueLabel);
 		container->setLayout(layout);
 
-		connect(parameter, &ListParameterBase::selectedIndexChanged, [parameter, valueLabel](int index) {
+        connect(parameter, &ListParameterBase::selectedIndexChanged, [parameter, valueLabel](int) {
 			valueLabel->setText(parameter->getSelectedKey());
 			});
 
