@@ -1,22 +1,22 @@
 #include "LightControlController.h"
 #include <QStringList>
 
-LightControlController::LightControlController(LightControlModel* model, LightControlWindow* view, QObject* parent) :
+LightControlController::LightControlController(LightControl* model, LightControlWindow* view, QObject* parent) :
 	QObject(parent),
 	m_model(model),
 	m_view(view)
 {
 	connect(view, &LightControlWindow::portSelectedChanged, this, &LightControlController::onViewPortSelectedChanged);
-	connect(view, &LightControlWindow::relayButtonPressed, model, &LightControlModel::toggleRelay);
+	connect(view, &LightControlWindow::relayButtonPressed, model, &LightControl::toggleRelay);
 
-	connect(model, &LightControlModel::disconnected, this, &LightControlController::onModelDisconnected);
-	connect(model, &LightControlModel::connected, this, &LightControlController::onModelConnected);
-	connect(model, &LightControlModel::connectionFailed, this, &LightControlController::onModelConnectionFailed);
-	connect(model, &LightControlModel::relayStateChanged, view, &LightControlWindow::setRelayState);
-	connect(model, &LightControlModel::moduleInfoReceived, view, &LightControlWindow::setModuleInfo);
+	connect(model, &LightControl::disconnected, this, &LightControlController::onModelDisconnected);
+	connect(model, &LightControl::connected, this, &LightControlController::onModelConnected);
+	connect(model, &LightControl::connectionFailed, this, &LightControlController::onModelConnectionFailed);
+	connect(model, &LightControl::relayStateChanged, view, &LightControlWindow::setRelayState);
+	connect(model, &LightControl::moduleInfoReceived, view, &LightControlWindow::setModuleInfo);
 
-	connect(view, &LightControlWindow::closeRequest, model, &LightControlModel::release);
-	connect(model, &LightControlModel::released, this, &LightControlController::deleteLater);
+	connect(view, &LightControlWindow::closeRequest, model, &LightControl::release);
+	connect(model, &LightControl::released, this, &LightControlController::deleteLater);
 
 	autoConnect();
 }

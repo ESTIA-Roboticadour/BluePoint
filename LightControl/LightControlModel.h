@@ -5,13 +5,13 @@
 #include <QSerialPort>
 #include <QTimer>
 
-class LightControlModel : public QObject
+class LightControl : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit LightControlModel(QObject* parent = nullptr);
-    ~LightControlModel() override = default;
+    explicit LightControl(QObject* parent = nullptr);
+    ~LightControl() override = default;
 
     void release();
     QStringList getAvailablePorts() const;

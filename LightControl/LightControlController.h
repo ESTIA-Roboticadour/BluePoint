@@ -10,7 +10,7 @@ class LightControlController : public QObject
     Q_OBJECT
 
 public:
-    explicit LightControlController(LightControlModel* model, LightControlWindow* view, QObject* parent=nullptr);
+    explicit LightControlController(LightControl* model, LightControlWindow* view, QObject* parent=nullptr);
     ~LightControlController();
 
 private slots:
@@ -24,6 +24,6 @@ private:
     void autoConnect() const;
 
 private:
-    LightControlModel* m_model;
+    LightControl* m_model;
     LightControlWindow* m_view;
 };

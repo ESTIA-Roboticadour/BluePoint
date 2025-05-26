@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     
-    auto* model = new LightControlModel;
+    auto* model = new LightControl;
     auto* window = new LightControlWindow;
     auto* controller = new LightControlController(model, window);
 

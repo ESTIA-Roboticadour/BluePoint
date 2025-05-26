@@ -4,16 +4,16 @@
 
 static const int states[4] = { 0x01, 0x02, 0x04, 0x08 };
 
-LightControlModel::LightControlModel(QObject* parent) :
+LightControl::LightControl(QObject* parent) :
     QObject(parent),
     m_serial(this),
 	m_pollTimer(this),
 	m_relayStates(0)
 {
-    connect(&m_pollTimer, &QTimer::timeout, this, &LightControlModel::pollRelayStates);
+    connect(&m_pollTimer, &QTimer::timeout, this, &LightControl::pollRelayStates);
 }
 
-void LightControlModel::release()
+void LightControl::release()
 {
     if (m_serial.isOpen()) 
         m_serial.close();
@@ -22,7 +22,7 @@ void LightControlModel::release()
     emit released();
 }
 
-QStringList LightControlModel::getAvailablePorts() const
+QStringList LightControl::getAvailablePorts() const
 {
     QStringList ports;
     for (const QSerialPortInfo& info : QSerialPortInfo::availablePorts()) {
@@ -31,7 +31,7 @@ QStringList LightControlModel::getAvailablePorts() const
     return ports;
 }
 
-void LightControlModel::disconnect()
+void LightControl::disconnect()
 {
 	if (m_serial.isOpen()) 
     {
@@ -41,7 +41,7 @@ void LightControlModel::disconnect()
 	m_pollTimer.stop();
 }
 
-void LightControlModel::connectToPort(const QString& portName)
+void LightControl::connectToPort(const QString& portName)
 {
     disconnect();
 
@@ -77,7 +77,7 @@ void LightControlModel::connectToPort(const QString& portName)
 
 }
 
-void LightControlModel::toggleRelay(int relayIndex)
+void LightControl::toggleRelay(int relayIndex)
 {
     if (!m_serial.isOpen()) 
         return;
@@ -89,7 +89,7 @@ void LightControlModel::toggleRelay(int relayIndex)
     sendCommand(on ? cmdOn[relayIndex] : cmdOff[relayIndex]);
 }
 
-void LightControlModel::pollRelayStates()
+void LightControl::pollRelayStates()
 {
     sendCommand(0x5B); // Get relay states
     if (m_serial.waitForReadyRead(500)) 
@@ -107,7 +107,7 @@ void LightControlModel::pollRelayStates()
     }
 }
 
-void LightControlModel::sendCommand(int command)
+void LightControl::sendCommand(int command)
 {
     if (m_serial.isOpen())
     {
