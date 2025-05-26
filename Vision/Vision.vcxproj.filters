@@ -133,6 +133,9 @@
     <ClCompile Include="AppConfigurationWidget.cpp">
       <Filter>Widgets\AppConfigurationWidget</Filter>
     </ClCompile>
+    <ClCompile Include="AppSetup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainController.h">
@@ -193,6 +196,9 @@
     </ClInclude>
     <ClInclude Include="AppConfigurationWidget.h">
       <Filter>Widgets\AppConfigurationWidget</Filter>
+    </ClInclude>
+    <ClInclude Include="AppSetup.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
