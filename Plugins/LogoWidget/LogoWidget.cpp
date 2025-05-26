@@ -4,13 +4,10 @@
 LogoWidget::LogoWidget(QWidget* parent) :
     QWidget(parent),
     m_logoLabel(new QLabel(this)),
-    m_logoPath(),
     m_width(128),
     m_height(128)
 {
     /* charge le pixmap d’origine */
-    //setLogoPath(m_logoPath);
-
     m_logoLabel->setAlignment(Qt::AlignCenter);
 
     auto* lay = new QVBoxLayout(this);
@@ -41,19 +38,11 @@ void LogoWidget::setSize(int w, int h, Qt::TransformationMode mode)
 /* ------------------------------------------------------------------ */
 /* setters Designer                                                   */
 /* ------------------------------------------------------------------ */
-void LogoWidget::setLogoPath(const QString& path)
+void LogoWidget::setLogoPixmap(const QPixmap& px)
 {
-    if (path.isEmpty() || path == m_logoPath)
-        return;
-
-    QPixmap pm(path);                  // charge à partir d’un fichier OU d’une ressource
-    if (pm.isNull())
-        return;                        // on ignore les chemins invalides
-
-    m_logoPath  = path;
-    m_original  = pm;
+    m_original = px;
     updatePixmap();
-    emit logoPathChanged(m_logoPath);
+    emit logoPixmapChanged(px);
 }
 
 void LogoWidget::setLogoWidth(int w)  { setSize(w, m_height); }
@@ -64,11 +53,6 @@ void LogoWidget::setLogoHeight(int h) { setSize(m_width, h); }
 /* ------------------------------------------------------------------ */
 void LogoWidget::updatePixmap(Qt::TransformationMode mode)
 {
-    if (m_original.isNull())
-        m_original = QPixmap(m_logoPath);     // en dernier recours
-
-    m_logoLabel->setPixmap(m_original.scaled(m_width,
-                                             m_height,
-                                             Qt::KeepAspectRatio,
-                                             mode));
+    if (!m_original.isNull())
+        m_logoLabel->setPixmap(m_original.scaled(m_width, m_height, Qt::KeepAspectRatio, mode));
 }

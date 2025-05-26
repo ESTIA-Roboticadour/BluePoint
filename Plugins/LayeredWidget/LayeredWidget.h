@@ -55,10 +55,10 @@ private:
     QPointer<QWidget> m_back;
     QPointer<QWidget> m_front;
     QWidget*          m_filter { nullptr };
-    qreal             m_backOpacity { 0.5 };
+    qreal             m_backOpacity;
 
-    QColor  m_filterColor { Qt::black };
-    qreal   m_filterAlpha { 0.5 };
+    QColor  m_filterColor;
+    qreal   m_filterAlpha;
 };
 
 #endif // LAYEREDWIDGET_H

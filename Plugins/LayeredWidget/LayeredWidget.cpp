@@ -21,7 +21,7 @@ LayeredWidget::LayeredWidget(QWidget* parent) :
 	m_filter(nullptr),
     m_backOpacity(0.5),
     m_filterColor(Qt::black),
-    m_filterAlpha(0.5)
+    m_filterAlpha(0)
 {
 }
 

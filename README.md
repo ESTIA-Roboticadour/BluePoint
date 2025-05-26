@@ -10,11 +10,15 @@ They provide reusable widgets and logic that are dynamically loaded by other app
 
 ### 🔧 Qt Creator Projects (Plugins & Libraries)
 
-- `FrameViewer`: Widget to display an image. Display as large as possible on a customisable background, keeping the aspect ratio.
-- `NavigationWidgets`: Widgets for navigation. Navigation is done through a tree of nodes.
-- `ParametersCustomWidgets`: Builds dynamic UI widgets to control various parameter types (numbers, booleans, strings...).
-- `TogglePanel`: A widget for an openable and closeable panel. Ideal for sidebar menus.
-- `NavigationLayout`: A Layout widget that includes a structure for building a multi-page application. Depends on the `NavigationWidgets` and `TogglePanel` plugins. They must have been compiled before.
+- `FrameViewer`: Widget to display a still image / video frame as large as possible on a user-defined background colour while always preserving the original aspect-ratio.
+- `LayeredWidget`: Composite container that stacks a *background* widget, an optional colour-filter overlay and a *foreground* widget. The background opacity and filter (colour + alpha) can be changed at run-time or in Qt Designer.
+- `LogoWidget`: Convenience widget that loads a pixmap from a file or Qt resource, keeps the original copy, and shows a scaled version inside a centred `QLabel`. Size and image path are exposed as Designer properties.
+- `LogTool`: Tiny logging library made of `LogDispatcher` (Qt global message handler), `LogModel` (table model) and `LogWidget` (viewer). It captures every ``qDebug/qInfo/...`` message, streams them to a file if requested, and displays them live in a colour-coded table.
+- `NavigationWidgets`: A set of widgets (branch / breadcrumb / tree classes) used to navigate through a hierarchical `NavigationTree` of nodes.
+- `ParametersCustomWidgets`: Factory that builds, at run-time, the appropriate Qt editor (spin box, checkbox, line edit, combo, colour picker…) for each parameter type: integers, floats, booleans, strings, enums, etc.
+- `TogglePanel`: Slide-in/slide-out side panel with a hamburger button. Useful for toolboxes or mobile-style menus.
+- `XAppLayout`: Legacy one-stop “application shell” that assembles `NavigationWidgets`, `TogglePanel`, `LayeredWidget`, `LogoWidget` and `LogTool` into a ready-to-use main-window layout (navbar + sidebar + background + log pane). Superseded by **AppLayout** but kept for backward compatibility. Requires the five plugins to be compiled first.
+- `XNavigationLayout`: Original layout widget that wires `NavigationWidgets` with a `TogglePanel` to build multi-page UIs. Requires the two plugins to be compiled first.
 
 👉 **Required to be compiled**, as they provide headers `.h`, `.lib` and `.dll` files used by other projects.
 
