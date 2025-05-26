@@ -3,92 +3,65 @@
 
 MainWindow::MainWindow(QWidget* parent) :
 	WindowBase(parent),
-	m_ui(new Ui::MainWindowClass()),
-	m_layeredWidget(new LayeredWidget(this)),
-	m_logoWidget(new LogoWidget()),
-	m_logWidget(new LogWidget(this)),
-	m_splitter(new QSplitter(Qt::Vertical, this))
+	m_ui(new Ui::MainWindowClass())
 {
 	m_ui->setupUi(this);
-
-	// --- 1) préparation du LayeredWidget de fond ---
-	m_layeredWidget->setBackgroundWidget(m_logoWidget);
-
-	m_logoWidget->setLogoPath(":/VisionWindow/Resources/icon.png");
-
-	// --- 2) construction du splitter (haut : layered, bas : logs) ---
-	m_splitter->addWidget(m_layeredWidget);
-	m_splitter->addWidget(m_logWidget);
-
-	const int h = height() > 0 ? height() : 800;   // valeur de secours
-	m_splitter->setSizes({ int(h * 0.8), int(h * 0.2) });
-
-	// (facultatif) rendre le panneau log repliable :
-	m_splitter->setCollapsible(1, true);
-
-	// ratios initiaux : 80 % / 20 % (ajustez à votre goût)
-	m_splitter->setStretchFactor(0, 4);   // index 0 = 4 parts
-	m_splitter->setStretchFactor(1, 1);   // index 1 = 1 part
-
-	// --- 3) place le splitter dans la zone centrale du NavigationLayoutWidget ---
-	m_ui->navigationLayoutWidget->setCentralWidget(m_splitter);
 }
 
 MainWindow::~MainWindow()
 {
-	m_logoWidget->deleteLater();
 	delete m_ui;
 }
 
 NavigationTree* MainWindow::getTree() const
 {
-	return m_ui->navigationLayoutWidget->getTree();
+	return m_ui->appLayoutWidget->getTree();
 }
 
 void MainWindow::setCentralWidget(QWidget* widget, bool deleteOld) const
 {
-	m_layeredWidget->setForegroundWidget(widget, deleteOld);
+	m_ui->appLayoutWidget->setCentralWidget(widget, deleteOld);
 }
 
 void MainWindow::clearCentralWidget(bool deleteOld) const
 {
-	m_layeredWidget->setForegroundWidget(nullptr, deleteOld);
+	m_ui->appLayoutWidget->clearCentralWidget( deleteOld);
 }
 
 void MainWindow::hideBackground()
 {
-	m_logoWidget->hide();
+	m_ui->appLayoutWidget->hideBackground();
 }
 
 void MainWindow::showBackground()
 {
-	m_logoWidget->show();
+	m_ui->appLayoutWidget->showBackground();
 }
 
 void MainWindow::setBackgroundVisibility(bool visible)
 {
 	if (visible)
-		m_layeredWidget->show();
+		showBackground();
 	else
-		m_layeredWidget->hide();
+		hideBackground();
 }
 
 qreal MainWindow::backgroundOpacity() const
 {
-	return m_layeredWidget->backgroundOpacity();
+	return m_ui->appLayoutWidget->backgroundOpacity();
 }
 
 void MainWindow::setBackgroundOpacity(qreal alpha)
 {
-	m_layeredWidget->setBackgroundOpacity(alpha);
+	m_ui->appLayoutWidget->setBackgroundOpacity(alpha);
 }
 
 void MainWindow::clearFilter()
 {
-	m_layeredWidget->clearFilter();
+	m_ui->appLayoutWidget->clearFilter();
 }
 
-void MainWindow::setFilterColor(const QColor& c, qreal alpha)
+void MainWindow::setFilter(const QColor& c, qreal alpha)
 {
-	m_layeredWidget->setFilter(c, alpha);
+	m_ui->appLayoutWidget->setFilter(c, alpha);
 }
