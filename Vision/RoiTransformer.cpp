@@ -24,24 +24,24 @@ void RoiTransformer::setConfig(RoiConfig* config)
 
 QImage RoiTransformer::transform(const QImage& image)
 {
-	// 1) Vérification de l’image en entrée
+	// 1) VÃ©rification de lâ€™image en entrÃ©e
 	if (!m_config || image.isNull())
 		return image;
 
-	// 2) Récupération du ROI demandé (x, y, w, h)
+	// 2) RÃ©cupÃ©ration du ROI demandÃ© (x, y, w, h)
 	QRect roi = m_config->getRoi();
 
 	if (!roi.isValid())
 		return image;
 
-	// 3) Adaptation aux limites de l’image
+	// 3) Adaptation aux limites de lâ€™image
 	//    image.rect() == QRect(0, 0, image.width(), image.height())
 	roi = roi.intersected(image.rect());
 
-	// 4) Si le ROI est en dehors de l’image ou nul, retourner vide
+	// 4) Si le ROI est en dehors de lâ€™image ou nul, retourner vide
 	if (roi.isEmpty())
 		return QImage();
 
-	// 5) Recadrage : QImage::copy crée déjà une nouvelle image
+	// 5) Recadrage : QImage::copy crÃ©e dÃ©jÃ  une nouvelle image
 	return image.copy(roi);
 }

@@ -1,7 +1,7 @@
 #include "MainController.h"
 #include "NavigationTree.h"
 #include "NavigationNode.h"
-#include "LogoWidget.h"
+#include <QLabel>
 
 MainController::MainController(MainModel* model, MainWindow* view, QObject* parent) :
 	WindowControllerBase(model, view, parent),
@@ -66,23 +66,32 @@ void MainController::onNavigationDone(NavigationNode* node)
 
 void MainController::updateCentralWidget(NavigationNode* node)
 {
-	if (node == m_deviceNode)
+	if (node == m_configurationNode)
 	{
-
+		m_view->setBackgroundOpacity(0.5);
+		m_view->setCentralWidget(new QLabel("Configuration"));
+	}
+	else if (node == m_deviceNode)
+	{
+		m_view->setBackgroundOpacity(0.5);
+		m_view->setCentralWidget(new QLabel("Device"));
 	}
 	else if (node == m_workspaceNode)
 	{
-
+		m_view->setBackgroundOpacity(0.5);
+		m_view->setCentralWidget(new QLabel("Workspace"));
 	}
 	else if (node == m_roiNode)
 	{
-
+		m_view->setBackgroundOpacity(0.5);
+		m_view->setCentralWidget(new QLabel("ROI"));
 	}
 	else
 		// root
-		// configuration
 		// app
 	{
-		m_view->setCentralWidget(new LogoWidget(m_view));
+		m_view->setBackgroundOpacity(1);
+		m_view->clearFilter();
+		m_view->clearCentralWidget();
 	}
 }

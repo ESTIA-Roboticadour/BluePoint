@@ -11,8 +11,8 @@ class RoiConfig : public Config
 
 public:
 	explicit RoiConfig(QObject* parent = nullptr);
-	explicit RoiConfig(int x, int y, int w, int h, QObject* parent = nullptr);
-	explicit RoiConfig(const RoiConfig& config, QObject* parent = nullptr);
+	RoiConfig(int x, int y, int w, int h, QObject* parent = nullptr);
+	RoiConfig(const RoiConfig& config, QObject* parent = nullptr);
 	~RoiConfig() override = default;
 
 	int getX() const;

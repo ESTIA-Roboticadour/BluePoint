@@ -42,9 +42,6 @@
     <Filter Include="Widgets">
       <UniqueIdentifier>{498804c7-2d70-4323-b952-e66470393b65}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Widgets\LogoWidget">
-      <UniqueIdentifier>{0adc132b-32d1-4498-8d93-32d68d2f98f5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Services">
       <UniqueIdentifier>{654be253-8ce1-423e-9db4-e6e15572e3a3}</UniqueIdentifier>
     </Filter>
@@ -59,6 +56,12 @@
     </Filter>
     <Filter Include="Services\Config">
       <UniqueIdentifier>{e388dd4c-a1b7-4b31-b34c-9b4a0c3d8737}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Services\LightControl">
+      <UniqueIdentifier>{3ffe0f4c-1d83-4f8d-b576-fae1069ab878}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Widgets\AppConfigurationWidget">
+      <UniqueIdentifier>{89db9d7a-4b62-47f4-a3e6-8dbfa227b4e9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -97,9 +100,6 @@
     <ClCompile Include="AppStore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LogoWidget.cpp">
-      <Filter>Widgets\LogoWidget</Filter>
-    </ClCompile>
     <ClCompile Include="ImageProvider.cpp">
       <Filter>Services\ImageProviders</Filter>
     </ClCompile>
@@ -114,6 +114,24 @@
     </ClCompile>
     <ClCompile Include="RoiConfig.cpp">
       <Filter>Services\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="LightControlConfig.cpp">
+      <Filter>Services\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraConfig.cpp">
+      <Filter>Services\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="LightControl.cpp">
+      <Filter>Services\LightControl</Filter>
+    </ClCompile>
+    <ClCompile Include="AppConfig.cpp">
+      <Filter>Services\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="BaslerCameraConfig.cpp">
+      <Filter>Services\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="AppConfigurationWidget.cpp">
+      <Filter>Widgets\AppConfigurationWidget</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -135,9 +153,6 @@
     <QtMoc Include="WindowControllerBase.h">
       <Filter>Features\MVCBase</Filter>
     </QtMoc>
-    <QtMoc Include="LogoWidget.h">
-      <Filter>Widgets\LogoWidget</Filter>
-    </QtMoc>
     <QtMoc Include="Camera.h">
       <Filter>Services\Camera</Filter>
     </QtMoc>
@@ -153,6 +168,21 @@
     <QtMoc Include="RoiConfig.h">
       <Filter>Services\Config</Filter>
     </QtMoc>
+    <QtMoc Include="LightControlConfig.h">
+      <Filter>Services\Config</Filter>
+    </QtMoc>
+    <QtMoc Include="CameraConfig.h">
+      <Filter>Services\Config</Filter>
+    </QtMoc>
+    <QtMoc Include="LightControl.h">
+      <Filter>Services\LightControl</Filter>
+    </QtMoc>
+    <QtMoc Include="AppConfig.h">
+      <Filter>Services\Config</Filter>
+    </QtMoc>
+    <QtMoc Include="BaslerCameraConfig.h">
+      <Filter>Services\Config</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ViewFactory.h">
@@ -160,6 +190,9 @@
     </ClInclude>
     <ClInclude Include="AppStore.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AppConfigurationWidget.h">
+      <Filter>Widgets\AppConfigurationWidget</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

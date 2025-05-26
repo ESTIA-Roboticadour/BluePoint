@@ -36,4 +36,3 @@ private:
 	NavigationNode* m_roiNode;
 	NavigationNode* m_appNode;
 };
-
