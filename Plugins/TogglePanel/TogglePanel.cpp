@@ -1,6 +1,7 @@
 #include "TogglePanel.h"
 
 #include <QChildEvent>
+#include <QtGlobal>   // QWIDGETSIZE_MAX
 #include <algorithm>
 
 TogglePanel::TogglePanel(QWidget* parent) :
@@ -27,7 +28,7 @@ TogglePanel::TogglePanel(QWidget* parent) :
 
     setMinimumWidth(collapsedWidth());
     setMaximumWidth(collapsedWidth());
-    setMaximumHeight(std::numeric_limits<int>::max());
+    setMaximumHeight(QWIDGETSIZE_MAX);
 
     // Animation
     m_anim->setDuration(200);

@@ -1,0 +1,12 @@
+#ifndef LAYEREDWIDGET_GLOBAL_H
+#define LAYEREDWIDGET_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(LAYEREDWIDGET_LIBRARY)
+#  define LAYEREDWIDGET_API Q_DECL_EXPORT
+#else
+#  define LAYEREDWIDGET_API Q_DECL_IMPORT
+#endif
+
+#endif // LAYEREDWIDGET_GLOBAL_H

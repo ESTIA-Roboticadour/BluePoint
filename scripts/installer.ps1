@@ -26,6 +26,9 @@ $X64_DIR = Join-Path $ROOT_DIR "x64"
 
 $PLUGINS = @(
     "FrameViewer",
+    "LayeredWidget",
+    "LogoWidget",
+    "LogTool",
     "NavigationWidgets",
     "ParametersWidgets",
     "TogglePanel",
