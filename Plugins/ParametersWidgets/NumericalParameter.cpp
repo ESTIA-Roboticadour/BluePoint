@@ -61,6 +61,7 @@ void NumericalParameter::internalSetValue(double value)
 	{
 		m_value = value;
 		emit valueChanged(value);
+        emit parameterChanged();
 	}
 }
 
@@ -73,6 +74,8 @@ void NumericalParameter::setMinimum(double minimum)
 
 		if (m_value < m_minimum)
 			setValue(m_minimum);
+        else
+            emit parameterChanged();
 	}
 }
 
@@ -85,6 +88,8 @@ void NumericalParameter::setMaximum(double maximum)
 
 		if (m_value > m_maximum)
 			setValue(m_maximum);
+        else
+            emit parameterChanged();
 	}
 }
 
@@ -94,6 +99,7 @@ void NumericalParameter::setIncrement(double increment)
 	{
 		m_increment = increment;
 		emit incrementChanged(m_increment);
+        emit parameterChanged();
 	}
 }
 

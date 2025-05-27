@@ -26,9 +26,12 @@ public:
     ParameterBase* getParameter(const QString& name) const override;
     QList<ParameterBase*> getParameters() const override;
 
-    void setParameters(const QList<ParameterBase*>& parameters);
+    QString getPath() { return m_path; }
 
-    static bool saveToFile(const Config& config, const QString& filePath);
+    bool save() const;
+    bool save(const QString& path);
+
+    static bool saveToFile(const Config* config, const QString& filePath);
     static std::unique_ptr<Config> loadFromFile(const QString& filePath, QObject* parent = nullptr);
 
     template<typename T = Config, std::enable_if_t<std::is_base_of_v<Config, T>, int> = 0>
@@ -44,11 +47,15 @@ public:
         return nullptr;
     }
 
+public slots:
+    void setParameters(const QList<ParameterBase*>& parameters);
+
 protected:
     virtual bool setFromConfig(const Config* src) { Q_UNUSED(src); return true; }
 
 private:
     QList<ParameterBase*> m_parameters;
+    QString m_path;
 };
 
 #endif // CONFIG_H

@@ -59,6 +59,10 @@ void GroupParameter::addParameter(ParameterBase* parameter)
 	if (parameter && !m_parameters.contains(parameter))
 	{
 		m_parameters.append(parameter);
+        connect(parameter, &ParameterBase::parameterChanged, this, &GroupParameter::parameterChanged);
+
+        // pour ne pas avoir un disconnect sur un pointeur libéré
+        connect(parameter, &QObject::destroyed, this, [this, parameter]{ m_parameters.removeOne(parameter); });
 	}
 }
 
@@ -66,12 +70,16 @@ void GroupParameter::removeParameter(ParameterBase* parameter)
 {
 	if (parameter && m_parameters.contains(parameter))
 	{
+        disconnect(parameter, &ParameterBase::parameterChanged, this, &GroupParameter::parameterChanged);
 		m_parameters.removeOne(parameter);
 	}
 }
 
 void GroupParameter::clearParameters()
 {
+    for (auto& parameter : m_parameters) {
+        disconnect(parameter, &ParameterBase::parameterChanged, this, &GroupParameter::parameterChanged);
+    }
 	m_parameters.clear();
 }
 

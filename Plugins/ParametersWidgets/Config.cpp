@@ -1,24 +1,31 @@
 #include "Config.h"
 
 #include <QFile>
+#include <QFileInfo>
+#include <QDir>
+#include <QSaveFile>
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
 
 Config::Config(QObject* parent) :
-    QObject(parent)
+    QObject(parent),
+    m_parameters(),
+    m_path()
 {
 }
 
 Config::Config(const QList<ParameterBase*>& parameters, QObject* parent) :
     QObject(parent),
-    m_parameters(parameters)
+    m_parameters(parameters),
+    m_path()
 {
 }
 
 Config::Config(const Config& other) :
     QObject(other.parent()),
-    m_parameters(other.m_parameters)
+    m_parameters(other.m_parameters),
+    m_path(other.m_path)
 {
 }
 
@@ -64,26 +71,71 @@ void Config::setParameters(const QList<ParameterBase*>& parameters)
     m_parameters = parameters;
 }
 
-bool Config::saveToFile(const Config& config, const QString& filePath)
+bool Config::save() const
 {
-    QFile file(filePath);
-    if (!file.open(QIODevice::WriteOnly))
+    return m_path.isEmpty() ? false : Config::saveToFile(this, m_path);
+}
+
+bool Config::save(const QString& path)
+{
+    if (m_path != path)
+    {
+        m_path = path;
+    }
+    return Config::saveToFile(this, m_path);
+}
+
+bool Config::saveToFile(const Config* cfg, const QString& userPath)
+{
+    // 1) garde-fou
+    if (!cfg)
         return false;
 
-    QJsonArray paramsArray;
-    for (auto* param : config.m_parameters)
-    {
-        if (param)
-            paramsArray.append(param->toJson());
+    // 2) Ajoute l'extension si oubliée
+    QString filePath = userPath;
+    if (!filePath.endsWith(".json", Qt::CaseInsensitive))
+        filePath += ".json";
+
+    // 3) Crée l'arborescence si nécessaire
+    QFileInfo fi(filePath);
+    QDir dir = fi.dir();
+    if (!dir.exists() && !dir.mkpath(".")) {
+        qWarning() << "Unable to create the" << filePath << "folder";
+        return false;
     }
 
+    // 4) Ecriture atomique : données dans un fichier temporaire
+    QSaveFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        qWarning() << "Can not open:" << filePath << ':' << file.errorString();
+        return false;
+    }
+
+    // 5) Construction du JSON
+    // Construction du tableau JSON (sans reserve)
+    QJsonArray paramsArray;
+    for (ParameterBase* p : cfg->m_parameters)
+        if (p)
+            paramsArray.append(p->toJson());
+
+    // Objet racine explicite -> aucune ambiguité
     QJsonObject root;
     root.insert("parameters", paramsArray);
 
     const QJsonDocument doc(root);
-    file.write(doc.toJson(QJsonDocument::Indented));
+    if (file.write(doc.toJson(QJsonDocument::Indented)) == -1) {
+        qWarning() << "Cannot write" << filePath << ':' << file.errorString();
+        return false;
+    }
+
+    // 6) Renomme le fichier temp -> définitif ; en cas d'échec, l'ancien reste intact
+    if (!file.commit()) {
+        qWarning() << "Can not commit" << filePath << ':' << file.errorString();
+        return false;
+    }
     return true;
 }
+
 
 std::unique_ptr<Config> Config::loadFromFile(const QString& filePath, QObject* parent)
 {
@@ -108,5 +160,6 @@ std::unique_ptr<Config> Config::loadFromFile(const QString& filePath, QObject* p
                 cfg->addParameter(param.release());
         }
     }
+    cfg->m_path = filePath;
     return cfg;
 }

@@ -52,8 +52,7 @@ public:
             m_values.append(QVariant::fromValue(value));
             if (m_selectedIndex == -1)
             {
-                m_selectedIndex = 0;
-                emit selectedIndexChanged(m_selectedIndex);
+                selectValueByIndex(0);
             }
         }
 
@@ -85,6 +84,7 @@ public:
         {
             m_selectedIndex = index;
             emit selectedIndexChanged(m_selectedIndex);
+            emit parameterChanged();
         }
     }
 

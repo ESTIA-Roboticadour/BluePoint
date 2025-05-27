@@ -27,6 +27,7 @@ bool ListParameterBase::selectByKey(const QString& key)
     {
         m_selectedIndex = index;
         emit selectedIndexChanged(index);
+        emit parameterChanged();
         return true;
     }
     return false;

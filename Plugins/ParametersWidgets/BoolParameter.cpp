@@ -30,6 +30,7 @@ void BoolParameter::setValue(bool value)
 	{
 		m_value = value;
 		emit valueChanged(m_value);
+        emit parameterChanged();
 	}
 }
 

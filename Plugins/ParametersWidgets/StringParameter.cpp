@@ -30,6 +30,7 @@ void StringParameter::setValue(const QString& value)
 	{
 		m_value = value;
 		emit valueChanged(m_value);
+        emit parameterChanged();
 	}
 }
 
