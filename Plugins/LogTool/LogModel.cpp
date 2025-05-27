@@ -35,11 +35,11 @@ LogModel::LogModel(QObject* parent)
     : QAbstractTableModel(parent)
 {
     const QPalette pal = qApp->palette();
-    m_colors[QtDebugMsg] = pal.color(QPalette::WindowText);
-    m_colors[QtInfoMsg] = pal.color(QPalette::Text);
-    m_colors[QtWarningMsg] = pal.color(QPalette::Link);        // orange/jaune
-    m_colors[QtCriticalMsg] = pal.color(QPalette::BrightText);  // rouge clair
-    m_colors[QtFatalMsg] = m_colors[QtCriticalMsg];
+    m_colors[QtDebugMsg]    = QColor(150, 150, 150);           // gray
+    m_colors[QtInfoMsg]     = pal.color(QPalette::WindowText); // theme color
+    m_colors[QtWarningMsg]  = QColor(255, 210, 0);             // yellow
+    m_colors[QtCriticalMsg] = QColor(Qt::red);                 // red
+    m_colors[QtFatalMsg]    = QColor(139, 0, 0);               // dark red
 }
 
 /* ------------------------------------------------------------------ */
@@ -87,6 +87,13 @@ void LogModel::append(const LogEntry& entry)
     beginInsertRows({}, m_entries.size(), m_entries.size());
     m_entries.push_back(entry);
     endInsertRows();
+}
+
+void LogModel::clear()
+{
+    beginResetModel();
+    m_entries.clear();
+    endResetModel();
 }
 
 /* ------------------------------------------------------------------ */

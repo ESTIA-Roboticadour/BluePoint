@@ -34,6 +34,7 @@ public:
 
 public slots:
     void append(const LogEntry& entry);
+    void clear();
 
 private:
     QVector<LogEntry>                 m_entries;

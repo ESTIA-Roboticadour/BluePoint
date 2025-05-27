@@ -30,6 +30,11 @@ LogWidget::LogWidget(QWidget* parent) :
 
     m_view->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_view, &QTableView::customContextMenuRequested, this, &LogWidget::showContextMenu);
+
+    const int widths[] = { 80, 40, 60, 50, 120, 400 };          // Time, Lvl, Thread, Cat., File, Message
+    for (int i = 0; i < LogModel::Count; ++i) {
+        m_view->horizontalHeader()->resizeSection(i, widths[i]);
+    }
 }
 
 /* -- nouvelles méthodes ------------------------------------------- */
@@ -59,15 +64,27 @@ void LogWidget::copySelectedRow()
 void LogWidget::showContextMenu(const QPoint& pos)
 {
     const QModelIndex idx = m_view->indexAt(pos);
-    if (!idx.isValid())
-        return;
+    const bool hasRow = idx.isValid();
 
     QMenu menu(this);
-    QAction* copyMsg = menu.addAction("Copy message");
-    QAction* copyRow = menu.addAction("Copy full row");
-    QAction* chosen = menu.exec(m_view->viewport()->mapToGlobal(pos));
+    QAction* copyMsg  = menu.addAction("Copy message");
+    QAction* copyRow  = menu.addAction("Copy full row");
+    copyMsg->setEnabled(hasRow);          // désactivé s’il n’y a pas de ligne
+    copyRow->setEnabled(hasRow);
 
+    menu.addSeparator();
+    QAction* clearAll = menu.addAction("Clear log");
+
+    QAction* chosen = menu.exec(m_view->viewport()->mapToGlobal(pos));
     if (!chosen)
+        return;
+
+    if (chosen == clearAll) {
+        m_model->clear();
+        return;
+    }
+
+    if (!hasRow)        // on a cliqué dans le vide : rien à copier
         return;
 
     const int row = idx.row();
