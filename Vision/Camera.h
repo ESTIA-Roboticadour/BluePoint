@@ -30,6 +30,10 @@ protected:
 
 signals:
 	void transformError(ImageTransformer* transformer, const int index, const QString& message);
+	void opened();
+	void closed();
+	void connected();
+	void disconnected();
 
 private:
 	QList<ImageTransformer*> m_transformers;

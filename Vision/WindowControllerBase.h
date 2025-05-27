@@ -16,9 +16,9 @@ protected slots:
 	virtual void onViewCloseRequested() = 0;
 
 private:
-	virtual void setupConnections();
+	void setupConnections();
 
-private:
+protected:
 	WindowBase* m_view;
 	ModelBase* m_model;
 };

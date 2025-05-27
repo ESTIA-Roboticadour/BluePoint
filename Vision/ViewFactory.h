@@ -1,12 +1,15 @@
 #pragma once
 
-#include "MainModel.h"
 #include "MainWindow.h"
-#include "MainController.h"
+#include "DeviceView.h"
+
+#include "CameraConfig.h"
+#include "LightControlConfig.h"
+#include "Camera.h"
 
 class ViewFactory
 {
 public:
 	static MainWindow* createMainWindow();
+	static DeviceView* createDeviceView(CameraConfig* cameraConfig, LightControlConfig* lightConfig, Camera* camera, QWidget* parentView=nullptr);
 };
-

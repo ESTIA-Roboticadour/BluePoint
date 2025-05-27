@@ -119,12 +119,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AppConfig.cpp" />
-    <ClCompile Include="AppConfigurationWidget.cpp" />
     <ClCompile Include="AppSetup.cpp" />
     <ClCompile Include="AppStore.cpp" />
+    <ClCompile Include="BaslerCamera.cpp" />
     <ClCompile Include="BaslerCameraConfig.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraConfig.cpp" />
+    <ClCompile Include="DeviceController.cpp" />
+    <ClCompile Include="DeviceModel.cpp" />
+    <ClCompile Include="DeviceView.cpp" />
     <ClCompile Include="ImageProvider.cpp" />
     <ClCompile Include="ImageTransformer.cpp" />
     <ClCompile Include="LightControl.cpp" />
@@ -133,6 +136,7 @@
     <ClCompile Include="RoiConfig.cpp" />
     <ClCompile Include="RoiTransformer.cpp" />
     <ClCompile Include="ViewFactory.cpp" />
+    <ClCompile Include="WidgetControllerBase.cpp" />
     <ClCompile Include="WindowBase.cpp" />
     <ClCompile Include="WindowControllerBase.cpp" />
     <QtRcc Include="MainWindow.qrc" />
@@ -157,8 +161,8 @@
     <QtMoc Include="WindowControllerBase.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="WidgetControllerBase.h" />
     <QtMoc Include="AppConfig.h" />
-    <ClInclude Include="AppConfigurationWidget.h" />
     <ClInclude Include="AppSetup.h" />
     <ClInclude Include="AppStore.h" />
     <QtMoc Include="ImageProvider.h" />
@@ -170,6 +174,10 @@
     <QtMoc Include="CameraConfig.h" />
     <QtMoc Include="BaslerCameraConfig.h" />
     <QtMoc Include="LightControl.h" />
+    <QtMoc Include="DeviceView.h" />
+    <QtMoc Include="DeviceController.h" />
+    <QtMoc Include="DeviceModel.h" />
+    <QtMoc Include="BaslerCamera.h" />
     <ClInclude Include="ViewFactory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

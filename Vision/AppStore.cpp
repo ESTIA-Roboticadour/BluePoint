@@ -1,6 +1,8 @@
 #include "AppStore.h"
 
 bool AppStore::s_initialized = false;
+bool AppStore::s_isInEdition = false;
+
 AppConfig* AppStore::s_appConfig = nullptr;
 LightControlConfig* AppStore::s_lightControlConfig = nullptr;
 CameraConfig* AppStore::s_cameraConfig = nullptr;
@@ -42,6 +44,16 @@ void AppStore::deleteObject(QObject* o)
 		o->deleteLater();
 		o = nullptr;
 	}
+}
+
+void AppStore::setEditionMode(bool isInEdition)
+{
+	s_isInEdition = isInEdition;
+}
+
+bool AppStore::isInEdition()
+{
+	return s_isInEdition;
 }
 
 AppConfig* AppStore::getAppConfig()

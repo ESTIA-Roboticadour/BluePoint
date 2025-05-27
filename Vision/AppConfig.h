@@ -17,6 +17,7 @@ public:
 	// folder
 
 	QString getConfigFolder() const;
+	QString getAppConfigFolder() const;
 	QString getLightControlConfigFolder() const;
 	QString getCameraConfigFolder() const;
 	QString getRoiConfigFolder() const;
@@ -57,12 +58,12 @@ private:
 	// folder
 
 	StringParameter m_configFolder;
+	StringParameter m_appConfigFolder;
 	StringParameter m_lightControlConfigFolder;
 	StringParameter m_cameraConfigFolder;
 	StringParameter m_roiConfigFolder;
 
 	// path
-
 	StringParameter m_lightControlConfigPath;
 	StringParameter m_cameraConfigPath;
 	StringParameter m_roiConfigPath;

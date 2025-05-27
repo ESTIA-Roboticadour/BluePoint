@@ -17,6 +17,7 @@ private slots:
 	void onModelReleased();
 
 private slots:
+	void onNavigationRequest(NavigationNode* newNode, NavigationNode* currentNode, bool* accept);
 	void onNavigationDone(NavigationNode* node);
 
 private:

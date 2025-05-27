@@ -9,6 +9,7 @@ AppConfig::AppConfig(QObject* parent) :
 	m_folderGroup("Folders", this),
 	m_pathGroup("Config", this),
 	m_configFolder("Config Folder", "Config", this),
+	m_appConfigFolder("App Config Folder", "Config/App", this),
 	m_lightControlConfigFolder("Light Control Folder", "Config/Light Control", this),
 	m_cameraConfigFolder("Camera Config Folder", "Config/Camera", this),
 	m_roiConfigFolder("ROI Config Folder", "Config/ROI", this),
@@ -24,6 +25,7 @@ AppConfig::AppConfig(const AppConfig& config, QObject* parent) :
 	m_folderGroup("Folders", this),
 	m_pathGroup("Config", this),
 	m_configFolder("Config Folder", config.m_configFolder, this),
+	m_appConfigFolder("App Config Folder", config.m_appConfigFolder, this),
 	m_lightControlConfigFolder("Light Control Folder", config.m_lightControlConfigFolder, this),
 	m_cameraConfigFolder("Camera Config Folder", config.m_cameraConfigFolder, this),
 	m_roiConfigFolder("ROI Config Folder", config.m_roiConfigFolder, this),
@@ -37,6 +39,11 @@ AppConfig::AppConfig(const AppConfig& config, QObject* parent) :
 QString AppConfig::getConfigFolder() const
 {
 	return m_configFolder.getValue();
+}
+
+QString AppConfig::getAppConfigFolder() const
+{
+	return m_appConfigFolder.getValue();
 }
 
 QString AppConfig::getLightControlConfigFolder() const

@@ -39,9 +39,6 @@
     <Filter Include="Features\MVCBase">
       <UniqueIdentifier>{91808525-be46-4420-98f3-e55769f08782}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Widgets">
-      <UniqueIdentifier>{498804c7-2d70-4323-b952-e66470393b65}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Services">
       <UniqueIdentifier>{654be253-8ce1-423e-9db4-e6e15572e3a3}</UniqueIdentifier>
     </Filter>
@@ -60,8 +57,17 @@
     <Filter Include="Services\LightControl">
       <UniqueIdentifier>{3ffe0f4c-1d83-4f8d-b576-fae1069ab878}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Widgets\AppConfigurationWidget">
-      <UniqueIdentifier>{89db9d7a-4b62-47f4-a3e6-8dbfa227b4e9}</UniqueIdentifier>
+    <Filter Include="Features\DeviceView">
+      <UniqueIdentifier>{5cafb1a5-f4cb-475c-9919-142c51b36944}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\DeviceView\Views">
+      <UniqueIdentifier>{bc57397d-7896-452a-9234-9b328d77ab2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\DeviceView\Controllers">
+      <UniqueIdentifier>{f31af73a-055d-43c8-9db5-0a5afdf05fa7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\DeviceView\Models">
+      <UniqueIdentifier>{8e812ebd-cb85-4c13-a0a9-705697ac231f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -130,11 +136,23 @@
     <ClCompile Include="BaslerCameraConfig.cpp">
       <Filter>Services\Config</Filter>
     </ClCompile>
-    <ClCompile Include="AppConfigurationWidget.cpp">
-      <Filter>Widgets\AppConfigurationWidget</Filter>
-    </ClCompile>
     <ClCompile Include="AppSetup.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DeviceView.cpp">
+      <Filter>Features\DeviceView\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="DeviceController.cpp">
+      <Filter>Features\DeviceView\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="DeviceModel.cpp">
+      <Filter>Features\DeviceView\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="WidgetControllerBase.cpp">
+      <Filter>Features\MVCBase</Filter>
+    </ClCompile>
+    <ClCompile Include="BaslerCamera.cpp">
+      <Filter>Services\Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -186,6 +204,21 @@
     <QtMoc Include="BaslerCameraConfig.h">
       <Filter>Services\Config</Filter>
     </QtMoc>
+    <QtMoc Include="DeviceView.h">
+      <Filter>Features\DeviceView\Views</Filter>
+    </QtMoc>
+    <QtMoc Include="DeviceController.h">
+      <Filter>Features\DeviceView\Controllers</Filter>
+    </QtMoc>
+    <QtMoc Include="DeviceModel.h">
+      <Filter>Features\DeviceView\Models</Filter>
+    </QtMoc>
+    <QtMoc Include="WidgetControllerBase.h">
+      <Filter>Features\MVCBase</Filter>
+    </QtMoc>
+    <QtMoc Include="BaslerCamera.h">
+      <Filter>Services\Camera</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ViewFactory.h">
@@ -193,9 +226,6 @@
     </ClInclude>
     <ClInclude Include="AppStore.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AppConfigurationWidget.h">
-      <Filter>Widgets\AppConfigurationWidget</Filter>
     </ClInclude>
     <ClInclude Include="AppSetup.h">
       <Filter>Header Files</Filter>

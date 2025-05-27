@@ -20,11 +20,8 @@ public:
 
 	static void deleteAll();
 
-	//static void setAppConfig(AppConfig* appConfig);
-	//static void setLightControlConfig(LightControlConfig* lightControlConfig);
-	//static void setCameraConfig(CameraConfig* cameraConfig);
-	//static void setRoiConfig(RoiConfig* roiConfig);
-	//static void setCamera(Camera* camera);
+	static void setEditionMode(bool isInEdition);
+	static bool isInEdition();
 	
 	static AppConfig* getAppConfig();
 	static LightControlConfig* getLightControlConfig();
@@ -37,6 +34,7 @@ private:
 
 private:
 	static bool s_initialized;
+	static bool s_isInEdition;
 
 	static AppConfig* s_appConfig;
 	static LightControlConfig* s_lightControlConfig;

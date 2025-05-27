@@ -1,0 +1,51 @@
+{
+    "parameters": [
+        {
+            "name": "Folders",
+            "parameters": [
+                {
+                    "name": "Config Folder",
+                    "type": "string",
+                    "value": "Config"
+                },
+                {
+                    "name": "Light Control Folder",
+                    "type": "string",
+                    "value": "Config/Light Control"
+                },
+                {
+                    "name": "Camera Config Folder",
+                    "type": "string",
+                    "value": "Config/Camera"
+                }
+            ],
+            "type": "group"
+        },
+        {
+            "name": "Config",
+            "parameters": [
+                {
+                    "name": "ROI Config Folder",
+                    "type": "string",
+                    "value": "Config/ROI"
+                },
+                {
+                    "name": "Light Control Config Path",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "Light Control Config Path",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "Light Control Config Path",
+                    "type": "string",
+                    "value": ""
+                }
+            ],
+            "type": "group"
+        }
+    ]
+}
