@@ -11,7 +11,7 @@
 #include <memory>
 
 // ---------------------------------------------------------------------
-// Tout ce qui suit est *privé* au fichier (namespace anonyme)
+// Tout ce qui suit est *privÃ©* au fichier (namespace anonyme)
 // ---------------------------------------------------------------------
 namespace {
 
@@ -26,7 +26,7 @@ namespace {
     QVector<MsgEntry> g_messages;
     QString           g_errorMessage;
 
-    std::unique_ptr<AppConfig> g_appConfig;   // RAII, évite fuite mémoire
+    std::unique_ptr<AppConfig> g_appConfig;   // RAII, Ã©vite fuite mÃ©moire
 
     // ---------------------------------------------------------------------
     // Outils internes
@@ -151,7 +151,7 @@ bool AppSetup::setupApp()
         return false;
     }
 
-    // --- Création des dossiers indispensables ---
+    // --- CrÃ©ation des dossiers indispensables ---
     createFolder("Config folder", g_appConfig->getConfigFolder());
     createFolder("Light control config", g_appConfig->getLightControlConfigFolder());
     createFolder("Camera config folder", g_appConfig->getCameraConfigFolder());
@@ -160,7 +160,7 @@ bool AppSetup::setupApp()
     if (!g_errorMessage.isEmpty())
         return false;
 
-    // --- Vérification existence fichiers de config ---
+    // --- VÃ©rification existence fichiers de config ---
     checkFileExists("Light control config", g_appConfig->getLightControlConfigPath());
     checkFileExists("Camera config", g_appConfig->getCameraConfigPath());
     checkFileExists("ROI config", g_appConfig->getRoiConfigPath());

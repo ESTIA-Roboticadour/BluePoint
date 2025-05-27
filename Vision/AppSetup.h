@@ -6,13 +6,13 @@
 class AppSetup
 {
 public:
-    /// Prépare l’application.  Renvoie true si tout est OK.
+    /// PrÃ©pare lâ€™application.  Renvoie true si tout est OK.
     static bool setupApp();
 
-    /// Affiche toutes les infos et warnings emmagasinées pendant setup.
+    /// Affiche toutes les infos et warnings emmagasinÃ©es pendant setup.
     static void shareMessages();
 
-    /// Affiche la boîte de dialogue d’erreur (s’il y a eu échec).
+    /// Affiche la boÃ®te de dialogue dâ€™erreur (sâ€™il y a eu Ã©chec).
     static void showError(QWidget* parent = nullptr);
 
     // Interdire construction / copie

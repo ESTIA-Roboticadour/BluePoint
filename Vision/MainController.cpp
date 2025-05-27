@@ -11,6 +11,7 @@ MainController::MainController(MainModel* model, MainWindow* view, QObject* pare
 	m_rootNode(nullptr),
 	m_deviceNode(nullptr),
 	m_configurationNode(nullptr),
+	m_lightNode(nullptr),
 	m_workspaceNode(nullptr),
 	m_roiNode(nullptr),
 	m_appNode(nullptr)
@@ -38,8 +39,9 @@ void MainController::setupTreeNodes()
 	m_configurationNode = m_rootNode->getChild(1);
 	m_appNode = m_rootNode->getChild(2);
 
-	m_workspaceNode = m_configurationNode->getChild(0);
-	m_roiNode = m_configurationNode->getChild(1);
+	m_lightNode = m_configurationNode->getChild(0);
+	m_workspaceNode = m_configurationNode->getChild(1);
+	m_roiNode = m_configurationNode->getChild(2);
 }
 
 void MainController::setupConnections()
@@ -66,32 +68,34 @@ void MainController::onNavigationDone(NavigationNode* node)
 
 void MainController::updateCentralWidget(NavigationNode* node)
 {
+	qreal opacity = 0.5;
 	if (node == m_configurationNode)
 	{
-		m_view->setBackgroundOpacity(0.5);
 		m_view->setCentralWidget(new QLabel("Configuration"));
 	}
 	else if (node == m_deviceNode)
 	{
-		m_view->setBackgroundOpacity(0.5);
 		m_view->setCentralWidget(new QLabel("Device"));
+	}
+	else if (node == m_lightNode)
+	{
+		m_view->setCentralWidget(new QLabel("Light"));
 	}
 	else if (node == m_workspaceNode)
 	{
-		m_view->setBackgroundOpacity(0.5);
 		m_view->setCentralWidget(new QLabel("Workspace"));
 	}
 	else if (node == m_roiNode)
 	{
-		m_view->setBackgroundOpacity(0.5);
 		m_view->setCentralWidget(new QLabel("ROI"));
 	}
 	else
 		// root
 		// app
 	{
-		m_view->setBackgroundOpacity(1);
-		m_view->clearFilter();
+		opacity = 1.0;
+		//m_view->clearFilter();
 		m_view->clearCentralWidget();
 	}
+	m_view->setBackgroundOpacity(opacity);
 }

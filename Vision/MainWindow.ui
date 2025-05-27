@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>986</width>
-    <height>501</height>
+    <height>591</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -69,6 +69,13 @@
       <property name="filterOpacity">
        <double>0.000000000000000</double>
       </property>
+      <property name="warningColor">
+       <color>
+        <red>255</red>
+        <green>213</green>
+        <blue>0</blue>
+       </color>
+      </property>
       <property name="treeDef" stdset="0">
        <string notr="true">{
     &quot;name&quot;: &quot;Vision&quot;,
@@ -77,11 +84,12 @@
         {
             &quot;name&quot;: &quot;Configuration&quot;,
             &quot;children&quot;: [
+                { &quot;name&quot;: &quot;Light&quot; },
                 { &quot;name&quot;: &quot;Workspace&quot; },
                 { &quot;name&quot;: &quot;ROI&quot; }
             ]
         },
-        { &quot;name&quot;: &quot;Application&quot;, &quot;enabled&quot;: false }
+        { &quot;name&quot;: &quot;Application&quot; }
     ]
 }</string>
       </property>

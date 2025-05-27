@@ -32,6 +32,7 @@ private:
 	NavigationNode* m_rootNode;
 	NavigationNode* m_deviceNode;
 	NavigationNode* m_configurationNode;
+	NavigationNode* m_lightNode;
 	NavigationNode* m_workspaceNode;
 	NavigationNode* m_roiNode;
 	NavigationNode* m_appNode;
