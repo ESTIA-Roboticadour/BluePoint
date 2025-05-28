@@ -52,10 +52,10 @@ private:
 	static T* tryLoadConfig(const QString& configName, const QString& path)
 	{
 		T* out = nullptr;
-		bool fullyLoaded;
 
 		if (checkFileExists(configName, path))
 		{
+			bool fullyLoaded;
 			std::unique_ptr<T> tmp = Config::loadFromFile<T>(path, fullyLoaded);
 			if (tmp)
 			{

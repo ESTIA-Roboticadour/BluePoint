@@ -1,38 +1,55 @@
 #include "AppConfig.h"
+#include "ListParameterBase.h"
 #include <QFile>
+#include <QVariant>
+#include <QPair>
 #include <memory>
-
-const QString AppConfig::BACKUP_FILE_PATH = "Config/Backup.json";
 
 AppConfig::AppConfig(QObject* parent) :
 	Config(parent),
 	m_folderGroup("Folders", this),
-	m_pathGroup("Config", this),
-	m_configFolder("Config Folder", "Config", this),
-	m_appConfigFolder("App Config Folder", "Config/App", this),
-	m_lightControlConfigFolder("Light Control Folder", "Config/Light Control", this),
-	m_cameraConfigFolder("Camera Config Folder", "Config/Camera", this),
-	m_roiConfigFolder("ROI Config Folder", "Config/ROI", this),
-	m_lightControlConfigPath("Light Control Config Path", "", this),
-	m_cameraConfigPath("Light Control Config Path", "", this),
-	m_roiConfigPath("Light Control Config Path", "", this)
+	m_pathGroup("Paths", this),
+	m_configFolder(CONFIG_FOLDER, CONFIG_FOLDER_DEFAULT_VALUE, StringParameter::Kind::DirectoryPath, this),
+	m_appConfigFolder(APP_CONFIG_FOLDER, APP_CONFIG_FOLDER_DEFAULT_VALUE, StringParameter::Kind::DirectoryPath, this),
+	m_lightControlConfigFolder(LIGHT_CONTROL_CONFIG_FOLDER, LIGHT_CONTROL_CONFIG_FOLDER_DEFAULT_VALUE, StringParameter::Kind::DirectoryPath, this),
+	m_cameraConfigFolder(CAMERA_CONFIG_FOLDER, CAMERA_CONFIG_FOLDER_DEFAULT_VALUE, StringParameter::Kind::DirectoryPath, this),
+	m_roiConfigFolder(ROI_CONFIG_FOLDER, ROI_CONFIG_FOLDER_DEFAULT_VALUE, StringParameter::Kind::DirectoryPath, this),
+	m_lightControlConfigPath(LIGHT_CONTROL_CONFIG_PATH, "", StringParameter::Kind::FilePath, this),
+	m_cameraConfigPath(CAMERA_CONFIG_PATH, "", StringParameter::Kind::FilePath, this),
+	m_roiConfigPath(ROI_CONFIG_PATH, "", StringParameter::Kind::FilePath, this),
+	m_camera("Camera", this)
 {
+	m_camera.addItem("Basler", "Basler");
 	addParameters();
 }
 
 AppConfig::AppConfig(const AppConfig& config, QObject* parent) :
 	Config(parent),
 	m_folderGroup("Folders", this),
-	m_pathGroup("Config", this),
-	m_configFolder("Config Folder", config.m_configFolder, this),
-	m_appConfigFolder("App Config Folder", config.m_appConfigFolder, this),
-	m_lightControlConfigFolder("Light Control Folder", config.m_lightControlConfigFolder, this),
-	m_cameraConfigFolder("Camera Config Folder", config.m_cameraConfigFolder, this),
-	m_roiConfigFolder("ROI Config Folder", config.m_roiConfigFolder, this),
-	m_lightControlConfigPath("Light Control Config Path", config.m_lightControlConfigPath, this),
-	m_cameraConfigPath("Light Control Config Path", config.m_cameraConfigPath, this),
-	m_roiConfigPath("Light Control Config Path", config.m_roiConfigPath, this)
+	m_pathGroup("Paths", this),
+	m_configFolder(CONFIG_FOLDER, config.m_configFolder, this),
+	m_appConfigFolder(APP_CONFIG_FOLDER, config.m_appConfigFolder, this),
+	m_lightControlConfigFolder(LIGHT_CONTROL_CONFIG_FOLDER, config.m_lightControlConfigFolder, this),
+	m_cameraConfigFolder(CAMERA_CONFIG_FOLDER, config.m_cameraConfigFolder, this),
+	m_roiConfigFolder(ROI_CONFIG_FOLDER, config.m_roiConfigFolder, this),
+	m_lightControlConfigPath(LIGHT_CONTROL_CONFIG_PATH, config.m_lightControlConfigPath, this),
+	m_cameraConfigPath(CAMERA_CONFIG_PATH, config.m_cameraConfigPath, this),
+	m_roiConfigPath(ROI_CONFIG_PATH, config.m_roiConfigPath, this),
+	m_camera("Camera", this)
 {
+	m_configFolder.setKind(StringParameter::Kind::DirectoryPath);
+	m_appConfigFolder.setKind(StringParameter::Kind::DirectoryPath);
+	m_lightControlConfigFolder.setKind(StringParameter::Kind::DirectoryPath);
+	m_cameraConfigFolder.setKind(StringParameter::Kind::DirectoryPath);
+	m_roiConfigFolder.setKind(StringParameter::Kind::DirectoryPath);
+	m_lightControlConfigPath.setKind(StringParameter::Kind::FilePath);
+	m_cameraConfigPath.setKind(StringParameter::Kind::FilePath);
+	m_roiConfigPath.setKind(StringParameter::Kind::FilePath);
+
+	for (const auto& camera : config.m_camera.items())
+	{
+		m_camera.addItem(camera.first, camera.second.toString());
+	}
 	addParameters();
 }
 
@@ -80,6 +97,7 @@ void AppConfig::setConfigFolder(const QString& folder)
 {
 	m_configFolder.setValue(folder);
 }
+
 void AppConfig::setLightControlConfigFolder(const QString& folder)
 {
 	m_lightControlConfigFolder.setValue(folder);
@@ -131,16 +149,18 @@ void AppConfig::deleteBackupConfig()
 void AppConfig::addParameters()
 {
 	m_folderGroup.addParameter(&m_configFolder);
+	m_folderGroup.addParameter(&m_appConfigFolder);
 	m_folderGroup.addParameter(&m_lightControlConfigFolder);
 	m_folderGroup.addParameter(&m_cameraConfigFolder);
-	
-	m_pathGroup.addParameter(&m_roiConfigFolder);
+	m_folderGroup.addParameter(&m_roiConfigFolder);
+
 	m_pathGroup.addParameter(&m_lightControlConfigPath);
 	m_pathGroup.addParameter(&m_cameraConfigPath);
 	m_pathGroup.addParameter(&m_roiConfigPath);
 
 	addParameter(&m_folderGroup);
 	addParameter(&m_pathGroup);
+	addParameter(&m_camera);
 }
 
 AppConfig* AppConfig::openBackupConfig()
@@ -162,5 +182,113 @@ AppConfig* AppConfig::openBackupConfig()
 
 bool AppConfig::setFromConfig(const Config* src)
 {
-	return true;
+	int numberOfParametersToSet = 9;
+	int numberOfParametersSet = 0;
+
+	if (src)
+	{
+		// Folders
+		if (GroupParameter* group = qobject_cast<GroupParameter*>(src->getParameter("Folders")))
+		{
+			// Config
+			if (StringParameter* folder = qobject_cast<StringParameter*>(group->getParameter(CONFIG_FOLDER)))
+			{
+				m_configFolder.setValue(folder->getValue());
+				numberOfParametersSet++;
+			}
+			else
+			{
+				m_configFolder.setValue(CONFIG_FOLDER_DEFAULT_VALUE);
+			}
+
+			// App Config
+			if (StringParameter* folder = qobject_cast<StringParameter*>(group->getParameter(APP_CONFIG_FOLDER)))
+			{
+				m_appConfigFolder.setValue(folder->getValue());
+				numberOfParametersSet++;
+			}
+			else
+			{
+				m_appConfigFolder.setValue(APP_CONFIG_FOLDER_DEFAULT_VALUE);
+			}
+
+			// Light Control
+			if (StringParameter* folder = qobject_cast<StringParameter*>(group->getParameter(LIGHT_CONTROL_CONFIG_FOLDER)))
+			{
+				m_lightControlConfigFolder.setValue(folder->getValue());
+				numberOfParametersSet++;
+			}
+			else
+			{
+				m_lightControlConfigFolder.setValue(LIGHT_CONTROL_CONFIG_FOLDER_DEFAULT_VALUE);
+			}
+
+			// Camera
+			if (StringParameter* folder = qobject_cast<StringParameter*>(group->getParameter(CAMERA_CONFIG_FOLDER)))
+			{
+				m_cameraConfigFolder.setValue(folder->getValue());
+				numberOfParametersSet++;
+			}
+			else
+			{
+				m_cameraConfigFolder.setValue(CAMERA_CONFIG_FOLDER_DEFAULT_VALUE);
+			}
+
+			// ROI
+			if (StringParameter* folder = qobject_cast<StringParameter*>(group->getParameter(ROI_CONFIG_FOLDER)))
+			{
+				m_roiConfigFolder.setValue(folder->getValue());
+				numberOfParametersSet++;
+			}
+			else
+			{
+				m_roiConfigFolder.setValue(ROI_CONFIG_FOLDER_DEFAULT_VALUE);
+			}
+		}
+		else
+		{
+			m_configFolder.setValue(CONFIG_FOLDER_DEFAULT_VALUE);
+			m_appConfigFolder.setValue(APP_CONFIG_FOLDER_DEFAULT_VALUE);
+			m_lightControlConfigFolder.setValue(LIGHT_CONTROL_CONFIG_FOLDER_DEFAULT_VALUE);
+			m_cameraConfigFolder.setValue(CAMERA_CONFIG_FOLDER_DEFAULT_VALUE);
+			m_roiConfigFolder.setValue(ROI_CONFIG_FOLDER_DEFAULT_VALUE);
+		}
+
+		// Paths
+		if (GroupParameter* group = qobject_cast<GroupParameter*>(src->getParameter("Paths")))
+		{
+			// Light control config
+			if (StringParameter* path = qobject_cast<StringParameter*>(group->getParameter(LIGHT_CONTROL_CONFIG_PATH)))
+			{
+				m_lightControlConfigPath.setValue(path->getValue());
+				numberOfParametersSet++;
+			}
+
+			// Camera config
+			if (StringParameter* path = qobject_cast<StringParameter*>(group->getParameter(CAMERA_CONFIG_PATH)))
+			{
+				m_cameraConfigPath.setValue(path->getValue());
+				numberOfParametersSet++;
+			}
+
+			// ROI config
+			if (StringParameter* path = qobject_cast<StringParameter*>(group->getParameter(ROI_CONFIG_PATH)))
+			{
+				m_roiConfigPath.setValue(path->getValue());
+				numberOfParametersSet++;
+			}
+		}
+
+		// Camera
+		if (ListParameterBase* cameraList = qobject_cast<ListParameterBase*>(src->getParameter("Camera")))
+		{
+			m_camera.clear();
+			for (const auto& item : cameraList->items())
+			{
+				m_camera.addItem(item.first, item.second.toString());
+			}
+			numberOfParametersSet++;
+		}
+	}
+	return numberOfParametersSet == numberOfParametersToSet;
 }

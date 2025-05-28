@@ -2,7 +2,7 @@
 
 LightControlConfig::LightControlConfig(QObject* parent) :
 	Config(parent),
-	m_comPort("COM Port", "", this),
+	m_comPort("COM Port", "", StringParameter::Kind::Plain, this),
 	m_relay("Relay", 1, this)
 {
 	defineBounds();
@@ -11,7 +11,7 @@ LightControlConfig::LightControlConfig(QObject* parent) :
 
 LightControlConfig::LightControlConfig(const QString& comPort, int relay, QObject* parent) :
 	Config(parent),
-	m_comPort("COM Port", comPort, this),
+	m_comPort("COM Port", comPort, StringParameter::Kind::Plain, this),
 	m_relay("Relay", relay, this)
 {
 	defineBounds();
@@ -23,6 +23,7 @@ LightControlConfig::LightControlConfig(const LightControlConfig& config, QObject
 	m_comPort("COM Port", config.m_comPort, this),
 	m_relay("Relay", config.m_relay, this)
 {
+	m_comPort.setKind(StringParameter::Kind::Plain);
 	defineBounds();
 	addParameters();
 }

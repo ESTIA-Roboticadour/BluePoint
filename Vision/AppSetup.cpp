@@ -161,7 +161,6 @@ bool AppSetup::checkFileExists(const QString& logicalName, const QString& filePa
 
 }
 
-
 // ---------------------------------------------------------------------
 // API publique d'AppSetup
 // ---------------------------------------------------------------------
@@ -188,16 +187,19 @@ bool AppSetup::setupApp()
 	if (!g_errorMessage.isEmpty())
 		return false;
 
-	// --- Création des config ---
-	LightControlConfig* lightControlConfig = nullptr;
-	CameraConfig* cameraConfig = nullptr;
-	RoiConfig* roiConfig = nullptr;
+	// --- Vérification existence fichiers de config et création des configs ---
+	LightControlConfig*  lightControlConfig = tryLoadConfig<LightControlConfig>("Light control config", g_appConfig->getLightControlConfigPath());
+	CameraConfig* cameraConfig = tryLoadConfig<CameraConfig>("Camera config", g_appConfig->getCameraConfigPath());
+	RoiConfig* roiConfig = tryLoadConfig<RoiConfig>("ROI config", g_appConfig->getRoiConfigPath());
 
-	// --- Vérification existence fichiers de config ---
-	lightControlConfig = tryLoadConfig<LightControlConfig>("Light control config", g_appConfig->getLightControlConfigPath());
-	cameraConfig = tryLoadConfig<CameraConfig>("Camera config", g_appConfig->getCameraConfigPath());
-	roiConfig = tryLoadConfig<RoiConfig>("ROI config", g_appConfig->getRoiConfigPath());
-
+	AppStore::init(
+		g_appConfig.release(),
+		lightControlConfig,
+		cameraConfig,
+		roiConfig,
+		nullptr//Camera::getInstance()
+	);
+	
 	return true;
 }
 

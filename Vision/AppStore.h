@@ -10,7 +10,7 @@
 class AppStore
 {
 public:
-	void init(
+	static void init(
 		AppConfig* appConfig,
 		LightControlConfig* lightControlConfig,
 		CameraConfig* cameraConfig,

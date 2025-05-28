@@ -1,8 +1,11 @@
 #pragma once
 #include "Config.h"
 #include "StringParameter.h"
+#include "ListParameterBase.h"
+#include "ListParameter.h"
 #include "GroupParameter.h"
 
+#include <QObject>
 #include <QString>
 
 class AppConfig : public Config
@@ -45,7 +48,7 @@ public:
 	static void deleteBackupConfig();
 	static AppConfig* openBackupConfig();
 
-protected:
+private:
 	bool setFromConfig(const Config* src) override;
 
 private:
@@ -68,5 +71,23 @@ private:
 	StringParameter m_cameraConfigPath;
 	StringParameter m_roiConfigPath;
 
-	static const QString BACKUP_FILE_PATH;
+	ListParameter<QString> m_camera;
+
+	static const inline QString CONFIG_FOLDER = "Config Folder";
+	static const inline QString APP_CONFIG_FOLDER = "App Config Folder";
+	static const inline QString LIGHT_CONTROL_CONFIG_FOLDER = "Light Control Config Folder";
+	static const inline QString CAMERA_CONFIG_FOLDER = "Camera Config Folder";
+	static const inline QString ROI_CONFIG_FOLDER = "ROI Config Folder";
+
+	static const inline QString LIGHT_CONTROL_CONFIG_PATH = "Light Control Config Path";
+	static const inline QString CAMERA_CONFIG_PATH = "Camera Config Path";
+	static const inline QString ROI_CONFIG_PATH = "ROI Config Path";
+
+	static const inline QString CONFIG_FOLDER_DEFAULT_VALUE = "Config";
+	static const inline QString APP_CONFIG_FOLDER_DEFAULT_VALUE = "Config/App";
+	static const inline QString LIGHT_CONTROL_CONFIG_FOLDER_DEFAULT_VALUE = "Config/Light Control";
+	static const inline QString CAMERA_CONFIG_FOLDER_DEFAULT_VALUE = "Config/Camera";
+	static const inline QString ROI_CONFIG_FOLDER_DEFAULT_VALUE = "Config/ROI";
+	
+	static const inline QString BACKUP_FILE_PATH = APP_CONFIG_FOLDER_DEFAULT_VALUE + "/backup.json";
 };

@@ -4,48 +4,72 @@
             "name": "Folders",
             "parameters": [
                 {
+                    "kind": 2,
                     "name": "Config Folder",
                     "type": "string",
                     "value": "Config"
                 },
                 {
-                    "name": "Light Control Folder",
+                    "kind": 2,
+                    "name": "App Config Folder",
+                    "type": "string",
+                    "value": "Config/App"
+                },
+                {
+                    "kind": 2,
+                    "name": "Light Control Config Folder",
                     "type": "string",
                     "value": "Config/Light Control"
                 },
                 {
+                    "kind": 2,
                     "name": "Camera Config Folder",
                     "type": "string",
                     "value": "Config/Camera"
+                },
+                {
+                    "kind": 2,
+                    "name": "ROI Config Folder",
+                    "type": "string",
+                    "value": "Config/ROI"
                 }
             ],
             "type": "group"
         },
         {
-            "name": "Config",
+            "name": "Paths",
             "parameters": [
                 {
-                    "name": "ROI Config Folder",
-                    "type": "string",
-                    "value": "Config/ROI"
-                },
-                {
+                    "kind": 1,
                     "name": "Light Control Config Path",
                     "type": "string",
                     "value": ""
                 },
                 {
-                    "name": "Light Control Config Path",
+                    "kind": 1,
+                    "name": "Camera Config Path",
                     "type": "string",
                     "value": ""
                 },
                 {
-                    "name": "Light Control Config Path",
+                    "kind": 1,
+                    "name": "ROI Config Path",
                     "type": "string",
                     "value": ""
                 }
             ],
             "type": "group"
+        },
+        {
+            "index": 0,
+            "keys": [
+                "Basler"
+            ],
+            "name": "Camera",
+            "type": "list",
+            "values": [
+                "Basler"
+            ]
         }
     ]
 }
