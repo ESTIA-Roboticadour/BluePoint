@@ -26,6 +26,7 @@ public:
 	~ParametersView();
 
 	bool isReadOnly() const;
+    void clear();
 
 public slots:
 	void setParameters(const QList<const ParameterBase*>& parameters);
@@ -33,7 +34,6 @@ public slots:
 
 private:
 	static void setBoxLayoutSpacing(QBoxLayout* layout, int spacing, int left, int top, int right, int bottom);
-	void clear();
 	void clearLayout(QLayout* layout);
 	void setParameters(const QList<const ParameterBase*>& parameters, QLayout* layout);
 

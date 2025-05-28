@@ -17,7 +17,8 @@ class PARAMETERS_WIDGETS_API Config : public QObject, public IParametrable
 
 public:
     explicit Config(QObject* parent = nullptr);
-    explicit Config(const QList<ParameterBase*>& parameters, QObject* parent = nullptr);
+    Config(const QList<ParameterBase*>& parameters, QObject* parent = nullptr);
+    Config(const Config& other, QObject* parent);
     Config(const Config& other);
     Config& operator=(const Config& other);
     ~Config() override = default;
@@ -26,7 +27,7 @@ public:
     ParameterBase* getParameter(const QString& name) const override;
     QList<ParameterBase*> getParameters() const override;
 
-    QString getPath() { return m_path; }
+    QString getPath() const { return m_path; }
 
     bool save() const;
     bool save(const QString& path);
@@ -47,17 +48,17 @@ public:
         return nullptr;
     }
 
+    virtual bool setFromConfig(const Config* src) { Q_UNUSED(src); return true; }
+
 public slots:
     void setParameters(const QList<ParameterBase*>& parameters);
-
-protected:
-    virtual bool setFromConfig(const Config* src) { Q_UNUSED(src); return true; }
 
 private slots:
     void onParameterChanged(const ParameterBase* sender);
 
 signals:
     void parameterChanged(const ParameterBase* sender);
+    void pathChanged(const QString& path);
 
 private:
     QList<ParameterBase*> m_parameters;

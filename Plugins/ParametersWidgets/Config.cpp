@@ -22,6 +22,13 @@ Config::Config(const QList<ParameterBase*>& parameters, QObject* parent) :
 {
 }
 
+Config::Config(const Config& other, QObject* parent) :
+    QObject(parent ? parent : other.parent()),
+    m_parameters(other.m_parameters),
+    m_path(other.m_path)
+{
+}
+
 Config::Config(const Config& other) :
     QObject(other.parent()),
     m_parameters(other.m_parameters),
@@ -94,11 +101,21 @@ bool Config::save() const
 
 bool Config::save(const QString& path)
 {
-    if (m_path != path)
+    QFileInfo fi(path);
+    QString absPath = fi.isAbsolute() ?
+                          path :
+                          (QDir::currentPath() + '/' + path);
+
+    if (absPath.isEmpty())
+        return false;
+
+    bool saved = Config::saveToFile(this, absPath);
+    if (saved && m_path != absPath)
     {
-        m_path = path;
+        m_path = absPath;
+        emit pathChanged(absPath);
     }
-    return Config::saveToFile(this, m_path);
+    return saved;
 }
 
 bool Config::saveToFile(const Config* cfg, const QString& userPath)
