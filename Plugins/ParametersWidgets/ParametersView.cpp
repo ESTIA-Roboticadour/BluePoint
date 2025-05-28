@@ -234,8 +234,10 @@ QWidget* ParametersView::createStringParameterWidget(const StringParameter* para
 		stringWidget->setFrom(parameter);
 
 		connect(stringWidget, &StringParameterWidget::valueChanged, parameter, &StringParameter::setValue);
+        connect(stringWidget, &StringParameterWidget::kindChanged, parameter, &StringParameter::setKind);
 
 		connect(parameter, &StringParameter::valueChanged, stringWidget, &StringParameterWidget::setValue);
+        connect(parameter, &StringParameter::kindChanged, stringWidget, &StringParameterWidget::setKind);
 		connect(parameter, &ParameterBase::isEditableChanged, stringWidget, &QWidget::setEnabled);
 
 		widget = stringWidget;

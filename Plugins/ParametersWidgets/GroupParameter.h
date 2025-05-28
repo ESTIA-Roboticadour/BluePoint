@@ -14,7 +14,6 @@
 class PARAMETERS_WIDGETS_API GroupParameter : public ParameterBase
 {
 	Q_OBJECT
-
 public:
     explicit GroupParameter(const QString& name, QObject* parent = nullptr);
     GroupParameter(const GroupParameter& other, QObject* parent = nullptr);
@@ -24,13 +23,18 @@ public:
 	void addParameter(ParameterBase* parameter);
 	void removeParameter(ParameterBase* parameter);
 	void clearParameters();
+
 	QList<const ParameterBase*> getParameters() const;
+    ParameterBase* getParameter(const QString& name) const;
 
     QJsonObject toJson() const override;
     static std::unique_ptr<ParameterBase> fromJson(const QJsonObject& obj, QObject* parent = nullptr);
 
 public slots:
 	void setIsEditable(bool isEditable) override;
+
+private slots:
+    void onChildChanged(const ParameterBase* sender);
 
 private:
 	QList<ParameterBase*> m_parameters;

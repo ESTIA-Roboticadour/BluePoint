@@ -10,7 +10,7 @@
 #include <QVariant>
 
 template <typename T>
-class PARAMETERS_WIDGETS_API ListParameter : public ListParameterBase
+class ListParameter : public ListParameterBase
 {
 public:
     explicit ListParameter(const QString& name, QObject* parent = nullptr) :
@@ -84,7 +84,7 @@ public:
         {
             m_selectedIndex = index;
             emit selectedIndexChanged(m_selectedIndex);
-            emit parameterChanged();
+            emit parameterChanged(this);
         }
     }
 

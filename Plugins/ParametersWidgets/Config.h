@@ -53,6 +53,12 @@ public slots:
 protected:
     virtual bool setFromConfig(const Config* src) { Q_UNUSED(src); return true; }
 
+private slots:
+    void onParameterChanged(const ParameterBase* sender);
+
+signals:
+    void parameterChanged(const ParameterBase* sender);
+
 private:
     QList<ParameterBase*> m_parameters;
     QString m_path;

@@ -49,6 +49,10 @@ void Config::addParameter(ParameterBase* parameter)
             return;
     }
     m_parameters.append(parameter);
+
+    connect(parameter, &ParameterBase::parameterChanged, this, &Config::onParameterChanged);
+    // pour ne pas avoir un disconnect sur un pointeur libéré
+    connect(parameter, &QObject::destroyed, this, [this, parameter]{ m_parameters.removeOne(parameter); });
 }
 
 ParameterBase* Config::getParameter(const QString& name) const
@@ -68,7 +72,19 @@ QList<ParameterBase*> Config::getParameters() const
 
 void Config::setParameters(const QList<ParameterBase*>& parameters)
 {
-    m_parameters = parameters;
+    for (auto& parameter : m_parameters) {
+        disconnect(parameter, &ParameterBase::parameterChanged, this, &Config::onParameterChanged);
+    }
+    m_parameters.clear();
+    for (auto& parameter : parameters)
+    {
+        addParameter(parameter);
+    }
+}
+
+void Config::onParameterChanged(const ParameterBase* sender)
+{
+    emit parameterChanged(sender);
 }
 
 bool Config::save() const

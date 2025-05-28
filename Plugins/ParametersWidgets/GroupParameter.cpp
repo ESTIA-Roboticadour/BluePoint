@@ -59,7 +59,7 @@ void GroupParameter::addParameter(ParameterBase* parameter)
 	if (parameter && !m_parameters.contains(parameter))
 	{
 		m_parameters.append(parameter);
-        connect(parameter, &ParameterBase::parameterChanged, this, &GroupParameter::parameterChanged);
+        connect(parameter, &ParameterBase::parameterChanged, this, &GroupParameter::onChildChanged);
 
         // pour ne pas avoir un disconnect sur un pointeur libéré
         connect(parameter, &QObject::destroyed, this, [this, parameter]{ m_parameters.removeOne(parameter); });
@@ -70,7 +70,7 @@ void GroupParameter::removeParameter(ParameterBase* parameter)
 {
 	if (parameter && m_parameters.contains(parameter))
 	{
-        disconnect(parameter, &ParameterBase::parameterChanged, this, &GroupParameter::parameterChanged);
+        disconnect(parameter, &ParameterBase::parameterChanged, this, &GroupParameter::onChildChanged);
 		m_parameters.removeOne(parameter);
 	}
 }
@@ -78,9 +78,14 @@ void GroupParameter::removeParameter(ParameterBase* parameter)
 void GroupParameter::clearParameters()
 {
     for (auto& parameter : m_parameters) {
-        disconnect(parameter, &ParameterBase::parameterChanged, this, &GroupParameter::parameterChanged);
+        disconnect(parameter, &ParameterBase::parameterChanged, this, &GroupParameter::onChildChanged);
     }
 	m_parameters.clear();
+}
+
+void GroupParameter::onChildChanged(const ParameterBase* sender)
+{
+    emit parameterChanged(sender);
 }
 
 QList<const ParameterBase*> GroupParameter::getParameters() const
@@ -92,6 +97,16 @@ QList<const ParameterBase*> GroupParameter::getParameters() const
 		parameters[i++] = parameter;
 	}
 	return parameters;
+}
+
+ParameterBase* GroupParameter::getParameter(const QString& name) const
+{
+    for (auto& param : m_parameters)
+    {
+        if (param->getName() == name)
+            return param;
+    }
+    return nullptr;
 }
 
 QJsonObject GroupParameter::toJson() const

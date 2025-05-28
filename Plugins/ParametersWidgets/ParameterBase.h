@@ -28,7 +28,7 @@ public slots:
 	void unlock();
 
 signals:
-    void parameterChanged();
+    void parameterChanged(const ParameterBase* sender);
 	void isEditableChanged(bool isLocked);
 
 private:

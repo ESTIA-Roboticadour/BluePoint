@@ -27,10 +27,27 @@ bool ListParameterBase::selectByKey(const QString& key)
     {
         m_selectedIndex = index;
         emit selectedIndexChanged(index);
-        emit parameterChanged();
+        emit parameterChanged(this);
         return true;
     }
     return false;
+}
+
+QList<QPair<QString, QVariant>> ListParameterBase::items() const
+{
+    QList<QPair<QString, QVariant>> out;
+    out.reserve(m_keys.size());
+    for (int i = 0; i < m_keys.size() && i < m_values.size(); ++i)
+        out.append(qMakePair(m_keys[i], m_values[i]));
+    return out;
+}
+
+void ListParameterBase::clear()
+{
+    m_keys.clear();
+    m_values.clear();
+    m_selectedIndex = -1;
+    emit parameterChanged(this);
 }
 
 QJsonObject ListParameterBase::toJson() const
