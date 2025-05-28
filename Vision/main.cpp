@@ -20,11 +20,11 @@ int main(int argc, char* argv[])
 
         // Nettoyage de fin
         AppConfig::deleteBackupConfig();
-        AppStore::deleteAll();
     }
     else
     {
         AppSetup::showError();
     }
+    AppStore::deleteAll();
     return status;
 }

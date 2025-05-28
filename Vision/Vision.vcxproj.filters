@@ -69,6 +69,30 @@
     <Filter Include="Features\DeviceView\Models">
       <UniqueIdentifier>{8e812ebd-cb85-4c13-a0a9-705697ac231f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Services\Factories">
+      <UniqueIdentifier>{5f5d4bcd-a7f0-4f90-9b5a-c74a04212e33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Services\Factories\ViewFactory">
+      <UniqueIdentifier>{8be74ecd-b47f-474a-a26d-602b9660dc92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Services\Factories\CameraFactory">
+      <UniqueIdentifier>{bd3bc2e5-01c1-48cb-90a5-c03742e8adea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BaslerAPI">
+      <UniqueIdentifier>{8189a36a-9075-4e27-a273-3931ef6476ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\ConfigurationView">
+      <UniqueIdentifier>{e74abee2-02f7-40de-8c16-0c55a64ae886}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\ConfigurationView\Controllers">
+      <UniqueIdentifier>{479faf7b-1e99-4917-9b65-0526f08ce5ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\ConfigurationView\Models">
+      <UniqueIdentifier>{d47bdba7-a0db-41a8-bb93-297b8aa308fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\ConfigurationView\Views">
+      <UniqueIdentifier>{203c4011-ba7b-4fe7-9ae6-3860b495d37f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="MainWindow.qrc">
@@ -99,9 +123,6 @@
     </ClCompile>
     <ClCompile Include="WindowControllerBase.cpp">
       <Filter>Features\MVCBase</Filter>
-    </ClCompile>
-    <ClCompile Include="ViewFactory.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AppStore.cpp">
       <Filter>Source Files</Filter>
@@ -153,6 +174,39 @@
     </ClCompile>
     <ClCompile Include="BaslerCamera.cpp">
       <Filter>Services\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewFactory.cpp">
+      <Filter>Services\Factories\ViewFactory</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraFactory.cpp">
+      <Filter>Services\Factories\CameraFactory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BaslerAPI\BaslerCameraCameraParams.cpp">
+      <Filter>BaslerAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BaslerAPI\BaslerCameraChunkDataParams.cpp">
+      <Filter>BaslerAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BaslerAPI\BaslerCameraEventParams.cpp">
+      <Filter>BaslerAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BaslerAPI\BaslerCameraStreamParams.cpp">
+      <Filter>BaslerAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BaslerAPI\BaslerCameraTLParams.cpp">
+      <Filter>BaslerAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigurationView.cpp">
+      <Filter>Features\ConfigurationView\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigurationModel.cpp">
+      <Filter>Features\ConfigurationView\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigurationController.cpp">
+      <Filter>Features\ConfigurationView\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="Helper.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -219,15 +273,66 @@
     <QtMoc Include="BaslerCamera.h">
       <Filter>Services\Camera</Filter>
     </QtMoc>
+    <QtMoc Include="ConfigurationView.h">
+      <Filter>Features\ConfigurationView\Views</Filter>
+    </QtMoc>
+    <QtMoc Include="ConfigurationModel.h">
+      <Filter>Features\ConfigurationView\Models</Filter>
+    </QtMoc>
+    <QtMoc Include="ConfigurationController.h">
+      <Filter>Features\ConfigurationView\Controllers</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ViewFactory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AppStore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AppSetup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewFactory.h">
+      <Filter>Services\Factories\ViewFactory</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraFactory.h">
+      <Filter>Services\Factories\CameraFactory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BaslerAPI\BaslerCamera.h">
+      <Filter>BaslerAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BaslerAPI\BaslerCameraArray.h">
+      <Filter>BaslerAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BaslerAPI\BaslerCameraCameraEventHandler.h">
+      <Filter>BaslerAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BaslerAPI\BaslerCameraCameraParams.h">
+      <Filter>BaslerAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BaslerAPI\BaslerCameraChunkDataParams.h">
+      <Filter>BaslerAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BaslerAPI\BaslerCameraConfigurationEventHandler.h">
+      <Filter>BaslerAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BaslerAPI\BaslerCameraEventParams.h">
+      <Filter>BaslerAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BaslerAPI\BaslerCameraGrabResultData.h">
+      <Filter>BaslerAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BaslerAPI\BaslerCameraGrabResultPtr.h">
+      <Filter>BaslerAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BaslerAPI\BaslerCameraImageEventHandler.h">
+      <Filter>BaslerAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BaslerAPI\BaslerCameraStreamParams.h">
+      <Filter>BaslerAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BaslerAPI\BaslerCameraTLParams.h">
+      <Filter>BaslerAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="Helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

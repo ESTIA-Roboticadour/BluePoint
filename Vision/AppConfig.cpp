@@ -17,9 +17,9 @@ AppConfig::AppConfig(QObject* parent) :
 	m_lightControlConfigPath(LIGHT_CONTROL_CONFIG_PATH, "", StringParameter::Kind::FilePath, this),
 	m_cameraConfigPath(CAMERA_CONFIG_PATH, "", StringParameter::Kind::FilePath, this),
 	m_roiConfigPath(ROI_CONFIG_PATH, "", StringParameter::Kind::FilePath, this),
-	m_camera("Camera", this)
+	m_cameraType("Camera Type", this)
 {
-	m_camera.addItem("Basler", "Basler");
+	m_cameraType.addItem("Basler", "Basler");
 	addParameters();
 }
 
@@ -35,7 +35,7 @@ AppConfig::AppConfig(const AppConfig& config, QObject* parent) :
 	m_lightControlConfigPath(LIGHT_CONTROL_CONFIG_PATH, config.m_lightControlConfigPath, this),
 	m_cameraConfigPath(CAMERA_CONFIG_PATH, config.m_cameraConfigPath, this),
 	m_roiConfigPath(ROI_CONFIG_PATH, config.m_roiConfigPath, this),
-	m_camera("Camera", this)
+	m_cameraType("Camera Type", this)
 {
 	m_configFolder.setKind(StringParameter::Kind::DirectoryPath);
 	m_appConfigFolder.setKind(StringParameter::Kind::DirectoryPath);
@@ -46,9 +46,9 @@ AppConfig::AppConfig(const AppConfig& config, QObject* parent) :
 	m_cameraConfigPath.setKind(StringParameter::Kind::FilePath);
 	m_roiConfigPath.setKind(StringParameter::Kind::FilePath);
 
-	for (const auto& camera : config.m_camera.items())
+	for (const auto& camera : config.m_cameraType.items())
 	{
-		m_camera.addItem(camera.first, camera.second.toString());
+		m_cameraType.addItem(camera.first, camera.second.toString());
 	}
 	addParameters();
 }
@@ -128,6 +128,11 @@ void AppConfig::setRoiConfigPath(const QString& path)
 	m_roiConfigPath.setValue(path);
 }
 
+QString AppConfig::getCameraType() const
+{
+	return m_cameraType.getSelectedValue().toString();
+}
+
 bool AppConfig::backupConfigFound()
 {
 	QFile file(BACKUP_FILE_PATH);
@@ -160,7 +165,7 @@ void AppConfig::addParameters()
 
 	addParameter(&m_folderGroup);
 	addParameter(&m_pathGroup);
-	addParameter(&m_camera);
+	addParameter(&m_cameraType);
 }
 
 AppConfig* AppConfig::openBackupConfig()
@@ -252,12 +257,12 @@ bool AppConfig::setFromConfig(const Config* src)
 		}
 
 		// Camera
-		if (ListParameterBase* cameraList = qobject_cast<ListParameterBase*>(src->getParameter("Camera")))
+		if (ListParameterBase* cameraList = qobject_cast<ListParameterBase*>(src->getParameter("Camera Type")))
 		{
-			m_camera.clear();
+			m_cameraType.clear();
 			for (const auto& item : cameraList->items())
 			{
-				m_camera.addItem(item.first, item.second.toString());
+				m_cameraType.addItem(item.first, item.second.toString());
 			}
 			numberOfParametersSet++;
 		}

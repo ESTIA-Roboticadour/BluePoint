@@ -44,6 +44,10 @@ public:
 	void setCameraConfigPath(const QString& path);
 	void setRoiConfigPath(const QString& path);
 
+	QString getCameraType() const;
+
+	// static
+
 	static bool backupConfigFound();
 	static void deleteBackupConfig();
 	static AppConfig* openBackupConfig();
@@ -71,7 +75,7 @@ private:
 	StringParameter m_cameraConfigPath;
 	StringParameter m_roiConfigPath;
 
-	ListParameter<QString> m_camera;
+	ListParameter<QString> m_cameraType;
 
 	static const inline QString CONFIG_FOLDER = "Config Folder";
 	static const inline QString APP_CONFIG_FOLDER = "App Config Folder";

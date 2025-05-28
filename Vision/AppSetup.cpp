@@ -2,14 +2,16 @@
 #include "AppSetup.h"
 #include "AppStore.h"
 #include "LightControlConfig.h"
-#include "CameraConfig.h"
 #include "RoiConfig.h"
+#include "BaslerCameraConfig.h"
 
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QDebug>
+#include <QSettings>
+#include <QStandardPaths>
 
 QVector<AppSetup::MsgEntry> AppSetup::g_messages;
 QString                     AppSetup::g_errorMessage;
@@ -30,6 +32,44 @@ void AppSetup::addError(const QString& txt, bool critical)
 		g_errorMessage += g_errorMessage.isEmpty() ? txt : ('\n' + txt);
 }
 
+QCommandLineParser* AppSetup::buildParser()
+{
+	QCommandLineParser* parser = new QCommandLineParser();
+	parser->setApplicationDescription("BluePoint");
+	parser->addHelpOption();
+	parser->addPositionalArgument("config", QCoreApplication::translate("main", "Chemin vers le fichier .json de configuration."));
+	parser->process(QCoreApplication::arguments());
+	return parser;
+}
+
+void AppSetup::setupSettings()
+{
+	// On cherche d’abord près de l'exécutable
+	QString iniPath = QCoreApplication::applicationDirPath() + "/config.ini";
+
+	// Ou, à défaut, dans le dossier de conf système
+	//if (!QFileInfo::exists(iniPath)) {
+	//	iniPath = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation) + "/config.ini";
+	//}
+
+	QSettings* ini = new QSettings(iniPath, QSettings::IniFormat);
+	ini->beginGroup("General");
+	if (!ini->contains("AppConfigPath"))
+	{
+		ini->setValue("AppConfigPath", "Config/App/default.json");
+	}
+	ini->endGroup();
+	ini->sync();
+	AppStore::setSettings(ini);
+}
+
+QString AppSetup::getConfigPath(const QCommandLineParser* parser)
+{
+	return !parser->positionalArguments().isEmpty() ?
+		parser->positionalArguments().first() :
+		AppStore::getAppConfigPath();
+}
+
 bool AppSetup::createFolder(const QString& logicalName, const QString& folderPath)
 {
 	if (folderPath.isEmpty())
@@ -38,10 +78,9 @@ bool AppSetup::createFolder(const QString& logicalName, const QString& folderPat
 		return false;
 	}
 
-	QString absolutePath =
-		QDir(folderPath).isRelative()
-		? QDir::current().absoluteFilePath(folderPath)
-		: folderPath;
+	QString absolutePath = QDir(folderPath).isRelative() ?
+		QDir::current().absoluteFilePath(folderPath) :
+		folderPath;
 
 	QDir dir(absolutePath);
 	if (!dir.exists())
@@ -63,13 +102,15 @@ bool AppSetup::createFolder(const QString& logicalName, const QString& folderPat
 AppConfig* AppSetup::createDefaultAppConfig()
 {
 	AppConfig* result = new AppConfig();
-	if (result && result->save(DEFAULT_FILE_PATH))
+	QString path = QDir::currentPath() + '/' + AppStore::getDefaultAppConfigPath();
+
+	if (result && result->save(path))
 	{
-		addInfo("Default config saved at: " + DEFAULT_FILE_PATH);
+		addInfo("Default config saved at: " + AppStore::getDefaultAppConfigPath());
 	}
 	else
 	{
-		addError("Failed to save default config at: " + DEFAULT_FILE_PATH);
+		addError("Failed to save default config at: " + AppStore::getDefaultAppConfigPath());
 		if (result)
 			delete result;
 		result = nullptr;
@@ -77,10 +118,8 @@ AppConfig* AppSetup::createDefaultAppConfig()
 	return result;
 }
 
-AppConfig* AppSetup::createAppConfig(const QString& pathFromCli)
+AppConfig* AppSetup::createAppConfig(const QString& filepath)
 {
-	QString filePath = pathFromCli.isEmpty() ? DEFAULT_FILE_PATH : pathFromCli;
-
 	AppConfig* result = nullptr;
 
 	if (AppConfig::backupConfigFound() &&
@@ -92,51 +131,93 @@ AppConfig* AppSetup::createAppConfig(const QString& pathFromCli)
 		== QMessageBox::Yes)
 	{
 		result = AppConfig::openBackupConfig();
+		if (result)
+			return result;
+		else
+		{
+			QMessageBox::warning(nullptr, "Backup config", "Backup file not loaded.");
+			addWarning("Backup file not loaded.");
+		}
+	}
+	AppConfig::deleteBackupConfig();
+
+	if (filepath.isEmpty())
+	{
+		addInfo("Config file not specified. To specify a config file, use: Vision.exe [config-file]    or edit config.ini file.");
+		result = loadAppConfigFromNothing();
+	}
+	if (QFile::exists(filepath))
+	{
+		result = loadAppConfigFromFile(filepath);
+		if (!result)
+		{
+			addWarning(filepath + " not loaded.");
+			result = loadAppConfigFromNothing();
+		}
 	}
 	else
 	{
-		AppConfig::deleteBackupConfig();
+		addWarning(filepath + " not found.");
+		result = loadAppConfigFromNothing();
+	}
+	return result;
+}
 
-		if (pathFromCli.isEmpty())
+AppConfig* AppSetup::loadAppConfigFromNothing()
+{
+	AppConfig* result = nullptr;
+	QString path = QDir::currentPath() + '/' + AppStore::getDefaultAppConfigPath();
+	if (QFile::exists(path))
+	{
+		if (QMessageBox::question(nullptr, "Config file", "Config file is not specified, or not found or couldn't be loaded.\n" +
+			path + " found.\nDo you want to use it?")
+			== QMessageBox::Yes)
 		{
-			addInfo("Config file not specified.");
-			if (QFile::exists(DEFAULT_FILE_PATH))
-			{
-				addInfo("Using default config file: " + DEFAULT_FILE_PATH);
-				addInfo("To specify a config file: Vision.exe [config-file]");
-
-				// config is opened in next block with filePath
-			}
-			else
-			{
-				addInfo("No default config file found. Creating a new one.");
-				result = createDefaultAppConfig();
-			}
+			result = loadAppConfigFromDefault();
 		}
-
-		if (!result && !filePath.isEmpty())
+	}
+	else
+	{
+		if (QMessageBox::question(nullptr, "Config file", 
+			"Config file is not specified, or not found or couldn't be loaded.\nDefault config file not found.\nDo you want to create a new config?")
+			== QMessageBox::Yes)
 		{
-			bool fullyLoaded = false;
-			std::unique_ptr<AppConfig> tmp = AppConfig::loadFromFile<AppConfig>(filePath, fullyLoaded);
-
-			if (tmp)
-				result = tmp.release();
-
-			if (!result &&
-				QMessageBox::question(nullptr,
-					"Config",
-					"Unable to load the config: " + filePath +
-					".\nDo you want to create a default "
-					"config?")
-				== QMessageBox::Yes)
-			{
-				result = createDefaultAppConfig();
-			}
+			result = createDefaultAppConfig();
 		}
 	}
 	return result;
 }
 
+AppConfig* AppSetup::loadAppConfigFromDefault()
+{
+	AppConfig* result = loadAppConfigFromFile(AppStore::getDefaultAppConfigPath());
+
+	if (!result &&
+		QMessageBox::question(nullptr,
+			"Config",
+			"Unable to load the config: " + AppStore::getDefaultAppConfigPath() +
+			".\nDo you want to create a default "
+			"config?")
+		== QMessageBox::Yes)
+	{
+		result = createDefaultAppConfig();
+	}
+	return result;
+}
+
+AppConfig* AppSetup::loadAppConfigFromFile(const QString& filepath)
+{
+	AppConfig* result = nullptr;
+	addInfo("Opening: " + filepath);
+
+	bool fullyLoaded = false;
+	std::unique_ptr<AppConfig> tmp = AppConfig::loadFromFile<AppConfig>(filepath, fullyLoaded);
+
+	if (tmp)
+		result = tmp.release();
+
+	return result;
+}
 
 bool AppSetup::checkFileExists(const QString& logicalName, const QString& filePath)
 {
@@ -161,16 +242,34 @@ bool AppSetup::checkFileExists(const QString& logicalName, const QString& filePa
 
 }
 
+CameraConfig* AppSetup::tryLoadCameraConfig(const QString& camera, const QString& filePath)
+{
+	CameraConfig* config = nullptr;
+	if (camera == "Basler")
+	{
+		BaslerCameraConfig* baslerConfig = tryLoadConfig<BaslerCameraConfig>("Basler camera config", filePath);
+		if (baslerConfig)
+			config = baslerConfig;
+	}
+	else
+	{
+		addError("Unknown camera type: " + camera + ". No camera set.");
+	}
+	return config;
+}
+
 // ---------------------------------------------------------------------
 // API publique d'AppSetup
 // ---------------------------------------------------------------------
 bool AppSetup::setupApp()
 {
+	QCommandLineParser* parser = buildParser();
+	setupSettings();
 	LogDispatcher::setLogFile("Vision.log");
 
-	const QStringList args = QCoreApplication::arguments();
+	g_appConfig.reset(createAppConfig(getConfigPath(parser)));
+	delete parser;
 
-	g_appConfig.reset(createAppConfig(args.size() > 1 ? args[1] : QString()));
 	if (!g_appConfig)
 	{
 		g_errorMessage = "Failed to create AppConfig.";
@@ -188,18 +287,17 @@ bool AppSetup::setupApp()
 		return false;
 
 	// --- Vérification existence fichiers de config et création des configs ---
-	LightControlConfig*  lightControlConfig = tryLoadConfig<LightControlConfig>("Light control config", g_appConfig->getLightControlConfigPath());
-	CameraConfig* cameraConfig = tryLoadConfig<CameraConfig>("Camera config", g_appConfig->getCameraConfigPath());
+	LightControlConfig* lightControlConfig = tryLoadConfig<LightControlConfig>("Light control config", g_appConfig->getLightControlConfigPath());
+	CameraConfig* cameraConfig = tryLoadCameraConfig(g_appConfig->getCameraType(), g_appConfig->getCameraConfigPath());
 	RoiConfig* roiConfig = tryLoadConfig<RoiConfig>("ROI config", g_appConfig->getRoiConfigPath());
 
 	AppStore::init(
 		g_appConfig.release(),
 		lightControlConfig,
 		cameraConfig,
-		roiConfig,
-		nullptr//Camera::getInstance()
+		roiConfig
 	);
-	
+
 	return true;
 }
 

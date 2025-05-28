@@ -1,6 +1,7 @@
 #pragma once
 #include "ImageProvider.h"
 #include "ImageTransformer.h"
+#include "CameraConfig.h"
 
 #include <QObject>
 #include <QList>
@@ -11,6 +12,9 @@ class Camera : public ImageProvider
 public :
 	explicit Camera(QObject* parent = nullptr);
 	~Camera() = default;
+
+	CameraConfig* getConfig() const;
+	void setConfig(CameraConfig* config);
 
 	virtual bool isConnected() const = 0;
 	virtual bool isOpened() const = 0;
@@ -30,11 +34,17 @@ protected:
 
 signals:
 	void transformError(ImageTransformer* transformer, const int index, const QString& message);
-	void opened();
-	void closed();
 	void connected();
 	void disconnected();
+	void opened();
+	void closed();
+	void failedToConnect(const QString& message);
+	void failedToDisconnect(const QString& message);
+	void failedToOpen(const QString& message);
+	void failedToClose(const QString& message);
+	void errorThrown(const QString& error, const QString& message);
 
 private:
 	QList<ImageTransformer*> m_transformers;
+	CameraConfig* m_config;
 };

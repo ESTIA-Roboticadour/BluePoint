@@ -7,8 +7,8 @@ BaslerCamera::BaslerCamera(QObject* parent) :
 
 BaslerCamera::~BaslerCamera()
 {
-	if (isOpened())
-		close();
+	if (isConnected())
+		disconnect();
 }
 
 bool BaslerCamera::isConnected() const
@@ -23,7 +23,8 @@ bool BaslerCamera::isOpened() const
 
 void BaslerCamera::connect()
 {
-	emit connected();
+	emit failedToConnect("Not implemented");
+	//emit connected();
 }
 
 void BaslerCamera::disconnect()
@@ -33,7 +34,8 @@ void BaslerCamera::disconnect()
 
 void BaslerCamera::open()
 {
-	emit opened();
+	emit failedToOpen("Not implemented");
+	//emit opened();
 }
 
 void BaslerCamera::close()

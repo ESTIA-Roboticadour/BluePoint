@@ -1,16 +1,17 @@
 #pragma once
 
 #include "AppConfig.h"
+#include "CameraConfig.h"
 
 #include <QString>
 #include <QWidget>
+#include <QCommandLineParser>
 #include <memory>
 #include <type_traits>
 
 class AppSetup
 {
 private:
-	static const inline QString DEFAULT_FILE_PATH = "Config/App/app_config.json";
 
 	enum class MsgSeverity { Info, Warning, Error };
 	struct MsgEntry
@@ -42,10 +43,19 @@ private:
 	static inline void addWarning(const QString& txt);
 	static inline void addError(const QString& txt, bool critical = true);
 
+	static QCommandLineParser* buildParser();
+	static void setupSettings();
+
+	static inline QString getConfigPath(const QCommandLineParser* parser);
+
 	static bool createFolder(const QString& logicalName, const QString& folderPath);
 	static AppConfig* createDefaultAppConfig();
 
-	static AppConfig* createAppConfig(const QString& pathFromCli);
+	static AppConfig* createAppConfig(const QString& filepath);
+	static AppConfig* loadAppConfigFromNothing();
+	static AppConfig* loadAppConfigFromDefault();
+	static AppConfig* loadAppConfigFromFile(const QString& filepath);
+
 	static bool checkFileExists(const QString& logicalName, const QString& filePath);
 
 	template<typename T = Config, std::enable_if_t<std::is_base_of_v<Config, T>, int> = 0>
@@ -81,6 +91,8 @@ private:
 		}
 		return out;
 	}
+
+	static CameraConfig* tryLoadCameraConfig(const QString& camera, const QString& filePath);
 
 private:
 	static QVector<MsgEntry> g_messages;

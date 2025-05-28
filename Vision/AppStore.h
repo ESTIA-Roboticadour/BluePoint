@@ -3,9 +3,9 @@
 #include "RoiConfig.h"
 #include "LightControlConfig.h"
 #include "CameraConfig.h"
-#include "Camera.h"
 
 #include <QObject>
+#include <QSettings>
 
 class AppStore
 {
@@ -14,32 +14,39 @@ public:
 		AppConfig* appConfig,
 		LightControlConfig* lightControlConfig,
 		CameraConfig* cameraConfig,
-		RoiConfig* roiConfig,
-		Camera* camera
+		RoiConfig* roiConfig
 	);
 
 	static void deleteAll();
-
-	static void setEditionMode(bool isInEdition);
-	static bool isInEdition();
 	
+	static void setSettings(QSettings* settings);
+	static QSettings* getSettings();
+
+	static void setAppConfigPath(const QString& path);
+	static QString getAppConfigPath();
+	static QString getDefaultAppConfigPath();
+
+	static void setIsInEdition(bool isInEdition);
+	static bool isInEdition();
+
 	static AppConfig* getAppConfig();
 	static LightControlConfig* getLightControlConfig();
 	static CameraConfig* getCameraConfig();
 	static RoiConfig* getRoiConfig();
-	static Camera* getCamera();
 
 private:
-	static void deleteObject(QObject* o);
+	static inline void deleteObject(QObject* o);
 
 private:
+	static const inline QString DEFAULT_FILE_PATH = "Config/App/default.json";
+
 	static bool s_initialized;
 	static bool s_isInEdition;
+
+	static QSettings* s_settings;
 
 	static AppConfig* s_appConfig;
 	static LightControlConfig* s_lightControlConfig;
 	static CameraConfig* s_cameraConfig;
 	static RoiConfig* s_roiConfig;
-	static Camera* s_camera;
 };
-

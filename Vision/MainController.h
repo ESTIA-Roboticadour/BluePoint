@@ -4,6 +4,7 @@
 #include "MainWindow.h"
 #include "NavigationTree.h"
 #include "NavigationNode.h"
+#include "ParameterBase.h"
 
 class MainController : public WindowControllerBase
 {
@@ -19,6 +20,12 @@ private slots:
 private slots:
 	void onNavigationRequest(NavigationNode* newNode, NavigationNode* currentNode, bool* accept);
 	void onNavigationDone(NavigationNode* node);
+
+	void appConfigChanged(const ParameterBase* sender);
+	void appConfigPathChanged(const QString& path);
+	void lightControlConfigPathChanged(const QString& path);
+	void cameraConfigPathChanged(const QString& path);
+	void roiConfigPathChanged(const QString& path);
 
 private:
 	void setupTreeNodes();

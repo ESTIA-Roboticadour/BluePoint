@@ -18,7 +18,7 @@ void MainModel::release()
 	// if camera open
 	// close cam, wait signal to call ModelBase::release()
 	// else
-	 AppStore::getCamera();
+	//AppStore::getCamera();
 
 	ModelBase::release();
 }

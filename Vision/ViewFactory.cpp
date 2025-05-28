@@ -7,6 +7,9 @@
 #include "DeviceModel.h"
 #include "DeviceController.h"
 
+#include "ConfigurationModel.h"
+#include "ConfigurationController.h"
+
 MainWindow* ViewFactory::createMainWindow()
 {
 	MainWindow* mainWindow = new MainWindow();
@@ -15,10 +18,19 @@ MainWindow* ViewFactory::createMainWindow()
 	return mainWindow;
 }
 
-DeviceView* ViewFactory::createDeviceView(CameraConfig* cameraConfig, LightControlConfig* lightConfig, Camera* camera, QWidget* parentView)
+DeviceView* ViewFactory::createDeviceView(const QString& cameraType, CameraConfig* cameraConfig, LightControlConfig* lightConfig, QWidget* parent)
 {
-	DeviceView* view = new DeviceView(parentView);
-	DeviceModel* model = new DeviceModel(cameraConfig, lightConfig, camera);
+	DeviceView* view = new DeviceView(parent);
+	DeviceModel* model = new DeviceModel(cameraType, cameraConfig, lightConfig);
 	DeviceController* controller = new DeviceController(model, view);
+	return view;
+}
+
+ConfigurationView* ViewFactory::createConfigurationView(const QString& title, Config* config, QWidget* parent)
+{
+	ConfigurationView* view = new ConfigurationView(title, parent);
+	view->setConfig(config);
+	ConfigurationModel* model = new ConfigurationModel(config);
+	ConfigurationController* controller = new ConfigurationController(model, view);
 	return view;
 }

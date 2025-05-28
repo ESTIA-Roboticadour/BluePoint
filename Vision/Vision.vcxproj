@@ -118,6 +118,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\BaslerAPI\BaslerCameraCameraParams.cpp" />
+    <ClCompile Include="..\BaslerAPI\BaslerCameraChunkDataParams.cpp" />
+    <ClCompile Include="..\BaslerAPI\BaslerCameraEventParams.cpp" />
+    <ClCompile Include="..\BaslerAPI\BaslerCameraStreamParams.cpp" />
+    <ClCompile Include="..\BaslerAPI\BaslerCameraTLParams.cpp" />
     <ClCompile Include="AppConfig.cpp" />
     <ClCompile Include="AppSetup.cpp" />
     <ClCompile Include="AppStore.cpp" />
@@ -125,9 +130,14 @@
     <ClCompile Include="BaslerCameraConfig.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraConfig.cpp" />
+    <ClCompile Include="CameraFactory.cpp" />
+    <ClCompile Include="ConfigurationController.cpp" />
+    <ClCompile Include="ConfigurationModel.cpp" />
+    <ClCompile Include="ConfigurationView.cpp" />
     <ClCompile Include="DeviceController.cpp" />
     <ClCompile Include="DeviceModel.cpp" />
     <ClCompile Include="DeviceView.cpp" />
+    <ClCompile Include="Helper.cpp" />
     <ClCompile Include="ImageProvider.cpp" />
     <ClCompile Include="ImageTransformer.cpp" />
     <ClCompile Include="LightControl.cpp" />
@@ -163,6 +173,18 @@
   <ItemGroup>
     <QtMoc Include="WidgetControllerBase.h" />
     <QtMoc Include="AppConfig.h" />
+    <ClInclude Include="..\BaslerAPI\BaslerCamera.h" />
+    <ClInclude Include="..\BaslerAPI\BaslerCameraArray.h" />
+    <ClInclude Include="..\BaslerAPI\BaslerCameraCameraEventHandler.h" />
+    <ClInclude Include="..\BaslerAPI\BaslerCameraCameraParams.h" />
+    <ClInclude Include="..\BaslerAPI\BaslerCameraChunkDataParams.h" />
+    <ClInclude Include="..\BaslerAPI\BaslerCameraConfigurationEventHandler.h" />
+    <ClInclude Include="..\BaslerAPI\BaslerCameraEventParams.h" />
+    <ClInclude Include="..\BaslerAPI\BaslerCameraGrabResultData.h" />
+    <ClInclude Include="..\BaslerAPI\BaslerCameraGrabResultPtr.h" />
+    <ClInclude Include="..\BaslerAPI\BaslerCameraImageEventHandler.h" />
+    <ClInclude Include="..\BaslerAPI\BaslerCameraStreamParams.h" />
+    <ClInclude Include="..\BaslerAPI\BaslerCameraTLParams.h" />
     <ClInclude Include="AppSetup.h" />
     <ClInclude Include="AppStore.h" />
     <QtMoc Include="ImageProvider.h" />
@@ -178,6 +200,11 @@
     <QtMoc Include="DeviceController.h" />
     <QtMoc Include="DeviceModel.h" />
     <QtMoc Include="BaslerCamera.h" />
+    <ClInclude Include="CameraFactory.h" />
+    <QtMoc Include="ConfigurationView.h" />
+    <QtMoc Include="ConfigurationController.h" />
+    <QtMoc Include="ConfigurationModel.h" />
+    <ClInclude Include="Helper.h" />
     <ClInclude Include="ViewFactory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

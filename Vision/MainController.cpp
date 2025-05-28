@@ -6,7 +6,6 @@
 #include "AppConfig.h"
 #include "CameraConfig.h"
 #include "LightControlConfig.h"
-#include "Camera.h"
 
 #include <QLabel>
 #include <QMessageBox>
@@ -58,6 +57,19 @@ void MainController::setupConnections()
 
 	connect(m_tree, &NavigationTree::navigationRequest, this, &MainController::onNavigationRequest);
 	connect(m_tree, &NavigationTree::currentNodeChanged, this, &MainController::onNavigationDone);
+
+	AppConfig* appConfig = AppStore::getAppConfig();
+	connect(appConfig, &Config::pathChanged, this, &MainController::appConfigPathChanged);
+	connect(appConfig, &Config::parameterChanged, this, &MainController::appConfigChanged);
+
+	if (LightControlConfig* lightControlConfig = AppStore::getLightControlConfig())
+		connect(lightControlConfig, &Config::pathChanged, this, &MainController::lightControlConfigPathChanged);
+
+	if (CameraConfig* cameraConfig = AppStore::getCameraConfig())
+		connect(cameraConfig, &Config::pathChanged, this, &MainController::cameraConfigPathChanged);
+
+	if (RoiConfig* roiConfig = AppStore::getRoiConfig())
+		connect(roiConfig, &Config::pathChanged, this, &MainController::roiConfigPathChanged);
 }
 
 void MainController::onViewCloseRequested()
@@ -85,6 +97,31 @@ void MainController::onNavigationDone(NavigationNode* node)
 	updateCentralWidget(node);
 }
 
+void MainController::appConfigChanged(const ParameterBase* sender)
+{
+	bool saved = AppStore::getAppConfig()->save();
+}
+
+void MainController::appConfigPathChanged(const QString& path)
+{
+	AppStore::setAppConfigPath(path);
+}
+
+void MainController::lightControlConfigPathChanged(const QString& path)
+{
+	AppStore::getAppConfig()->setLightControlConfigPath(path);
+}
+
+void MainController::cameraConfigPathChanged(const QString& path)
+{
+	AppStore::getAppConfig()->setCameraConfigPath(path);
+}
+
+void MainController::roiConfigPathChanged(const QString& path)
+{
+	AppStore::getAppConfig()->setRoiConfigPath(path);
+}
+
 void MainController::updateCentralWidget(NavigationNode* node)
 {
 	qreal opacity = 0.5;
@@ -93,26 +130,24 @@ void MainController::updateCentralWidget(NavigationNode* node)
 		AppConfig* config = AppStore::getAppConfig();
 		CameraConfig* cameraConfig = AppStore::getCameraConfig();
 		LightControlConfig* lightConfig = AppStore::getLightControlConfig();
-		Camera* camera = AppStore::getCamera();
 
-		auto* view = ViewFactory::createDeviceView(cameraConfig, lightConfig, camera, m_view);
-		m_view->setCentralWidget(view);
+		m_view->setCentralWidget(ViewFactory::createDeviceView(config->getCameraType(), cameraConfig, lightConfig, m_view));
 	}
 	else if (node == m_configurationNode)
 	{
-		m_view->setCentralWidget(new QLabel("Configuration"));
+		m_view->setCentralWidget(ViewFactory::createConfigurationView("Configuration", AppStore::getAppConfig(), m_view));
 	}
 	else if (node == m_lightNode)
 	{
-		m_view->setCentralWidget(new QLabel("Light"));
+		m_view->setCentralWidget(ViewFactory::createConfigurationView("Light configuratoin", AppStore::getLightControlConfig(), m_view));
 	}
 	else if (node == m_workspaceNode)
 	{
-		m_view->setCentralWidget(new QLabel("Workspace"));
+		m_view->setCentralWidget(ViewFactory::createConfigurationView("Camera workspace configuratoin", AppStore::getCameraConfig(), m_view));
 	}
 	else if (node == m_roiNode)
 	{
-		m_view->setCentralWidget(new QLabel("ROI"));
+		m_view->setCentralWidget(ViewFactory::createConfigurationView("ROI configuratoin", AppStore::getRoiConfig(), m_view));
 	}
 	else
 		// root

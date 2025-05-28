@@ -35,7 +35,9 @@ void DeviceView::buildUi()
 
     // title
     auto* title = new QLabel(tr("Device"), content);
-    QFont f = title->font(); f.setPointSizeF(f.pointSizeF() * 1.6); f.setBold(true);
+    QFont f = title->font();
+    f.setPointSizeF(f.pointSizeF() * 1.6);
+    f.setBold(true);
     title->setFont(f);
     vMain->addWidget(title);
 
@@ -135,6 +137,6 @@ void DeviceView::setCameraConfig(const CameraConfig* cameraConfig)
     }
     else
     {
-		m_parametersView->setParameters(QList<const ParameterBase*>());
+        m_parametersView->setParameters(QList<const ParameterBase*>());
     }
 }

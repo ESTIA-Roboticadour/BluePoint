@@ -3,8 +3,26 @@
 #include <exception>
 
 Camera::Camera(QObject* parent) :
-	ImageProvider(parent)
+	ImageProvider(parent),
+	m_config(nullptr),
+    m_transformers()
 {
+}
+
+CameraConfig* Camera::getConfig() const
+{
+    return m_config;
+}
+
+void Camera::setConfig(CameraConfig* config)
+{
+	if (!config || m_config == config)
+		return;
+
+	//if (m_config)
+	//	delete m_config;
+
+	m_config = config;
 }
 
 void Camera::addTransformer(ImageTransformer* t)
