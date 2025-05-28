@@ -196,20 +196,12 @@ bool AppConfig::setFromConfig(const Config* src)
 				m_configFolder.setValue(folder->getValue());
 				numberOfParametersSet++;
 			}
-			else
-			{
-				m_configFolder.setValue(CONFIG_FOLDER_DEFAULT_VALUE);
-			}
 
 			// App Config
 			if (StringParameter* folder = qobject_cast<StringParameter*>(group->getParameter(APP_CONFIG_FOLDER)))
 			{
 				m_appConfigFolder.setValue(folder->getValue());
 				numberOfParametersSet++;
-			}
-			else
-			{
-				m_appConfigFolder.setValue(APP_CONFIG_FOLDER_DEFAULT_VALUE);
 			}
 
 			// Light Control
@@ -218,20 +210,12 @@ bool AppConfig::setFromConfig(const Config* src)
 				m_lightControlConfigFolder.setValue(folder->getValue());
 				numberOfParametersSet++;
 			}
-			else
-			{
-				m_lightControlConfigFolder.setValue(LIGHT_CONTROL_CONFIG_FOLDER_DEFAULT_VALUE);
-			}
 
 			// Camera
 			if (StringParameter* folder = qobject_cast<StringParameter*>(group->getParameter(CAMERA_CONFIG_FOLDER)))
 			{
 				m_cameraConfigFolder.setValue(folder->getValue());
 				numberOfParametersSet++;
-			}
-			else
-			{
-				m_cameraConfigFolder.setValue(CAMERA_CONFIG_FOLDER_DEFAULT_VALUE);
 			}
 
 			// ROI
@@ -240,18 +224,6 @@ bool AppConfig::setFromConfig(const Config* src)
 				m_roiConfigFolder.setValue(folder->getValue());
 				numberOfParametersSet++;
 			}
-			else
-			{
-				m_roiConfigFolder.setValue(ROI_CONFIG_FOLDER_DEFAULT_VALUE);
-			}
-		}
-		else
-		{
-			m_configFolder.setValue(CONFIG_FOLDER_DEFAULT_VALUE);
-			m_appConfigFolder.setValue(APP_CONFIG_FOLDER_DEFAULT_VALUE);
-			m_lightControlConfigFolder.setValue(LIGHT_CONTROL_CONFIG_FOLDER_DEFAULT_VALUE);
-			m_cameraConfigFolder.setValue(CAMERA_CONFIG_FOLDER_DEFAULT_VALUE);
-			m_roiConfigFolder.setValue(ROI_CONFIG_FOLDER_DEFAULT_VALUE);
 		}
 
 		// Paths

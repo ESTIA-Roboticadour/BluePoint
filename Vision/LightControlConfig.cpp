@@ -32,6 +32,7 @@ void LightControlConfig::defineBounds()
 {
 	m_relay.setMinimum(1);
 	m_relay.setMaximum(4);
+	m_relay.setIncrement(1);
 }
 
 void LightControlConfig::addParameters()
@@ -58,4 +59,26 @@ void LightControlConfig::setComPort(const QString& comPort)
 void LightControlConfig::setRelay(const int relay)
 {
 	m_relay.setValue(relay);
+}
+
+bool LightControlConfig::setFromConfig(const Config* src)
+{
+	int numberOfParametersToSet = 2;
+	int numberOfParametersSet = 0;
+
+	if (src)
+	{
+		if (StringParameter* com = qobject_cast<StringParameter*>(src->getParameter("COM Port")))
+		{
+			m_comPort.setValue(com->getValue());
+			numberOfParametersSet++;
+		}
+
+		if (NumericalParameter* relay = qobject_cast<NumericalParameter*>(src->getParameter("Relay")))
+		{
+			m_relay.setValue(relay->getValue());
+			numberOfParametersSet++;
+		}
+	}
+	return numberOfParametersSet == numberOfParametersToSet;
 }

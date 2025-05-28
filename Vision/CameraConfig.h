@@ -20,6 +20,9 @@ public:
 	void setHeight(const int height);
 	void setFps(const int fps);
 
+protected:
+	bool setFromConfig(const Config* src) override;
+
 private:
 	void defineBounds();
 	void addParameters();

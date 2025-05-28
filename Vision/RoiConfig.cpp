@@ -41,6 +41,12 @@ RoiConfig::RoiConfig(const RoiConfig& config, QObject* parent) :
 
 void RoiConfig::defineBounds()
 {
+	m_x.setMinimum(0);
+	m_x.setMinimum(8192);
+
+	m_y.setMinimum(0);
+	m_y.setMinimum(8192);
+
 	m_width.setMinimum(1);
 	m_width.setMaximum(8192);
 
@@ -119,4 +125,35 @@ void RoiConfig::setRoi(const int x, const int y, const int width, const int heig
 	m_y.setValue(y);
 	m_width.setValue(width);
 	m_height.setValue(height);
+}
+
+bool RoiConfig::setFromConfig(const Config* src)
+{
+	int numberOfParametersToSet = 4;
+	int numberOfParametersSet = 0;
+
+	if (src)
+	{
+		if (NumericalParameter* x = qobject_cast<NumericalParameter*>(src->getParameter("X")))
+		{
+			m_x.setValue(x->getValue());
+			numberOfParametersSet++;
+		}
+		if (NumericalParameter* y = qobject_cast<NumericalParameter*>(src->getParameter("Y")))
+		{
+			m_y.setValue(y->getValue());
+			numberOfParametersSet++;
+		}
+		if (NumericalParameter* w = qobject_cast<NumericalParameter*>(src->getParameter("Width")))
+		{
+			m_width.setValue(w->getValue());
+			numberOfParametersSet++;
+		}
+		if (NumericalParameter* h = qobject_cast<NumericalParameter*>(src->getParameter("Height")))
+		{
+			m_height.setValue(h->getValue());
+			numberOfParametersSet++;
+		}
+	}
+	return numberOfParametersSet == numberOfParametersToSet;
 }

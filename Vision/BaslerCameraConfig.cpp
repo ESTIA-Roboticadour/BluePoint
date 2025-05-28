@@ -23,3 +23,8 @@ void BaslerCameraConfig::defineBounds()
 void BaslerCameraConfig::addParameters()
 {
 }
+
+bool BaslerCameraConfig::setFromConfig(const Config* src)
+{
+	return CameraConfig::setFromConfig(src);
+}

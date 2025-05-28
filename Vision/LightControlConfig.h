@@ -22,6 +22,9 @@ public:
 	void setRelay(const int relay);
 
 private:
+	bool setFromConfig(const Config* src) override;
+
+private:
 	void defineBounds();
 	void addParameters();
 
