@@ -32,6 +32,7 @@ $PLUGINS = @(
     "NavigationWidgets",
     "ParametersWidgets",
     "TogglePanel",
+    "TransparentScrollArea",
     "XAppLayout",
     "XNavigationLayout"
     # Add other plugin directories here...
