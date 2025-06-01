@@ -1,40 +1,64 @@
 #include "ConfigurationModel.h"
 #include "AppStore.h"
 
-ConfigurationModel::ConfigurationModel(const Config* config, QObject* parent) :
+ConfigurationModel::ConfigurationModel(Config* srcConfig, QObject* parent) :
 	ModelBase(parent),
-	m_srcConfig(config),
+	m_srcConfig(srcConfig),
 	m_editableConfig(nullptr)
 {
 	if (m_srcConfig)
 	{
-		m_editableConfig = new Config(*config, this);
-		connect(m_editableConfig, &Config::parameterChanged, this, &ConfigurationModel::configChanged);
+		m_editableConfig = m_srcConfig->copy(this);
+		connect(m_editableConfig, &Config::parameterChanged, this, &ConfigurationModel::onConfigChanged);
 	}
 	else
-		qWarning() << "Source configuration is empty.";
+		qCritical() << "Source config is null";
 }
 
-const Config* ConfigurationModel::getConfig() const
+Config* ConfigurationModel::getEditableConfig() const
 {
 	return m_editableConfig;
 }
 
-bool ConfigurationModel::save(const QString& path) const
-{
-	bool saved = m_editableConfig && m_editableConfig->save(path);
-	if (saved)
-	{
-		AppStore::setIsInEdition(false);
-		// mets à jour la sauvegarde de la configuration source
-		//m_srcConfig->setFromConfig(m_editableConfig);
-		// Question : pb si sauvegarde dans un autre fichier ? -> La AppConfig devrait mettre à jour le fichier
-		// designer une callback de sauvegarde à fournir dans le ctor ?
-	}
-	return saved;
-}
-
-void ConfigurationModel::configChanged(const ParameterBase* sender)
+void ConfigurationModel::onConfigChanged(const ParameterBase* sender)
 {
 	AppStore::setIsInEdition(true);
+	emit changed();
+}
+
+void ConfigurationModel::cancel()
+{
+	if (m_srcConfig)
+	{
+		m_editableConfig->setFromConfig(m_srcConfig, true);
+		emit canceled();
+	}
+}
+
+void ConfigurationModel::reset()
+{
+	if (m_editableConfig)
+	{
+		AppStore::setIsInEdition(true);
+		m_editableConfig->reset();
+	}
+}
+
+void ConfigurationModel::save(const QString& path)
+{
+	if (m_editableConfig && m_editableConfig->save(path))
+	{
+		AppStore::setIsInEdition(false);
+		m_srcConfig->setFromConfig(m_editableConfig, true);
+		emit saved(m_srcConfig);
+	}
+}
+
+void ConfigurationModel::open(const QString& path)
+{
+	if (false)
+	{
+		AppStore::setIsInEdition(false);
+		emit opened(path);
+	}
 }

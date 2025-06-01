@@ -14,12 +14,13 @@ MainController::MainController(MainModel* model, MainWindow* view, QObject* pare
 	WindowControllerBase(model, view, parent),
 	m_view(view),
 	m_model(model),
+	m_tempConfig(nullptr),
 	m_tree(nullptr),
 	m_rootNode(nullptr),
 	m_deviceNode(nullptr),
 	m_configurationNode(nullptr),
 	m_lightNode(nullptr),
-	m_workspaceNode(nullptr),
+	m_cameraNode(nullptr),
 	m_roiNode(nullptr),
 	m_appNode(nullptr)
 {
@@ -31,6 +32,8 @@ MainController::MainController(MainModel* model, MainWindow* view, QObject* pare
 
 MainController::~MainController()
 {
+	if (m_tempConfig)
+		m_tempConfig->deleteLater();
 	if (m_model)
 		m_model->deleteLater();
 	if (m_view)
@@ -47,7 +50,7 @@ void MainController::setupTreeNodes()
 	m_appNode = m_rootNode->getChild(2);
 
 	m_lightNode = m_configurationNode->getChild(0);
-	m_workspaceNode = m_configurationNode->getChild(1);
+	m_cameraNode = m_configurationNode->getChild(1);
 	m_roiNode = m_configurationNode->getChild(2);
 }
 
@@ -94,12 +97,46 @@ void MainController::onNavigationRequest(NavigationNode* newNode, NavigationNode
 
 void MainController::onNavigationDone(NavigationNode* node)
 {
+	if (m_tempConfig)
+	{
+		m_tempConfig->deleteLater();
+		m_tempConfig = nullptr;
+	}
 	updateCentralWidget(node);
+}
+
+void MainController::updateCentralWidget(NavigationNode* node)
+{
+	qreal opacity = 0.5;
+	if (node == m_deviceNode)
+		navigateDeviceNode();
+
+	else if (node == m_configurationNode)
+		navigateConfigurationNode();
+
+	else if (node == m_lightNode)
+		navigateLightNode();
+
+	else if (node == m_cameraNode)
+		navigateCameraNode();
+
+	else if (node == m_roiNode)
+		navigateRoiNode();
+
+	else
+		// root
+		// app
+	{
+		opacity = 1.0;
+		m_view->clearCentralWidget();
+	}
+	//m_view->setFilter(QColor(255, 0, 0), 0.3);
+	m_view->setBackgroundOpacity(opacity);
 }
 
 void MainController::appConfigChanged(const ParameterBase* sender)
 {
-	bool saved = AppStore::getAppConfig()->save();
+	AppStore::getAppConfig()->save();
 }
 
 void MainController::appConfigPathChanged(const QString& path)
@@ -122,40 +159,96 @@ void MainController::roiConfigPathChanged(const QString& path)
 	AppStore::getAppConfig()->setRoiConfigPath(path);
 }
 
-void MainController::updateCentralWidget(NavigationNode* node)
+void MainController::appConfigSaved(const Config* config)
 {
-	qreal opacity = 0.5;
-	if (node == m_deviceNode)
-	{
-		AppConfig* config = AppStore::getAppConfig();
-		CameraConfig* cameraConfig = AppStore::getCameraConfig();
-		LightControlConfig* lightConfig = AppStore::getLightControlConfig();
+	QString path = config->getPath();
+	int a = 0;
+}
 
-		m_view->setCentralWidget(ViewFactory::createDeviceView(config->getCameraType(), cameraConfig, lightConfig, m_view));
-	}
-	else if (node == m_configurationNode)
+void MainController::lightControlConfigSaved(const Config* config)
+{
+	QString path = config->getPath();
+	int a = 0;
+	if (!AppStore::getLightControlConfig())
 	{
-		m_view->setCentralWidget(ViewFactory::createConfigurationView("Configuration", AppStore::getAppConfig(), m_view));
+		if (LightControlConfig* lightConfig = (LightControlConfig*)dynamic_cast<const LightControlConfig*>(config))
+		{
+			AppStore::setLightControlConfig(lightConfig);
+		}
 	}
-	else if (node == m_lightNode)
+}
+
+void MainController::cameraConfigSaved(const Config* config)
+{
+	QString path = config->getPath();
+	int a = 0;
+}
+
+void MainController::roiConfigSaved(const Config* config)
+{
+	QString path = config->getPath();
+	int a = 0;
+}
+
+void MainController::navigateDeviceNode()
+{
+	AppConfig* config = AppStore::getAppConfig();
+	CameraConfig* cameraConfig = AppStore::getCameraConfig();
+	LightControlConfig* lightConfig = AppStore::getLightControlConfig();
+
+	m_view->setCentralWidget(ViewFactory::createDeviceView(config->getCameraType(), cameraConfig, lightConfig, m_view));
+}
+
+void MainController::navigateConfigurationNode()
+{
+	AppConfig* config = AppStore::getAppConfig();
+	if (!config)
 	{
-		m_view->setCentralWidget(ViewFactory::createConfigurationView("Light configuratoin", AppStore::getLightControlConfig(), m_view));
+		config = new AppConfig();
+		m_tempConfig = config;
 	}
-	else if (node == m_workspaceNode)
+	auto* configView = ViewFactory::createConfigurationView("Configuration", config, m_view);
+	connect(config, &Config::saved, this, &MainController::appConfigSaved);
+	m_view->setCentralWidget(configView);
+	//m_view->setCentralWidget(new YellowWidget());
+	//m_view->setCentralWidget(new TestView());
+}
+
+void MainController::navigateLightNode()
+{
+	LightControlConfig* config = AppStore::getLightControlConfig();
+	if (!config)
 	{
-		m_view->setCentralWidget(ViewFactory::createConfigurationView("Camera workspace configuratoin", AppStore::getCameraConfig(), m_view));
+		config = new LightControlConfig();
+		m_tempConfig = config;
 	}
-	else if (node == m_roiNode)
+	auto* configView = ViewFactory::createConfigurationView("Light configuration", config, m_view);
+	connect(config, &Config::saved, this, &MainController::lightControlConfigSaved);
+	m_view->setCentralWidget(configView);
+}
+
+void MainController::navigateCameraNode()
+{
+	CameraConfig* config = AppStore::getCameraConfig();
+	if (!config)
 	{
-		m_view->setCentralWidget(ViewFactory::createConfigurationView("ROI configuratoin", AppStore::getRoiConfig(), m_view));
+		config = new CameraConfig();
+		m_tempConfig = config;
 	}
-	else
-		// root
-		// app
+	auto* configView = ViewFactory::createConfigurationView("Camera configuration", AppStore::getCameraConfig(), m_view);
+	connect(config, &Config::saved, this, &MainController::cameraConfigSaved);
+	m_view->setCentralWidget(configView);
+}
+
+void MainController::navigateRoiNode()
+{
+	RoiConfig* config = AppStore::getRoiConfig();
+	if (!config)
 	{
-		opacity = 1.0;
-		//m_view->clearFilter();
-		m_view->clearCentralWidget();
+		config = new RoiConfig();
+		m_tempConfig = config;
 	}
-	m_view->setBackgroundOpacity(opacity);
+	auto* configView = ViewFactory::createConfigurationView("ROI configuration", AppStore::getRoiConfig(), m_view);
+	connect(config, &Config::saved, this, &MainController::roiConfigSaved);
+	m_view->setCentralWidget(configView);
 }

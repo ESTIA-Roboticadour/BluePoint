@@ -34,8 +34,10 @@ public:
 	void setRoi(const QRect& roi);
 	void setRoi(const int x, const int y, const int width, const int height);
 
+	void reset() override;
+
 protected:
-	bool setFromConfig(const Config* src) override;
+	bool setFromConfig(const Config* src, bool copyPath) override;
 
 private:
 	void defineBounds();

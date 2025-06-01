@@ -14,6 +14,12 @@ BaslerCameraConfig::BaslerCameraConfig(const BaslerCameraConfig& config, QObject
 	addParameters();
 }
 
+void BaslerCameraConfig::reset()
+{
+	BaslerCameraConfig newConfig;
+	setFromConfig(&newConfig, false);
+}
+
 void BaslerCameraConfig::defineBounds()
 {
 	m_width.setMaximum(5048);
@@ -24,7 +30,8 @@ void BaslerCameraConfig::addParameters()
 {
 }
 
-bool BaslerCameraConfig::setFromConfig(const Config* src)
+bool BaslerCameraConfig::setFromConfig(const Config* src, bool copyPath)
 {
-	return CameraConfig::setFromConfig(src);
+	Config::setFromConfig(src, copyPath);
+	return CameraConfig::setFromConfig(src, copyPath);
 }

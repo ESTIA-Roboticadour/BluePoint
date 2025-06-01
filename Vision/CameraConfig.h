@@ -20,8 +20,10 @@ public:
 	void setHeight(const int height);
 	void setFps(const int fps);
 
+	void reset() override;
+
 protected:
-	bool setFromConfig(const Config* src) override;
+	bool setFromConfig(const Config* src, bool copyPath) override;
 
 private:
 	void defineBounds();

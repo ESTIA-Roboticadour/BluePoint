@@ -34,6 +34,8 @@ public:
 	static CameraConfig* getCameraConfig();
 	static RoiConfig* getRoiConfig();
 
+	static void setLightControlConfig(LightControlConfig* lightConfig);
+
 private:
 	static inline void deleteObject(QObject* o);
 

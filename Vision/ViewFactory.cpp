@@ -28,9 +28,9 @@ DeviceView* ViewFactory::createDeviceView(const QString& cameraType, CameraConfi
 
 ConfigurationView* ViewFactory::createConfigurationView(const QString& title, Config* config, QWidget* parent)
 {
-	ConfigurationView* view = new ConfigurationView(title, parent);
-	view->setConfig(config);
 	ConfigurationModel* model = new ConfigurationModel(config);
+	ConfigurationView* view = new ConfigurationView(title, parent);
+	view->setConfig(model->getEditableConfig());
 	ConfigurationController* controller = new ConfigurationController(model, view);
 	return view;
 }

@@ -85,7 +85,7 @@
             &quot;name&quot;: &quot;Configuration&quot;,
             &quot;children&quot;: [
                 { &quot;name&quot;: &quot;Light&quot; },
-                { &quot;name&quot;: &quot;Workspace&quot; },
+                { &quot;name&quot;: &quot;Camera&quot; },
                 { &quot;name&quot;: &quot;ROI&quot; }
             ]
         },

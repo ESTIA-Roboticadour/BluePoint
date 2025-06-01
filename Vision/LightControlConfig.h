@@ -21,8 +21,10 @@ public:
 	void setComPort(const QString& comPort);
 	void setRelay(const int relay);
 
+	void reset() override;
+
 private:
-	bool setFromConfig(const Config* src) override;
+	bool setFromConfig(const Config* src, bool copyPath) override;
 
 private:
 	void defineBounds();

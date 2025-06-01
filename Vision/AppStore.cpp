@@ -99,3 +99,11 @@ RoiConfig* AppStore::getRoiConfig()
 {
 	return s_roiConfig;
 }
+
+void AppStore::setLightControlConfig(LightControlConfig* lightConfig)
+{
+	if (!s_lightControlConfig)
+	{
+		s_lightControlConfig = new LightControlConfig(*lightConfig);
+	}
+}

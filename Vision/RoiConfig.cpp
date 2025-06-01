@@ -127,11 +127,18 @@ void RoiConfig::setRoi(const int x, const int y, const int width, const int heig
 	m_height.setValue(height);
 }
 
-bool RoiConfig::setFromConfig(const Config* src)
+void RoiConfig::reset()
+{
+	RoiConfig newConfig;
+	setFromConfig(&newConfig, false);
+}
+
+bool RoiConfig::setFromConfig(const Config* src, bool copyPath)
 {
 	int numberOfParametersToSet = 4;
 	int numberOfParametersSet = 0;
 
+	Config::setFromConfig(src, copyPath);
 	if (src)
 	{
 		if (NumericalParameter* x = qobject_cast<NumericalParameter*>(src->getParameter("X")))

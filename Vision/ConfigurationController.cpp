@@ -1,4 +1,5 @@
 #include "ConfigurationController.h"
+#include <QFile>
 
 ConfigurationController::ConfigurationController(ConfigurationModel* model, ConfigurationView* view, QObject* parent) :
 	WidgetControllerBase(model, view, parent),
@@ -16,27 +17,21 @@ ConfigurationController::~ConfigurationController()
 void ConfigurationController::setupConnections()
 {
 	connect(m_model, &ConfigurationModel::released, this, &ConfigurationController::onModelReleased);
-	connect(m_view, &ConfigurationView::cancelRequested, this, &ConfigurationController::onCancelRequested);
-	connect(m_view, &ConfigurationView::resetRequested, this, &ConfigurationController::onResetRequested);
-	connect(m_view, &ConfigurationView::saveRequested, this, &ConfigurationController::onSaveRequested);
+
+	connect(m_model, &ConfigurationModel::changed, m_view, &ConfigurationView::onConfigModified);
+	connect(m_model, &ConfigurationModel::saved, m_view, &ConfigurationView::onConfigSaved);
+	connect(m_model, &ConfigurationModel::opened, m_view, &ConfigurationView::onConfigOpened);
+	connect(m_model, &ConfigurationModel::canceled, m_view, &ConfigurationView::onConfigCanceled);
+
+	connect(m_view, &ConfigurationView::cancelRequested, m_model, &ConfigurationModel::cancel);
+	connect(m_view, &ConfigurationView::resetRequested, m_model, &ConfigurationModel::reset);
+	connect(m_view, &ConfigurationView::saveRequested, m_model, &ConfigurationModel::save);
+	connect(m_view, &ConfigurationView::openRequested, m_model, &ConfigurationModel::open);
 }
 
 void ConfigurationController::onModelReleased()
 {
 	deleteLater();
-}
-
-void ConfigurationController::onCancelRequested()
-{
-}
-
-void ConfigurationController::onResetRequested()
-{
-}
-
-void ConfigurationController::onSaveRequested(const QString& path)
-{
-	bool saved = m_model->save(path);
 }
 
 void ConfigurationController::onViewDestroyed()

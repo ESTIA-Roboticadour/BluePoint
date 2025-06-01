@@ -10,17 +10,26 @@ class ConfigurationModel : public ModelBase
 {
 	Q_OBJECT
 public:
-	explicit ConfigurationModel(const Config* config, QObject* parent = nullptr);
+	explicit ConfigurationModel(Config* srcConfig, QObject* parent = nullptr);
 
-	const Config* getConfig() const;
+	Config* getEditableConfig() const;
 
-	bool save(const QString& path) const;
+public slots:
+	void cancel();
+	void reset();
+	void save(const QString& path);
+	void open(const QString& path);
 
 private slots:
-	void configChanged(const ParameterBase* sender);
+	void onConfigChanged(const ParameterBase* sender);
+
+signals:
+	void canceled();
+	void changed();
+	void saved(const Config* config);
+	void opened(const QString& path);
 
 private:
-	const Config* m_srcConfig;
+	Config* m_srcConfig;
 	Config* m_editableConfig;
 };
-

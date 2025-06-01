@@ -9,6 +9,7 @@ AppConfig::AppConfig(QObject* parent) :
 	Config(parent),
 	m_folderGroup("Folders", this),
 	m_pathGroup("Paths", this),
+	m_deviceGroup("Devices", this),
 	m_configFolder(CONFIG_FOLDER, CONFIG_FOLDER_DEFAULT_VALUE, StringParameter::Kind::DirectoryPath, this),
 	m_appConfigFolder(APP_CONFIG_FOLDER, APP_CONFIG_FOLDER_DEFAULT_VALUE, StringParameter::Kind::DirectoryPath, this),
 	m_lightControlConfigFolder(LIGHT_CONTROL_CONFIG_FOLDER, LIGHT_CONTROL_CONFIG_FOLDER_DEFAULT_VALUE, StringParameter::Kind::DirectoryPath, this),
@@ -24,9 +25,10 @@ AppConfig::AppConfig(QObject* parent) :
 }
 
 AppConfig::AppConfig(const AppConfig& config, QObject* parent) :
-	Config(parent),
+	Config(config, parent),
 	m_folderGroup("Folders", this),
 	m_pathGroup("Paths", this),
+	m_deviceGroup("Devices", this),
 	m_configFolder(CONFIG_FOLDER, config.m_configFolder, this),
 	m_appConfigFolder(APP_CONFIG_FOLDER, config.m_appConfigFolder, this),
 	m_lightControlConfigFolder(LIGHT_CONTROL_CONFIG_FOLDER, config.m_lightControlConfigFolder, this),
@@ -133,6 +135,19 @@ QString AppConfig::getCameraType() const
 	return m_cameraType.getSelectedValue().toString();
 }
 
+void AppConfig::reset()
+{
+	AppConfig newConfig;
+	setFromConfig(&newConfig, false);
+}
+
+Config* AppConfig::copy(QObject* parent)
+{
+	AppConfig* newConfig = new AppConfig(parent);
+	newConfig->setFromConfig(this, true);
+	return newConfig;
+}
+
 bool AppConfig::backupConfigFound()
 {
 	QFile file(BACKUP_FILE_PATH);
@@ -163,9 +178,11 @@ void AppConfig::addParameters()
 	m_pathGroup.addParameter(&m_cameraConfigPath);
 	m_pathGroup.addParameter(&m_roiConfigPath);
 
+	m_deviceGroup.addParameter(&m_cameraType);
+
 	addParameter(&m_folderGroup);
 	addParameter(&m_pathGroup);
-	addParameter(&m_cameraType);
+	addParameter(&m_deviceGroup);
 }
 
 AppConfig* AppConfig::openBackupConfig()
@@ -185,11 +202,12 @@ AppConfig* AppConfig::openBackupConfig()
 	return nullptr;
 }
 
-bool AppConfig::setFromConfig(const Config* src)
+bool AppConfig::setFromConfig(const Config* src, bool copyPath)
 {
 	int numberOfParametersToSet = 9;
 	int numberOfParametersSet = 0;
 
+	Config::setFromConfig(src, copyPath);
 	if (src)
 	{
 		// Folders
@@ -256,15 +274,19 @@ bool AppConfig::setFromConfig(const Config* src)
 			}
 		}
 
-		// Camera
-		if (ListParameterBase* cameraList = qobject_cast<ListParameterBase*>(src->getParameter("Camera Type")))
+		// Devices
+		if (GroupParameter* group = qobject_cast<GroupParameter*>(src->getParameter("Devices")))
 		{
-			m_cameraType.clear();
-			for (const auto& item : cameraList->items())
+			// Camera type
+			if (ListParameterBase* cameraList = qobject_cast<ListParameterBase*>(group->getParameter("Camera Type")))
 			{
-				m_cameraType.addItem(item.first, item.second.toString());
+				m_cameraType.clear();
+				for (const auto& item : cameraList->items())
+				{
+					m_cameraType.addItem(item.first, item.second.toString());
+				}
+				numberOfParametersSet++;
 			}
-			numberOfParametersSet++;
 		}
 	}
 	return numberOfParametersSet == numberOfParametersToSet;

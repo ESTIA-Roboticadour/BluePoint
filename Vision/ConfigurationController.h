@@ -18,9 +18,6 @@ private slots:
 	void onViewDestroyed() override;
 
 	void onModelReleased();
-	void onCancelRequested();
-	void onResetRequested();
-	void onSaveRequested(const QString& path);
 
 private:
 	void setupConnections();
@@ -29,4 +26,3 @@ private:
 	ConfigurationModel* m_model{ nullptr };
 	ConfigurationView* m_view{ nullptr };
 };
-

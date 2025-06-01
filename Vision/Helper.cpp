@@ -40,3 +40,31 @@ QString Helper::getSaveConfigFile(
     QString out = QDir::toNativeSeparators(selected);
     return out;
 }
+
+QString Helper::getOpenConfigFile(
+    QWidget* parent,
+    const QString& defaultDir,
+    const QString& filters)
+{
+    // Emplacement initial : dossier de configuration de l'application,
+    // puis Documents si rien n’est configuré.
+    const QString defaultConfigDir = AppStore::getAppConfig()->getConfigFolder();
+    const QString initialDir = defaultDir.isEmpty()
+        ? (defaultConfigDir.isEmpty()
+            ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+            : defaultConfigDir)
+        : defaultDir;
+
+    QString selected = QFileDialog::getOpenFileName(parent,
+        QObject::tr("Open configuration"),
+        initialDir,
+        filters);
+    if (selected.isEmpty())
+        return {};                         // utilisateur : Annuler
+
+    // Normalise le chemin et, par sécurité, force l’extension « .json »
+    if (!selected.endsWith(".json", Qt::CaseInsensitive))
+        selected += ".json";
+
+    return QDir::toNativeSeparators(selected);
+}

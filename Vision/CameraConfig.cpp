@@ -60,6 +60,12 @@ void CameraConfig::setFps(const int fps)
 	m_fps.setValue(fps);
 }
 
+void CameraConfig::reset()
+{
+	CameraConfig newConfig;
+	setFromConfig(&newConfig, false);
+}
+
 void CameraConfig::defineBounds()
 {
 	m_width.setMinimum(2);
@@ -82,11 +88,12 @@ void CameraConfig::addParameters()
 	addParameter(&m_fps);
 }
 
-bool CameraConfig::setFromConfig(const Config* src)
+bool CameraConfig::setFromConfig(const Config* src, bool copyPath)
 {
 	int numberOfParametersToSet = 3;
 	int numberOfParametersSet = 0;
 
+	Config::setFromConfig(src, copyPath);
 	if (src)
 	{
 		if (NumericalParameter* width = qobject_cast<NumericalParameter*>(src->getParameter("Width")))

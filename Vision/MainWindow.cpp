@@ -25,7 +25,7 @@ void MainWindow::setCentralWidget(QWidget* widget, bool deleteOld) const
 
 void MainWindow::clearCentralWidget(bool deleteOld) const
 {
-	m_ui->appLayoutWidget->clearCentralWidget( deleteOld);
+	m_ui->appLayoutWidget->clearCentralWidget(deleteOld);
 }
 
 void MainWindow::hideBackground()

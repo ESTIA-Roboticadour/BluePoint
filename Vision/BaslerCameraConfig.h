@@ -10,8 +10,10 @@ public:
 	BaslerCameraConfig(const BaslerCameraConfig& config, QObject* parent = nullptr);
 	~BaslerCameraConfig() override = default;
 
+	void reset() override;
+
 protected:
-	bool setFromConfig(const Config* src) override;
+	bool setFromConfig(const Config* src, bool copyPath) override;
 
 private:
 	void defineBounds();

@@ -61,11 +61,18 @@ void LightControlConfig::setRelay(const int relay)
 	m_relay.setValue(relay);
 }
 
-bool LightControlConfig::setFromConfig(const Config* src)
+void LightControlConfig::reset()
+{
+	LightControlConfig newConfig;
+	setFromConfig(&newConfig, false);
+}
+
+bool LightControlConfig::setFromConfig(const Config* src, bool copyPath)
 {
 	int numberOfParametersToSet = 2;
 	int numberOfParametersSet = 0;
 
+	Config::setFromConfig(src, copyPath);
 	if (src)
 	{
 		if (StringParameter* com = qobject_cast<StringParameter*>(src->getParameter("COM Port")))

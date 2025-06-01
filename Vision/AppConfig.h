@@ -46,6 +46,10 @@ public:
 
 	QString getCameraType() const;
 
+	void reset() override;
+
+	Config* copy(QObject* parent=nullptr) override;
+
 	// static
 
 	static bool backupConfigFound();
@@ -53,7 +57,7 @@ public:
 	static AppConfig* openBackupConfig();
 
 private:
-	bool setFromConfig(const Config* src) override;
+	bool setFromConfig(const Config* src, bool copyPath) override;
 
 private:
 	void addParameters();
@@ -61,6 +65,7 @@ private:
 private:
 	GroupParameter m_folderGroup;
 	GroupParameter m_pathGroup;
+	GroupParameter m_deviceGroup;
 
 	// folder
 

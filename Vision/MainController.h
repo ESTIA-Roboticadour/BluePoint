@@ -5,6 +5,7 @@
 #include "NavigationTree.h"
 #include "NavigationNode.h"
 #include "ParameterBase.h"
+#include "Config.h"
 
 class MainController : public WindowControllerBase
 {
@@ -27,21 +28,33 @@ private slots:
 	void cameraConfigPathChanged(const QString& path);
 	void roiConfigPathChanged(const QString& path);
 
+	void appConfigSaved(const Config* config);
+	void lightControlConfigSaved(const Config* config);
+	void cameraConfigSaved(const Config* config);
+	void roiConfigSaved(const Config* config);
+
 private:
 	void setupTreeNodes();
 	void setupConnections();
 	void updateCentralWidget(NavigationNode* node);
 
+	void navigateDeviceNode();
+	void navigateConfigurationNode();
+	void navigateLightNode();
+	void navigateCameraNode();
+	void navigateRoiNode();
+
 private:
 	MainModel* m_model;
 	MainWindow* m_view;
+	Config* m_tempConfig;
 
 	NavigationTree* m_tree;
 	NavigationNode* m_rootNode;
 	NavigationNode* m_deviceNode;
 	NavigationNode* m_configurationNode;
 	NavigationNode* m_lightNode;
-	NavigationNode* m_workspaceNode;
+	NavigationNode* m_cameraNode;
 	NavigationNode* m_roiNode;
 	NavigationNode* m_appNode;
 };
