@@ -1,4 +1,5 @@
 #include "AppStore.h"
+#include "Helper.h"
 
 bool AppStore::s_initialized = false;
 bool AppStore::s_isInEdition = false;
@@ -20,20 +21,20 @@ void AppStore::setAppConfigPath(const QString& path)
 {
 	if (s_settings)
 	{
-		s_settings->setValue("General/AppConfigPath", path);
+		s_settings->setValue("General/AppConfigPath", Helper::makePathAbsolute(path));
 	}
 }
 
 QString AppStore::getAppConfigPath()
 {
 	return s_settings ?
-		s_settings->value("General/AppConfigPath", DEFAULT_FILE_PATH).toString() :
+		s_settings->value("General/AppConfigPath", getDefaultAppConfigPath()).toString() :
 		getDefaultAppConfigPath();
 }
 
 QString AppStore::getDefaultAppConfigPath()
 {
-	return DEFAULT_FILE_PATH;
+	return Helper::makePathAbsolute(DEFAULT_FILE_PATH);
 }
 
 QSettings* AppStore::getSettings()

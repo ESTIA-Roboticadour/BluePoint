@@ -22,12 +22,6 @@ private slots:
 	void onNavigationRequest(NavigationNode* newNode, NavigationNode* currentNode, bool* accept);
 	void onNavigationDone(NavigationNode* node);
 
-	void appConfigChanged(const ParameterBase* sender);
-	void appConfigPathChanged(const QString& path);
-	void lightControlConfigPathChanged(const QString& path);
-	void cameraConfigPathChanged(const QString& path);
-	void roiConfigPathChanged(const QString& path);
-
 	void appConfigSaved(const Config* config);
 	void lightControlConfigSaved(const Config* config);
 	void cameraConfigSaved(const Config* config);

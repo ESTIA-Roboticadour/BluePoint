@@ -2,7 +2,7 @@
 #include <QString>
 #include <QWidget>
 
-class Helper
+class Helper final
 {
 public:
 	static QString getSaveConfigFile(QWidget* parent,
@@ -14,4 +14,6 @@ public:
 		QWidget* parent,
 		const QString& defaultDir = {},
 		const QString& filters = QObject::tr("Configuration files (*.json);;All files (*.*)"));
+
+	static QString makePathAbsolute(const QString& path);
 };

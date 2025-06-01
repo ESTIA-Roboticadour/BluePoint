@@ -68,3 +68,18 @@ QString Helper::getOpenConfigFile(
 
     return QDir::toNativeSeparators(selected);
 }
+
+QString Helper::makePathAbsolute(const QString& path)
+{
+    if (path.isEmpty())
+        return {};
+
+    QFileInfo fi(path);
+
+    if (fi.isAbsolute())
+        return QDir::cleanPath(fi.absoluteFilePath());
+
+    // Construit un nouveau QFileInfo relatif au répertoire courant
+    fi.setFile(QDir::current(), path);
+    return QDir::cleanPath(fi.absoluteFilePath());
+}

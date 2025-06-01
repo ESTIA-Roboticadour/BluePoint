@@ -60,19 +60,6 @@ void MainController::setupConnections()
 
 	connect(m_tree, &NavigationTree::navigationRequest, this, &MainController::onNavigationRequest);
 	connect(m_tree, &NavigationTree::currentNodeChanged, this, &MainController::onNavigationDone);
-
-	AppConfig* appConfig = AppStore::getAppConfig();
-	connect(appConfig, &Config::pathChanged, this, &MainController::appConfigPathChanged);
-	connect(appConfig, &Config::parameterChanged, this, &MainController::appConfigChanged);
-
-	if (LightControlConfig* lightControlConfig = AppStore::getLightControlConfig())
-		connect(lightControlConfig, &Config::pathChanged, this, &MainController::lightControlConfigPathChanged);
-
-	if (CameraConfig* cameraConfig = AppStore::getCameraConfig())
-		connect(cameraConfig, &Config::pathChanged, this, &MainController::cameraConfigPathChanged);
-
-	if (RoiConfig* roiConfig = AppStore::getRoiConfig())
-		connect(roiConfig, &Config::pathChanged, this, &MainController::roiConfigPathChanged);
 }
 
 void MainController::onViewCloseRequested()
@@ -134,31 +121,6 @@ void MainController::updateCentralWidget(NavigationNode* node)
 	m_view->setBackgroundOpacity(opacity);
 }
 
-void MainController::appConfigChanged(const ParameterBase* sender)
-{
-	AppStore::getAppConfig()->save();
-}
-
-void MainController::appConfigPathChanged(const QString& path)
-{
-	AppStore::setAppConfigPath(path);
-}
-
-void MainController::lightControlConfigPathChanged(const QString& path)
-{
-	AppStore::getAppConfig()->setLightControlConfigPath(path);
-}
-
-void MainController::cameraConfigPathChanged(const QString& path)
-{
-	AppStore::getAppConfig()->setCameraConfigPath(path);
-}
-
-void MainController::roiConfigPathChanged(const QString& path)
-{
-	AppStore::getAppConfig()->setRoiConfigPath(path);
-}
-
 void MainController::appConfigSaved(const Config* config)
 {
 	QString path = config->getPath();
@@ -210,8 +172,6 @@ void MainController::navigateConfigurationNode()
 	auto* configView = ViewFactory::createConfigurationView("Configuration", config, m_view);
 	connect(config, &Config::saved, this, &MainController::appConfigSaved);
 	m_view->setCentralWidget(configView);
-	//m_view->setCentralWidget(new YellowWidget());
-	//m_view->setCentralWidget(new TestView());
 }
 
 void MainController::navigateLightNode()

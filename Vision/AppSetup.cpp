@@ -1,6 +1,7 @@
 #include "LogDispatcher.h"
 #include "AppSetup.h"
 #include "AppStore.h"
+#include "Helper.h"
 #include "LightControlConfig.h"
 #include "RoiConfig.h"
 #include "BaslerCameraConfig.h"
@@ -56,7 +57,7 @@ void AppSetup::setupSettings()
 	ini->beginGroup("General");
 	if (!ini->contains("AppConfigPath"))
 	{
-		ini->setValue("AppConfigPath", "Config/App/default.json");
+		ini->setValue("AppConfigPath", AppStore::getDefaultAppConfigPath());
 	}
 	ini->endGroup();
 	ini->sync();
@@ -102,7 +103,7 @@ bool AppSetup::createFolder(const QString& logicalName, const QString& folderPat
 AppConfig* AppSetup::createDefaultAppConfig()
 {
 	AppConfig* result = new AppConfig();
-	QString path = QDir::currentPath() + '/' + AppStore::getDefaultAppConfigPath();
+	QString path = AppStore::getDefaultAppConfigPath();
 
 	if (result && result->save(path))
 	{
@@ -166,7 +167,7 @@ AppConfig* AppSetup::createAppConfig(const QString& filepath)
 AppConfig* AppSetup::loadAppConfigFromNothing()
 {
 	AppConfig* result = nullptr;
-	QString path = QDir::currentPath() + '/' + AppStore::getDefaultAppConfigPath();
+	QString path = AppStore::getDefaultAppConfigPath();
 	if (QFile::exists(path))
 	{
 		if (QMessageBox::question(nullptr, "Config file", "Config file is not specified, or not found or couldn't be loaded.\n" +
@@ -208,6 +209,7 @@ AppConfig* AppSetup::loadAppConfigFromDefault()
 AppConfig* AppSetup::loadAppConfigFromFile(const QString& filepath)
 {
 	AppConfig* result = nullptr;
+
 	addInfo("Opening: " + filepath);
 
 	bool fullyLoaded = false;
@@ -267,7 +269,9 @@ bool AppSetup::setupApp()
 	setupSettings();
 	LogDispatcher::setLogFile("Vision.log");
 
-	g_appConfig.reset(createAppConfig(getConfigPath(parser)));
+	QString path = getConfigPath(parser);
+	path = Helper::makePathAbsolute(path);
+	g_appConfig.reset(createAppConfig(path));
 	delete parser;
 
 	if (!g_appConfig)
