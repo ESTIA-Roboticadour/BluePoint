@@ -4,12 +4,12 @@
 #include <utility>      // std::swap
 
 namespace {
-    inline void makeChild(QWidget* child, QWidget* parent)
+    inline void makeChild(QWidget* child, QWidget* parent, bool transparent = true)
     {
         if (!child) 
             return;
         child->setParent(parent);
-        child->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+        child->setAttribute(Qt::WA_TransparentForMouseEvents, transparent);
         child->show();
     }
 }
@@ -52,7 +52,7 @@ void LayeredWidget::setForegroundWidget(QWidget* w, bool deleteOld)
             m_front->deleteLater();
     }
     m_front = w;
-    makeChild(m_front, this);
+    makeChild(m_front, this, false);
     updateGeometryAndStacking();
 }
 
