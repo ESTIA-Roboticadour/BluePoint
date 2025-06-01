@@ -17,6 +17,7 @@ They provide reusable widgets and logic that are dynamically loaded by other app
 - `NavigationWidgets`: A set of widgets (branch / breadcrumb / tree classes) used to navigate through a hierarchical `NavigationTree` of nodes.
 - `ParametersCustomWidgets`: Factory that builds, at run-time, the appropriate Qt editor (spin box, checkbox, line edit, combo, colour picker…) for each parameter type: integers, floats, booleans, strings, enums, etc.
 - `TogglePanel`: Slide-in/slide-out side panel with a hamburger button. Useful for toolboxes or mobile-style menus.
+- `TransparentScrollArea`: A scrollable widget with a semi-transparent background, ideal for overlay panels and modern glass-effect UIs.
 - `XAppLayout`: Legacy one-stop “application shell” that assembles `NavigationWidgets`, `TogglePanel`, `LayeredWidget`, `LogoWidget` and `LogTool` into a ready-to-use main-window layout (navbar + sidebar + background + log pane). Superseded by **AppLayout** but kept for backward compatibility. Requires the five plugins to be compiled first.
 - `XNavigationLayout`: Original layout widget that wires `NavigationWidgets` with a `TogglePanel` to build multi-page UIs. Requires the two plugins to be compiled first.
 
