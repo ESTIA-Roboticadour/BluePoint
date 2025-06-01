@@ -139,6 +139,11 @@ int NumericalParameter::getIncrement() const
 	return m_increment;
 }
 
+ParameterBase* NumericalParameter::copy(QObject* parent) const
+{
+    return new NumericalParameter(*this, parent);
+}
+
 QJsonObject NumericalParameter::toJson() const
 {
     return { {"type", "number"},

@@ -24,21 +24,30 @@ public:
 
 	QString getValue() const;
     Kind    getKind()  const;
+    bool    getCanEditPath() const;
+
+    ParameterBase* copy(QObject* parent = nullptr) const override;
 
     QJsonObject toJson() const override;
     static std::unique_ptr<ParameterBase> fromJson(const QJsonObject& obj, QObject* parent = nullptr);
+
 
 public slots:
 	void setValue(const QString& value);
     void setKind(Kind k);
 
+    // only active for FilePath and DirectoryPath kinds.
+    void setCanEditPath(bool canEditPath);
+
 signals:
 	void valueChanged(const QString& value);
     void kindChanged(Kind kind);
+    void canEditPathChanged(bool canEditPath);
 
 private:
 	QString m_value;
     Kind    m_kind;
+    bool    m_canEditPath;
 };
 
 #endif // STRINGPARAMETER_H

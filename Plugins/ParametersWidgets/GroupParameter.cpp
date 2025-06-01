@@ -9,32 +9,28 @@ GroupParameter::GroupParameter(const QString& name, QObject* parent) :
 {}
 
 GroupParameter::GroupParameter(const GroupParameter& other, QObject* parent) :
-    ParameterBase(other.getName(), parent),
-    m_parameters()
+    GroupParameter(other.getName(), other, parent)
 {
-    for (const auto* p : other.m_parameters)
-    {
-        if (!p)
-            continue;
-        // Deep-copy via sérialisation (nécessite toJson()/fromJson())
-        auto dup = ParameterBase::fromJson(p->toJson(), this);
-        if (dup)
-            m_parameters.append(dup.release());
-    }
 }
 
 GroupParameter::GroupParameter(const QString& name, const GroupParameter& other, QObject* parent) :
     ParameterBase(name, parent),
     m_parameters()
 {
-    for (const auto* p : other.m_parameters)
-    {
-        if (!p)
-            continue;
-        // Deep-copy via sérialisation (nécessite toJson()/fromJson())
-        auto dup = ParameterBase::fromJson(p->toJson(), this);
-        if (dup) m_parameters.append(dup.release());
+    for (const ParameterBase* p : other.m_parameters) {
+        if (p)
+            addParameter(p->copy(this));   // parent = this
     }
+    setIsEditable(other.getIsEditable());
+
+    //for (const auto* p : other.m_parameters)
+    //{
+    //    if (!p)
+    //        continue;
+    //    // Deep-copy via sérialisation (nécessite toJson()/fromJson())
+    //    auto dup = ParameterBase::fromJson(p->toJson(), this);
+    //    if (dup) m_parameters.append(dup.release());
+    //}
 }
 
 GroupParameter::~GroupParameter()
@@ -107,6 +103,19 @@ ParameterBase* GroupParameter::getParameter(const QString& name) const
             return param;
     }
     return nullptr;
+}
+
+ParameterBase* GroupParameter::copy(QObject* parent) const
+{
+    auto* g = new GroupParameter(this->getName(), parent);
+    g->setIsEditable(getIsEditable());
+
+    for (const ParameterBase* p : m_parameters)
+    {
+        // On passe 'g' comme parent pour respecter la hiérarchie QObject
+        g->addParameter(p->copy(g));
+    }
+    return g;
 }
 
 QJsonObject GroupParameter::toJson() const

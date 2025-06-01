@@ -6,7 +6,9 @@ ListParameterWidget::ListParameterWidget(QWidget* parent) :
 	m_label(new QLabel("List Parameter:", this)),
 	m_comboBox(new QComboBox(this))
 {
-	QHBoxLayout* mainLayout = new QHBoxLayout(this);
+    m_comboBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    QHBoxLayout* mainLayout = new QHBoxLayout(this);
 	mainLayout->addWidget(m_label);
 	mainLayout->addWidget(m_comboBox);
 

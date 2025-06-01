@@ -18,6 +18,8 @@ public:
 	QString getName() const;
 	bool getIsEditable() const;
 
+    virtual ParameterBase* copy(QObject* parent = nullptr) const = 0;
+
     virtual QJsonObject toJson() const = 0;
 
     static std::unique_ptr<ParameterBase> fromJson(const QJsonObject& obj, QObject* parent = nullptr);

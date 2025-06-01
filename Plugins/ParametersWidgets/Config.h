@@ -42,13 +42,21 @@ public:
 		std::unique_ptr<Config> config = loadFromFile(filePath, parent);
         if (config) {
             auto derived = std::make_unique<T>(parent);
-            configFullyLoaded = static_cast<Config*>(derived.get())->setFromConfig(config.get());
+            configFullyLoaded = static_cast<Config*>(derived.get())->setFromConfig(config.get(), true);
             return derived;
         }
         return nullptr;
     }
 
-    virtual bool setFromConfig(const Config* src) { Q_UNUSED(src); return true; }
+    virtual bool setFromConfig(const Config* src, bool copyPath) {
+        if (copyPath && src)
+            m_path = src->m_path;
+        return true;
+    }
+
+    virtual void reset() {}
+
+    virtual Config* copy(QObject* parent = nullptr);
 
 public slots:
     void setParameters(const QList<ParameterBase*>& parameters);
@@ -56,9 +64,13 @@ public slots:
 private slots:
     void onParameterChanged(const ParameterBase* sender);
 
+private:
+    static void cloneFrom(Config& dst, const Config& src);
+
 signals:
     void parameterChanged(const ParameterBase* sender);
     void pathChanged(const QString& path);
+    void saved(const Config* sender);
 
 private:
     QList<ParameterBase*> m_parameters;

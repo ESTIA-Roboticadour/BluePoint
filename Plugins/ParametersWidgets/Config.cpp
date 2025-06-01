@@ -12,37 +12,57 @@ Config::Config(QObject* parent) :
     QObject(parent),
     m_parameters(),
     m_path()
-{
-}
+{}
 
 Config::Config(const QList<ParameterBase*>& parameters, QObject* parent) :
     QObject(parent),
-    m_parameters(parameters),
+    m_parameters(),
     m_path()
 {
+    for (const ParameterBase* p : parameters)
+        if (p)
+            addParameter(p->copy(this));
 }
 
 Config::Config(const Config& other, QObject* parent) :
-    QObject(parent ? parent : other.parent()),
-    m_parameters(other.m_parameters),
-    m_path(other.m_path)
+QObject(parent ? parent : other.parent()),
+    m_parameters(),
+    m_path()
 {
+    cloneFrom(*this, other);
 }
 
 Config::Config(const Config& other) :
     QObject(other.parent()),
-    m_parameters(other.m_parameters),
-    m_path(other.m_path)
+    m_parameters(),
+    m_path()
 {
+    cloneFrom(*this, other);
 }
 
 Config& Config::operator=(const Config& other)
 {
-    if (this != &other)
-    {
-        m_parameters = other.m_parameters;
-    }
+    if (this == &other)
+        return *this;
+    // 1) Purger les paramètres existants
+    qDeleteAll(m_parameters);        // détruit aussi les enfants QObject
+    m_parameters.clear();
+    // 2) Copier le reste
+    cloneFrom(*this, other);
     return *this;
+}
+
+void Config::cloneFrom(Config& dst, const Config& src)
+{
+    // Chemin éventuel
+    dst.m_path = src.m_path;
+
+    // Duplication profonde des paramètres
+    for (const ParameterBase* p : src.m_parameters)
+    {
+        if (p)
+            dst.addParameter(p->copy(&dst));     // parent = dst
+    }
 }
 
 void Config::addParameter(ParameterBase* parameter)
@@ -109,13 +129,17 @@ bool Config::save(const QString& path)
     if (absPath.isEmpty())
         return false;
 
-    bool saved = Config::saveToFile(this, absPath);
-    if (saved && m_path != absPath)
+    bool fileSaved = Config::saveToFile(this, absPath);
+    if (fileSaved)
     {
-        m_path = absPath;
-        emit pathChanged(absPath);
+        emit saved(this);
+        if (m_path != absPath)
+        {
+            m_path = absPath;
+            emit pathChanged(absPath);
+        }
     }
-    return saved;
+    return fileSaved;
 }
 
 bool Config::saveToFile(const Config* cfg, const QString& userPath)
@@ -195,4 +219,22 @@ std::unique_ptr<Config> Config::loadFromFile(const QString& filePath, QObject* p
     }
     cfg->m_path = filePath;
     return cfg;
+}
+
+Config* Config::copy(QObject* parent)
+{
+    // 1) Nouvelle config, même parent
+    auto clone = new Config(parent);
+
+    // 2) Copie la valeur du chemin
+    clone->m_path = this->m_path;
+
+    // 3) Copie profonde des paramètres
+    for (const ParameterBase* p : m_parameters)
+    {
+        if (p)
+            clone->addParameter(p->copy(clone));   // parent = clone
+    }
+
+    return clone;
 }

@@ -27,6 +27,8 @@ public:
 	QList<const ParameterBase*> getParameters() const;
     ParameterBase* getParameter(const QString& name) const;
 
+    ParameterBase* copy(QObject* parent) const;
+
     QJsonObject toJson() const override;
     static std::unique_ptr<ParameterBase> fromJson(const QJsonObject& obj, QObject* parent = nullptr);
 

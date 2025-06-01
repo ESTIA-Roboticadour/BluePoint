@@ -35,6 +35,11 @@ public:
 
     ~ListParameter() override = default;
 
+    ParameterBase* copy(QObject* parent = nullptr) const override
+    {
+        return new ListParameter<T>(*this, parent);
+    }
+
     bool addItem(const QString& key, const T& value)
     {
         int i;

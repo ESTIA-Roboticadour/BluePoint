@@ -24,6 +24,8 @@ public:
 	double getMaximum() const;
 	int	   getIncrement() const;
 
+    ParameterBase* copy(QObject* parent = nullptr) const override;
+
     QJsonObject toJson() const override;
     static std::unique_ptr<ParameterBase> fromJson(const QJsonObject& obj, QObject* parent = nullptr);
 

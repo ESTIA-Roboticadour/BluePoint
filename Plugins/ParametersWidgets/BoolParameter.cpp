@@ -24,6 +24,11 @@ bool BoolParameter::getValue() const
 	return m_value;
 }
 
+ParameterBase* BoolParameter::copy(QObject* parent) const
+{
+    return new BoolParameter(*this, parent);
+}
+
 void BoolParameter::setValue(bool value)
 {
 	if (getIsEditable() && m_value != value)

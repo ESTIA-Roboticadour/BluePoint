@@ -9,10 +9,11 @@ StringParameterWidget::StringParameterWidget(QWidget* parent) :
 	m_label(new QLabel("String Parameter:", this)),
     m_lineEdit(new QLineEdit(this)),
     m_browseBtn(new QPushButton("…", this)),
-    m_kind(StringParameter::Kind::Plain)
+    m_kind(StringParameter::Kind::Plain),
+    m_canEditPath(true)
 {
     m_browseBtn->setFixedWidth(24);
-	m_lineEdit->setPlaceholderText("Value");
+    m_lineEdit->setPlaceholderText("Value");
 
     QHBoxLayout* layoutControls = new QHBoxLayout();
 	layoutControls->addWidget(m_label);
@@ -45,7 +46,8 @@ void StringParameterWidget::setFrom(const StringParameter* parameter)
 {
 	setName(parameter->getName());
 	setValue(parameter->getValue());
-    setKind (parameter->getKind());
+    setKind(parameter->getKind());
+    setCanEditPath(parameter->getCanEditPath());
 	setEnabled(parameter->getIsEditable());
 }
 
@@ -53,12 +55,24 @@ void StringParameterWidget::setValue(const QString& val) { m_lineEdit->setText(v
 
 StringParameter::Kind StringParameterWidget::getKind() const { return m_kind; }
 
+bool StringParameterWidget::canEditPath() const { return m_canEditPath; }
+
 void StringParameterWidget::setKind(StringParameter::Kind k)
 {
     if (m_kind != k) {
         m_kind = k;
         updateBrowseVisibility();
         emit kindChanged(m_kind);
+    }
+}
+
+void StringParameterWidget::setCanEditPath(bool canEditPath)
+{
+    if (m_canEditPath != canEditPath)
+    {
+        m_canEditPath = canEditPath;
+        m_lineEdit->setEnabled(m_canEditPath);
+        emit canEditPathChanged(m_canEditPath);
     }
 }
 
