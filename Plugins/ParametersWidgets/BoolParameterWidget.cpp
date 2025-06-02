@@ -1,26 +1,41 @@
 #include "BoolParameterWidget.h"
-#include <QVBoxLayout>
+#include <QHBoxLayout>
 
-BoolParameterWidget::BoolParameterWidget(QWidget* parent) :
-	QWidget(parent),
-	m_checkBox(new QCheckBox("Bool Parameter", this))
+BoolParameterWidget::BoolParameterWidget(bool readOnly, QWidget* parent) :
+    ParameterWidget(parent),
+    m_name("Bool Parameter"),
+    m_label(new QLabel("Bool Parameter:")),
+    m_checkBox(new QCheckBox(this)),
+    m_readOnly(readOnly)
 {
-	QVBoxLayout* mainLayout = new QVBoxLayout(this);
-	mainLayout->addWidget(m_checkBox);
+    m_checkBox->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-	connect(m_checkBox, &QCheckBox::toggled, this, &BoolParameterWidget::valueChanged);
+    QHBoxLayout* layoutControls = new QHBoxLayout(this);
+    layoutControls->addWidget(m_label);
+    layoutControls->addWidget(m_checkBox);
+    layoutControls->addStretch();
+
+    if (m_readOnly)
+    {
+        m_checkBox->setEnabled(false);
+    }
+    else
+    {
+        connect(m_checkBox, &QCheckBox::toggled, this, &BoolParameterWidget::valueChanged);
+    }
 }
 
 QString BoolParameterWidget::getName() const
 {
-	return m_checkBox->text();
+    return m_name;
 }
 
 void BoolParameterWidget::setName(const QString& newName)
 {
-	if (m_checkBox->text() != newName)
+    if (m_name != newName)
 	{
-		m_checkBox->setText(newName);
+        m_name = newName;
+        m_label->setText(newName + ':');
 		emit nameChanged(newName);
 	}
 }
@@ -36,6 +51,25 @@ void BoolParameterWidget::setValue(bool value)
 bool BoolParameterWidget::getValue() const
 {
 	return m_checkBox->isChecked();
+}
+
+int BoolParameterWidget::getLabelWidth() const
+{
+    return m_label->sizeHint().width();
+}
+
+void BoolParameterWidget::setLabelWidth(int width)
+{
+    m_label->setFixedWidth(width);
+}
+
+void BoolParameterWidget::setEnabled(bool enabled)
+{
+    QWidget::setEnabled(enabled);
+    if (m_readOnly)
+    {
+        m_checkBox->setEnabled(false);
+    }
 }
 
 void BoolParameterWidget::setFrom(const BoolParameter* parameter)

@@ -35,7 +35,7 @@ public slots:
 	void setMaximum(double maximum);
 	void setIncrement(double increment);
 
-	void increment();
+    void increment();
 	void decrement();
 
 private:

@@ -13,6 +13,7 @@ HEADERS += \
     Config.h \
     GroupParameter.h \
     IParametrable.h \
+    ParameterWidget.h \
     ParametersWidgetCollectionPlugin.h \
     ParametersWidgetCollection_global.h \
     ParameterBase.h \
@@ -41,6 +42,7 @@ SOURCES += \
     BoolParameterWidget.cpp \
     NumericalParameter.cpp \
     NumericalParameterWidget.cpp \
+    ParameterWidget.cpp \
     ParametersWidgetCollectionPlugin.cpp \
     StringParameter.cpp \
     StringParameterWidget.cpp \

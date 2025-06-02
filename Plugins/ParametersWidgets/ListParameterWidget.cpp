@@ -1,18 +1,31 @@
 #include "ListParameterWidget.h"
 #include <QHBoxLayout>
 
-ListParameterWidget::ListParameterWidget(QWidget* parent) :
-	QWidget(parent),
+ListParameterWidget::ListParameterWidget(bool readOnly, QWidget* parent) :
+    ParameterWidget(parent),
 	m_label(new QLabel("List Parameter:", this)),
-	m_comboBox(new QComboBox(this))
+    m_comboBox(nullptr),
+    m_lineEdit(nullptr),
+    m_selectedIndex(-1),
+    m_options(),
+    m_readOnly(readOnly)
 {
-    m_comboBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    QHBoxLayout* layoutControls = new QHBoxLayout(this);
+    layoutControls->addWidget(m_label);
 
-    QHBoxLayout* mainLayout = new QHBoxLayout(this);
-	mainLayout->addWidget(m_label);
-	mainLayout->addWidget(m_comboBox);
+    if (m_readOnly)
+    {
+        m_lineEdit = new QLineEdit(this);
+        layoutControls->addWidget(m_lineEdit);
+    }
+    else
+    {
+        m_comboBox = new QComboBox(this);
+        m_comboBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        layoutControls->addWidget(m_comboBox);
 
-	connect(m_comboBox, &QComboBox::currentIndexChanged, this, &ListParameterWidget::selectedIndexChanged);
+        connect(m_comboBox, &QComboBox::currentIndexChanged, this, &ListParameterWidget::selectedIndexChanged);
+    }
 }
 
 QString ListParameterWidget::getName() const
@@ -23,16 +36,33 @@ QString ListParameterWidget::getName() const
 QStringList ListParameterWidget::getOptions() const
 {
 	QStringList options;
-	for (int i = 0; i < m_comboBox->count(); ++i)
-	{
-		options << m_comboBox->itemText(i);
-	}
+    for (auto item : m_options)
+        options.append(item);
 	return options;
 }
 
 int ListParameterWidget::getCurrentIndex() const
 {
-	return m_comboBox->currentIndex();
+    return m_selectedIndex;
+}
+
+int ListParameterWidget::getLabelWidth() const
+{
+    return m_label->sizeHint().width();
+}
+
+void ListParameterWidget::setLabelWidth(int width)
+{
+    m_label->setFixedWidth(width);
+}
+
+void ListParameterWidget::setEnabled(bool enabled)
+{
+    QWidget::setEnabled(enabled);
+    if (m_readOnly)
+    {
+        m_lineEdit->setEnabled(false);
+    }
 }
 
 void ListParameterWidget::setFrom(const ListParameterBase* parameter)
@@ -55,15 +85,26 @@ void ListParameterWidget::setName(const QString& name)
 
 void ListParameterWidget::setOptions(const QStringList& keys)
 {
-	m_comboBox->clear();
-	m_comboBox->addItems(keys);
+    m_selectedIndex = -1;
+    m_options.clear();
+    m_options.append(keys);
+
+    if (m_comboBox)
+    {
+        m_comboBox->clear();
+        m_comboBox->addItems(m_options);
+    }
     emit optionsChanged(keys);
 }
 
 void ListParameterWidget::setCurrentIndex(int index)
 {
-	if (index != m_comboBox->currentIndex())
+    if (index != m_selectedIndex && index > 0 && index < m_options.size())
 	{
-		m_comboBox->setCurrentIndex(index);
+        m_selectedIndex = index;
+        if (m_comboBox)
+            m_comboBox->setCurrentIndex(index);
+        else
+            m_lineEdit->setText(m_options[index]);
 	}
 }

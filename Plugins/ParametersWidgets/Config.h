@@ -28,6 +28,7 @@ public:
     QList<ParameterBase*> getParameters() const override;
 
     QString getPath() const { return m_path; }
+    bool getIsEditable() const { return m_isEditable; }
 
     bool save() const;
     bool save(const QString& path);
@@ -49,8 +50,12 @@ public:
     }
 
     virtual bool setFromConfig(const Config* src, bool copyPath) {
-        if (copyPath && src)
-            m_path = src->m_path;
+        if (src)
+        {
+            m_isEditable = src->m_isEditable;
+            if (copyPath)
+                m_path = src->m_path;
+        }
         return true;
     }
 
@@ -60,6 +65,7 @@ public:
 
 public slots:
     void setParameters(const QList<ParameterBase*>& parameters);
+    void setIsEditable(bool isEditable);
 
 private slots:
     void onParameterChanged(const ParameterBase* sender);
@@ -71,10 +77,12 @@ signals:
     void parameterChanged(const ParameterBase* sender);
     void pathChanged(const QString& path);
     void saved(const Config* sender);
+    void isEditableChanged(bool isEditable);
 
 private:
     QList<ParameterBase*> m_parameters;
     QString m_path;
+    bool m_isEditable;
 };
 
 #endif // CONFIG_H

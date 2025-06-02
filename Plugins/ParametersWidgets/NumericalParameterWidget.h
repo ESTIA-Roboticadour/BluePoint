@@ -3,14 +3,16 @@
 
 #include "NumericalParameter.h"
 #include "ParametersWidgetCollection_global.h"
+#include "ParameterWidget.h"
 
 #include <QWidget>
 #include <QString>
 #include <QLabel>
 #include <QSlider>
 #include <QDoubleSpinBox>
+#include <QLineEdit>
 
-class PARAMETERS_WIDGETS_API NumericalParameterWidget : public QWidget
+class PARAMETERS_WIDGETS_API NumericalParameterWidget : public ParameterWidget
 {
 	Q_OBJECT
 	Q_PROPERTY(QString getName READ getName WRITE setName NOTIFY nameChanged)
@@ -20,7 +22,7 @@ class PARAMETERS_WIDGETS_API NumericalParameterWidget : public QWidget
 	Q_PROPERTY(int increment READ getIncrement WRITE setIncrement NOTIFY incrementChanged)
 
 public:
-	explicit NumericalParameterWidget(QWidget* parent = nullptr);
+    explicit NumericalParameterWidget(bool readOnly = false, QWidget* parent = nullptr);
 	~NumericalParameterWidget() = default;
 
 	QString getName() const;
@@ -28,6 +30,7 @@ public:
 	double getMaximum() const;
 	double getValue() const;
 	double getIncrement() const;
+    int getLabelWidth() const override;
 
 	void setFrom(const NumericalParameter* boolParameter);
 
@@ -37,6 +40,8 @@ public slots:
 	void setMaximum(double max);
 	void setValue(double val);
 	void setIncrement(double increment);
+    void setLabelWidth(int width) override;
+    void setEnabled(bool enabled);
 
 	void increment();
 	void decrement();
@@ -56,11 +61,14 @@ private:
 	QLabel* m_label;
 	QSlider* m_slider;
 	QDoubleSpinBox* m_doubleSpinBox;
+    QLineEdit* m_lineEdit;
 	QString m_name;
+    double m_value;
 	double m_minValue;
 	double m_maxValue;
 	double m_increment;
 	bool m_isSliderUpdating;
+    bool m_readOnly;
 };
 
 #endif // NUMERICALPARAMETERWIDGET_H

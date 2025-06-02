@@ -2,35 +2,52 @@
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QSizePolicy>
+#include <QMargins>
 
-NumericalParameterWidget::NumericalParameterWidget(QWidget* parent) :
-	QWidget(parent),
+NumericalParameterWidget::NumericalParameterWidget(bool readOnly, QWidget* parent) :
+    ParameterWidget(parent),
+    m_value(0),
 	m_minValue(0),
 	m_maxValue(100),
 	m_increment(1.),
 	m_isSliderUpdating(false),
 	m_name("Numerical Parameter"),
 	m_label(new QLabel("Numerical Parameter:", this)),
-	m_slider(new QSlider(Qt::Horizontal, this)),
-	m_doubleSpinBox(new QDoubleSpinBox(this))
+    m_slider(nullptr),
+    m_doubleSpinBox(nullptr),
+    m_lineEdit(nullptr),
+    m_readOnly(readOnly)
 {
-	m_slider->setRange(m_minValue, m_maxValue);
-	m_slider->setSingleStep(m_increment);
-	m_doubleSpinBox->setRange(m_minValue, m_maxValue);
-	m_doubleSpinBox->setSingleStep(m_increment);
+    QHBoxLayout* layoutControls = new QHBoxLayout(this);
+    layoutControls->addWidget(m_label);
 
-	QHBoxLayout* layoutControls = new QHBoxLayout;
-	layoutControls->addWidget(m_slider);
-	layoutControls->addWidget(m_doubleSpinBox);
+    if (m_readOnly)
+    {
+        m_lineEdit = new QLineEdit(this);
+        m_lineEdit->setPlaceholderText("Value");
+        layoutControls->addWidget(m_lineEdit);
+    }
+    else
+    {
+        m_slider = new QSlider(Qt::Horizontal, this);
+        m_doubleSpinBox = new QDoubleSpinBox(this);
 
-	QVBoxLayout* mainLayout = new QVBoxLayout(this);
-	mainLayout->addWidget(m_label);
-	mainLayout->addLayout(layoutControls);
+        //layoutControls->addWidget(new QLabel(this)); // label vide pour faire un espace
 
-	connect(m_slider, &QSlider::valueChanged, this, &NumericalParameterWidget::onSliderValueChanged);
-	connect(m_doubleSpinBox, &QDoubleSpinBox::valueChanged, this, &NumericalParameterWidget::onSpinBoxValueChanged);
+        m_slider->setRange(m_minValue, m_maxValue);
+        m_slider->setSingleStep(m_increment);
+        m_doubleSpinBox->setRange(m_minValue, m_maxValue);
+        m_doubleSpinBox->setSingleStep(m_increment);
 
-	connect(m_doubleSpinBox, &QDoubleSpinBox::valueChanged, this, &NumericalParameterWidget::valueChanged);
+        layoutControls->addWidget(m_slider,        /*stretch=*/1);
+        layoutControls->addWidget(m_doubleSpinBox, /*stretch=*/1);
+
+        connect(m_slider, &QSlider::valueChanged, this, &NumericalParameterWidget::onSliderValueChanged);
+        connect(m_doubleSpinBox, &QDoubleSpinBox::valueChanged, this, &NumericalParameterWidget::onSpinBoxValueChanged);
+
+        connect(m_doubleSpinBox, &QDoubleSpinBox::valueChanged, this, &NumericalParameterWidget::valueChanged);
+    }
 }
 
 QString NumericalParameterWidget::getName() const { return m_name; }
@@ -52,8 +69,11 @@ void NumericalParameterWidget::setMinimum(double min)
 	if (m_minValue != min && min > m_maxValue)
 	{
 		m_minValue = min;
-		m_slider->setMinimum(min);
-		m_doubleSpinBox->setMinimum(min);
+        if (m_slider)
+        {
+            m_slider->setMinimum(min);
+            m_doubleSpinBox->setMinimum(min);
+        }
 		emit minimumChanged(min);
 
 		if (getValue() < m_minValue)
@@ -70,10 +90,12 @@ void NumericalParameterWidget::setMaximum(double max)
 	if (m_maxValue != max && max > m_minValue)
 	{
 		m_maxValue = max;
-		m_slider->setMaximum(max);
-		m_doubleSpinBox->setMaximum(max);
+        if (m_slider)
+        {
+            m_slider->setMaximum(max);
+            m_doubleSpinBox->setMaximum(max);
+        }
 		emit maximumChanged(max);
-
 		if (getValue() > m_maxValue)
 		{
 			setValue(m_maxValue);
@@ -81,22 +103,57 @@ void NumericalParameterWidget::setMaximum(double max)
 	}
 }
 
-double NumericalParameterWidget::getValue() const { return m_doubleSpinBox->value(); }
+double NumericalParameterWidget::getValue() const
+{
+    return m_value;
+}
 
-void NumericalParameterWidget::setValue(double val) { m_doubleSpinBox->setValue(val); }
+void NumericalParameterWidget::setValue(double val)
+{
+    if (m_value != val)
+    {
+        m_value = val;
+        if (m_doubleSpinBox)
+            m_doubleSpinBox->setValue(val);
+        else
+            m_lineEdit->setText(QString::number(m_value, 'f', 3));
+    }
+}
 
 void NumericalParameterWidget::setIncrement(double increment)
 {
 	if (increment > 0. && m_increment != increment)
 	{
 		m_increment = increment;
-		m_slider->setSingleStep(round(increment));
-		m_doubleSpinBox->setSingleStep(increment);
+        if (m_slider)
+        {
+            m_slider->setSingleStep(round(increment));
+            m_doubleSpinBox->setSingleStep(increment);
+        }
 		emit incrementChanged(increment);
 	}
 }
 
 double NumericalParameterWidget::getIncrement() const { return m_increment; }
+
+int NumericalParameterWidget::getLabelWidth() const
+{
+    return m_label->sizeHint().width();
+}
+
+void NumericalParameterWidget::setLabelWidth(int width)
+{
+    m_label->setFixedWidth(width);
+}
+
+void NumericalParameterWidget::setEnabled(bool enabled)
+{
+    QWidget::setEnabled(enabled);
+    if (m_readOnly)
+    {
+        m_lineEdit->setEnabled(false);
+    }
+}
 
 void NumericalParameterWidget::setFrom(const NumericalParameter* parameter)
 {
@@ -105,7 +162,7 @@ void NumericalParameterWidget::setFrom(const NumericalParameter* parameter)
 	setMaximum(parameter->getMaximum());
 	setIncrement(parameter->getIncrement());
 	setValue(parameter->getValue());
-	setEnabled(parameter->getIsEditable());
+    setEnabled(parameter->getIsEditable());
 }
 
 void NumericalParameterWidget::onSpinBoxValueChanged(double value)
@@ -126,11 +183,11 @@ void NumericalParameterWidget::onSliderValueChanged(int value)
 void NumericalParameterWidget::increment()
 {
 	double newValue = m_slider->value() + m_increment;
-	m_slider->setValue(newValue < m_maxValue ? newValue : m_maxValue);
+    setValue(newValue < m_maxValue ? newValue : m_maxValue);
 }
 
 void NumericalParameterWidget::decrement()
 {
 	double newValue = m_slider->value() - m_increment;
-	m_doubleSpinBox->setValue(newValue > m_minValue ? newValue : m_minValue);
+    setValue(newValue > m_minValue ? newValue : m_minValue);
 }

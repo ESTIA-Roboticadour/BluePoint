@@ -11,13 +11,15 @@
 Config::Config(QObject* parent) :
     QObject(parent),
     m_parameters(),
-    m_path()
+    m_path(),
+    m_isEditable(true)
 {}
 
 Config::Config(const QList<ParameterBase*>& parameters, QObject* parent) :
     QObject(parent),
     m_parameters(),
-    m_path()
+    m_path(),
+    m_isEditable(true)
 {
     for (const ParameterBase* p : parameters)
         if (p)
@@ -27,7 +29,8 @@ Config::Config(const QList<ParameterBase*>& parameters, QObject* parent) :
 Config::Config(const Config& other, QObject* parent) :
 QObject(parent ? parent : other.parent()),
     m_parameters(),
-    m_path()
+    m_path(),
+    m_isEditable(true)
 {
     cloneFrom(*this, other);
 }
@@ -35,7 +38,8 @@ QObject(parent ? parent : other.parent()),
 Config::Config(const Config& other) :
     QObject(other.parent()),
     m_parameters(),
-    m_path()
+    m_path(),
+    m_isEditable(true)
 {
     cloneFrom(*this, other);
 }
@@ -56,6 +60,7 @@ void Config::cloneFrom(Config& dst, const Config& src)
 {
     // Chemin éventuel
     dst.m_path = src.m_path;
+    dst.m_isEditable = src.m_isEditable;
 
     // Duplication profonde des paramètres
     for (const ParameterBase* p : src.m_parameters)
@@ -75,6 +80,7 @@ void Config::addParameter(ParameterBase* parameter)
         if (param == parameter || param->getName() == parameter->getName())
             return;
     }
+    parameter->setIsEditable(m_isEditable);
     m_parameters.append(parameter);
 
     connect(parameter, &ParameterBase::parameterChanged, this, &Config::onParameterChanged);
@@ -109,6 +115,18 @@ void Config::setParameters(const QList<ParameterBase*>& parameters)
     }
 }
 
+void Config::setIsEditable(bool isEditable)
+{
+    if (m_isEditable != isEditable)
+    {
+        m_isEditable = isEditable;
+        for (auto& param : m_parameters)
+            param->setIsEditable(m_isEditable);
+
+        emit isEditableChanged(m_isEditable);
+    }
+}
+
 void Config::onParameterChanged(const ParameterBase* sender)
 {
     emit parameterChanged(sender);
@@ -132,12 +150,12 @@ bool Config::save(const QString& path)
     bool fileSaved = Config::saveToFile(this, absPath);
     if (fileSaved)
     {
-        emit saved(this);
         if (m_path != absPath)
         {
             m_path = absPath;
             emit pathChanged(absPath);
         }
+        emit saved(this);
     }
     return fileSaved;
 }
@@ -157,14 +175,14 @@ bool Config::saveToFile(const Config* cfg, const QString& userPath)
     QFileInfo fi(filePath);
     QDir dir = fi.dir();
     if (!dir.exists() && !dir.mkpath(".")) {
-        qWarning() << "Unable to create the" << filePath << "folder";
+        qCritical() << "Unable to create the" << filePath << "folder";
         return false;
     }
 
     // 4) Ecriture atomique : données dans un fichier temporaire
     QSaveFile file(filePath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        qWarning() << "Can not open:" << filePath << ':' << file.errorString();
+        qCritical() << "Can not open:" << filePath << ':' << file.errorString();
         return false;
     }
 
@@ -181,13 +199,13 @@ bool Config::saveToFile(const Config* cfg, const QString& userPath)
 
     const QJsonDocument doc(root);
     if (file.write(doc.toJson(QJsonDocument::Indented)) == -1) {
-        qWarning() << "Cannot write" << filePath << ':' << file.errorString();
+        qCritical() << "Cannot write" << filePath << ':' << file.errorString();
         return false;
     }
 
     // 6) Renomme le fichier temp -> définitif ; en cas d'échec, l'ancien reste intact
     if (!file.commit()) {
-        qWarning() << "Can not commit" << filePath << ':' << file.errorString();
+        qCritical() << "Can not commit" << filePath << ':' << file.errorString();
         return false;
     }
     return true;
@@ -198,12 +216,18 @@ std::unique_ptr<Config> Config::loadFromFile(const QString& filePath, QObject* p
 {
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly))
+    {
+        qCritical() << "Unable to open" << filePath;
         return nullptr;
+    }
 
     const QByteArray data = file.readAll();
     const QJsonDocument doc = QJsonDocument::fromJson(data);
     if (!doc.isObject())
+    {
+        qCritical() << "Unable to convert data into json object";
         return nullptr;
+    }
 
     const QJsonArray paramsArray = doc.object().value("parameters").toArray();
 
@@ -228,6 +252,7 @@ Config* Config::copy(QObject* parent)
 
     // 2) Copie la valeur du chemin
     clone->m_path = this->m_path;
+    clone->m_isEditable = this->m_isEditable;
 
     // 3) Copie profonde des paramètres
     for (const ParameterBase* p : m_parameters)

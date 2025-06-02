@@ -3,6 +3,7 @@
 
 #include "StringParameter.h"
 #include "ParametersWidgetCollection_global.h"
+#include "ParameterWidget.h"
 
 #include <QWidget>
 #include <QString>
@@ -10,7 +11,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 
-class PARAMETERS_WIDGETS_API StringParameterWidget : public QWidget
+class PARAMETERS_WIDGETS_API StringParameterWidget : public ParameterWidget
 {
 	Q_OBJECT
 	Q_PROPERTY(QString name READ getName WRITE setName NOTIFY nameChanged)
@@ -18,14 +19,15 @@ class PARAMETERS_WIDGETS_API StringParameterWidget : public QWidget
     Q_PROPERTY(StringParameter::Kind kind READ getKind WRITE setKind NOTIFY kindChanged)
     Q_PROPERTY(bool canEditPath READ canEditPath WRITE setCanEditPath NOTIFY canEditPathChanged)
 
-public:   
-	explicit StringParameterWidget(QWidget* parent = nullptr);
+public:
+    explicit StringParameterWidget(bool readOnly = false, QWidget* parent = nullptr);
 	~StringParameterWidget() = default;
 
 	QString getName() const;
 	QString getValue() const;
     StringParameter::Kind getKind() const;
     bool canEditPath() const;
+    int getLabelWidth() const override;
 
 	void setFrom(const StringParameter* parameter);
 
@@ -34,6 +36,8 @@ public slots:
 	void setValue(const QString& value);
     void setKind(StringParameter::Kind kind);
     void setCanEditPath(bool canEditPath);
+    void setLabelWidth(int width) override;
+    void setEnabled(bool enabled);
 
 private slots:
 	void onEditingFinished();
@@ -55,6 +59,7 @@ private:
     QPushButton* m_browseBtn;
     StringParameter::Kind m_kind;
     bool m_canEditPath;
+    bool m_readOnly;
 };
 
 #endif // STRINGPARAMETERWIDGET_H
