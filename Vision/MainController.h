@@ -6,6 +6,7 @@
 #include "NavigationNode.h"
 #include "ParameterBase.h"
 #include "Config.h"
+#include "MockConfig.h"
 
 class MainController : public WindowControllerBase
 {
@@ -22,7 +23,9 @@ private slots:
 	void onNavigationRequest(NavigationNode* newNode, NavigationNode* currentNode, bool* accept);
 	void onNavigationDone(NavigationNode* node);
 
-	void appConfigSaved(const Config* config);
+	void appConfigValidator(const ParameterBase* parameterChanged, Config* config);
+
+	void appConfigPathChanged(const QString& path);
 	void lightControlConfigSaved(const Config* config);
 	void cameraConfigSaved(const Config* config);
 	void roiConfigSaved(const Config* config);
@@ -42,6 +45,7 @@ private:
 	MainModel* m_model;
 	MainWindow* m_view;
 	Config* m_tempConfig;
+	MockConfig m_mockConfig;
 
 	NavigationTree* m_tree;
 	NavigationNode* m_rootNode;

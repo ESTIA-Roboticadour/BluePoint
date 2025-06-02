@@ -15,12 +15,18 @@ AppConfig::AppConfig(QObject* parent) :
 	m_lightControlConfigFolder(LIGHT_CONTROL_CONFIG_FOLDER, LIGHT_CONTROL_CONFIG_FOLDER_DEFAULT_VALUE, StringParameter::Kind::DirectoryPath, this),
 	m_cameraConfigFolder(CAMERA_CONFIG_FOLDER, CAMERA_CONFIG_FOLDER_DEFAULT_VALUE, StringParameter::Kind::DirectoryPath, this),
 	m_roiConfigFolder(ROI_CONFIG_FOLDER, ROI_CONFIG_FOLDER_DEFAULT_VALUE, StringParameter::Kind::DirectoryPath, this),
+	m_cameraType("Camera Type", this),
 	m_lightControlConfigPath(LIGHT_CONTROL_CONFIG_PATH, "", StringParameter::Kind::FilePath, this),
 	m_cameraConfigPath(CAMERA_CONFIG_PATH, "", StringParameter::Kind::FilePath, this),
-	m_roiConfigPath(ROI_CONFIG_PATH, "", StringParameter::Kind::FilePath, this),
-	m_cameraType("Camera Type", this)
+	m_roiConfigPath(ROI_CONFIG_PATH, "", StringParameter::Kind::FilePath, this)
 {
 	m_cameraType.addItem("Basler", "Basler");
+	m_cameraType.addItem("RealSense", "RealSense");
+	
+	m_lightControlConfigPath.setCanEditPath(false);
+	m_cameraConfigPath.setCanEditPath(false);
+	m_roiConfigPath.setCanEditPath(false);
+
 	addParameters();
 }
 
@@ -34,10 +40,10 @@ AppConfig::AppConfig(const AppConfig& config, QObject* parent) :
 	m_lightControlConfigFolder(LIGHT_CONTROL_CONFIG_FOLDER, config.m_lightControlConfigFolder, this),
 	m_cameraConfigFolder(CAMERA_CONFIG_FOLDER, config.m_cameraConfigFolder, this),
 	m_roiConfigFolder(ROI_CONFIG_FOLDER, config.m_roiConfigFolder, this),
+	m_cameraType("Camera Type", this),
 	m_lightControlConfigPath(LIGHT_CONTROL_CONFIG_PATH, config.m_lightControlConfigPath, this),
 	m_cameraConfigPath(CAMERA_CONFIG_PATH, config.m_cameraConfigPath, this),
-	m_roiConfigPath(ROI_CONFIG_PATH, config.m_roiConfigPath, this),
-	m_cameraType("Camera Type", this)
+	m_roiConfigPath(ROI_CONFIG_PATH, config.m_roiConfigPath, this)
 {
 	m_configFolder.setKind(StringParameter::Kind::DirectoryPath);
 	m_appConfigFolder.setKind(StringParameter::Kind::DirectoryPath);
@@ -52,6 +58,9 @@ AppConfig::AppConfig(const AppConfig& config, QObject* parent) :
 	{
 		m_cameraType.addItem(camera.first, camera.second.toString());
 	}
+	m_lightControlConfigPath.setCanEditPath(false);
+	m_cameraConfigPath.setCanEditPath(false);
+	m_roiConfigPath.setCanEditPath(false);
 	addParameters();
 }
 
@@ -148,23 +157,23 @@ Config* AppConfig::copy(QObject* parent)
 	return newConfig;
 }
 
-bool AppConfig::backupConfigFound()
-{
-	QFile file(BACKUP_FILE_PATH);
-	return file.exists();
-}
+//bool AppConfig::backupConfigFound()
+//{
+//	QFile file(BACKUP_FILE_PATH);
+//	return file.exists();
+//}
 
-void AppConfig::deleteBackupConfig()
-{
-	if (backupConfigFound())
-	{
-		QFile file(BACKUP_FILE_PATH);
-		if (file.remove())
-			qDebug() << "Backup config deleted.";
-		else
-			qWarning() << "Failed to delete backup config.";
-	}
-}
+//void AppConfig::deleteBackupConfig()
+//{
+//	if (backupConfigFound())
+//	{
+//		QFile file(BACKUP_FILE_PATH);
+//		if (file.remove())
+//			qDebug() << "Backup config deleted.";
+//		else
+//			qWarning() << "Failed to delete backup config.";
+//	}
+//}
 
 void AppConfig::addParameters()
 {
@@ -174,33 +183,33 @@ void AppConfig::addParameters()
 	m_folderGroup.addParameter(&m_cameraConfigFolder);
 	m_folderGroup.addParameter(&m_roiConfigFolder);
 
+	m_deviceGroup.addParameter(&m_cameraType);
+
 	m_pathGroup.addParameter(&m_lightControlConfigPath);
 	m_pathGroup.addParameter(&m_cameraConfigPath);
 	m_pathGroup.addParameter(&m_roiConfigPath);
 
-	m_deviceGroup.addParameter(&m_cameraType);
-
 	addParameter(&m_folderGroup);
-	addParameter(&m_pathGroup);
 	addParameter(&m_deviceGroup);
+	addParameter(&m_pathGroup);
 }
 
-AppConfig* AppConfig::openBackupConfig()
-{
-	if (backupConfigFound())
-	{
-		QFile file(BACKUP_FILE_PATH);
-		if (file.open(QIODevice::ReadOnly))
-		{
-			bool configFullyLoaded;
-			std::unique_ptr<AppConfig> pConfig = Config::loadFromFile<AppConfig>(BACKUP_FILE_PATH, configFullyLoaded);
-			if (pConfig)
-				return pConfig.release();
-			file.close();
-		}
-	}
-	return nullptr;
-}
+//AppConfig* AppConfig::openBackupConfig()
+//{
+//	if (backupConfigFound())
+//	{
+//		QFile file(BACKUP_FILE_PATH);
+//		if (file.open(QIODevice::ReadOnly))
+//		{
+//			bool configFullyLoaded;
+//			std::unique_ptr<AppConfig> pConfig = Config::loadFromFile<AppConfig>(BACKUP_FILE_PATH, configFullyLoaded);
+//			if (pConfig)
+//				return pConfig.release();
+//			file.close();
+//		}
+//	}
+//	return nullptr;
+//}
 
 bool AppConfig::setFromConfig(const Config* src, bool copyPath)
 {
@@ -249,6 +258,21 @@ bool AppConfig::setFromConfig(const Config* src, bool copyPath)
 			}
 		}
 
+		// Devices
+		if (GroupParameter* group = qobject_cast<GroupParameter*>(src->getParameter("Devices")))
+		{
+			// Camera type
+			if (ListParameterBase* cameraList = qobject_cast<ListParameterBase*>(group->getParameter("Camera Type")))
+			{
+				m_cameraType.clear();
+				for (const auto& item : cameraList->items())
+				{
+					m_cameraType.addItem(item.first, item.second.toString());
+				}
+				numberOfParametersSet++;
+			}
+		}
+
 		// Paths
 		if (GroupParameter* group = qobject_cast<GroupParameter*>(src->getParameter("Paths")))
 		{
@@ -270,21 +294,6 @@ bool AppConfig::setFromConfig(const Config* src, bool copyPath)
 			if (StringParameter* path = qobject_cast<StringParameter*>(group->getParameter(ROI_CONFIG_PATH)))
 			{
 				m_roiConfigPath.setValue(path->getValue());
-				numberOfParametersSet++;
-			}
-		}
-
-		// Devices
-		if (GroupParameter* group = qobject_cast<GroupParameter*>(src->getParameter("Devices")))
-		{
-			// Camera type
-			if (ListParameterBase* cameraList = qobject_cast<ListParameterBase*>(group->getParameter("Camera Type")))
-			{
-				m_cameraType.clear();
-				for (const auto& item : cameraList->items())
-				{
-					m_cameraType.addItem(item.first, item.second.toString());
-				}
 				numberOfParametersSet++;
 			}
 		}

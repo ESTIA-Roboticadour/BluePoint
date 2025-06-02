@@ -22,6 +22,7 @@ void AppStore::setAppConfigPath(const QString& path)
 	if (s_settings)
 	{
 		s_settings->setValue("General/AppConfigPath", Helper::makePathAbsolute(path));
+		s_settings->sync();
 	}
 }
 
@@ -105,6 +106,31 @@ void AppStore::setLightControlConfig(LightControlConfig* lightConfig)
 {
 	if (!s_lightControlConfig)
 	{
-		s_lightControlConfig = new LightControlConfig(*lightConfig);
+		s_lightControlConfig = (LightControlConfig*)lightConfig->copy();
+	}
+}
+
+void AppStore::setCameraConfig(CameraConfig* cameraConfig)
+{
+	if (!s_cameraConfig)
+	{
+		s_cameraConfig = (CameraConfig*)cameraConfig->copy();
+	}
+}
+
+void AppStore::setRoiConfig(RoiConfig* roiConfig)
+{
+	if (!s_roiConfig)
+	{
+		s_roiConfig = (RoiConfig*)roiConfig->copy();
+	}
+}
+
+void AppStore::eraseCameraConfig()
+{
+	if (s_cameraConfig)
+	{
+		s_cameraConfig->deleteLater();
+		s_cameraConfig = nullptr;
 	}
 }

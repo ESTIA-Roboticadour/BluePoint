@@ -26,10 +26,15 @@ DeviceView* ViewFactory::createDeviceView(const QString& cameraType, CameraConfi
 	return view;
 }
 
-ConfigurationView* ViewFactory::createConfigurationView(const QString& title, Config* config, QWidget* parent)
+ConfigurationView* ViewFactory::createConfigurationView(const QString& title, Config* config, QWidget* parent, const ConfigValidatorCallback& validator)
 {
-	ConfigurationModel* model = new ConfigurationModel(config);
-	ConfigurationView* view = new ConfigurationView(title, parent);
+	return createConfigurationView(title, config, false, parent, validator);
+}
+
+ConfigurationView* ViewFactory::createConfigurationView(const QString& title, Config* config, bool isReadOnly, QWidget* parent, const ConfigValidatorCallback& validator)
+{
+	ConfigurationModel* model = new ConfigurationModel(config, nullptr, validator);
+	ConfigurationView* view = new ConfigurationView(title, isReadOnly, parent);
 	view->setConfig(model->getEditableConfig());
 	ConfigurationController* controller = new ConfigurationController(model, view);
 	return view;

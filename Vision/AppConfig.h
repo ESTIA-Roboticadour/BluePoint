@@ -47,14 +47,13 @@ public:
 	QString getCameraType() const;
 
 	void reset() override;
-
 	Config* copy(QObject* parent=nullptr) override;
 
 	// static
 
-	static bool backupConfigFound();
-	static void deleteBackupConfig();
-	static AppConfig* openBackupConfig();
+	//static bool backupConfigFound();
+	//static void deleteBackupConfig();
+	//static AppConfig* openBackupConfig();
 
 private:
 	bool setFromConfig(const Config* src, bool copyPath) override;
@@ -64,8 +63,8 @@ private:
 
 private:
 	GroupParameter m_folderGroup;
-	GroupParameter m_pathGroup;
 	GroupParameter m_deviceGroup;
+	GroupParameter m_pathGroup;
 
 	// folder
 
@@ -75,12 +74,12 @@ private:
 	StringParameter m_cameraConfigFolder;
 	StringParameter m_roiConfigFolder;
 
+	ListParameter<QString> m_cameraType;
+
 	// path
 	StringParameter m_lightControlConfigPath;
 	StringParameter m_cameraConfigPath;
 	StringParameter m_roiConfigPath;
-
-	ListParameter<QString> m_cameraType;
 
 	static const inline QString CONFIG_FOLDER = "Config Folder";
 	static const inline QString APP_CONFIG_FOLDER = "App Config Folder";

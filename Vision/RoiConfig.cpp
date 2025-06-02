@@ -133,6 +133,13 @@ void RoiConfig::reset()
 	setFromConfig(&newConfig, false);
 }
 
+Config* RoiConfig::copy(QObject* parent)
+{
+	RoiConfig* newConfig = new RoiConfig(parent);
+	newConfig->setFromConfig(this, true);
+	return newConfig;
+}
+
 bool RoiConfig::setFromConfig(const Config* src, bool copyPath)
 {
 	int numberOfParametersToSet = 4;

@@ -11,17 +11,18 @@
 #include <QPalette>
 #include <QColor>
 #include <QFileDialog>
+#include <QGroupBox>
 
-ConfigurationView::ConfigurationView(const QString& title, QWidget* parent) :
+ConfigurationView::ConfigurationView(const QString& title, bool isReadOnly, QWidget* parent) :
 	TransparentScrollArea(parent),
 	m_configPath(),
 	m_isConfigModified(false),
 	m_isFullPath(false)
 {
-	buildUi(title);
+	buildUi(title, isReadOnly);
 }
 
-void ConfigurationView::buildUi(const QString& titleStr)
+void ConfigurationView::buildUi(const QString& titleStr, bool isReadOnly)
 {
 	/* ---- widget qui contiendra tout le contenu défilable ---- */
 	auto* content = new QWidget(scrollArea());
@@ -66,9 +67,17 @@ void ConfigurationView::buildUi(const QString& titleStr)
 	vMain->addWidget(sep);
 
 	/* ---- vue des paramètres ---- */
-	m_parametersView = new ParametersView(content);
+	QGroupBox* box = new QGroupBox("Parameters", content);
+	auto* boxLayout = new QVBoxLayout(box);
+
+	m_parametersView = new ParametersView(box);
+	m_parametersView->setReadOnly(isReadOnly);
+	m_parametersView->setAlignment(ParametersView::Alignment::NoAlignment);
 	m_parametersView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	vMain->addWidget(m_parametersView);
+
+	boxLayout->addWidget(m_parametersView);
+
+	vMain->addWidget(box);
 
 	/* ---- boutons ---- */
 	auto* hBtns = new QHBoxLayout();
@@ -86,6 +95,8 @@ void ConfigurationView::buildUi(const QString& titleStr)
 	hBtns->addWidget(m_resetButton);
 	hBtns->addWidget(m_openButton);
 	hBtns->addWidget(m_saveButton);
+	hBtns->addStretch();
+
 	vMain->addLayout(hBtns);
 
 	vMain->addStretch();
@@ -125,6 +136,7 @@ void ConfigurationView::updateUiConfig(bool isModified)
 void ConfigurationView::updateFileLabel()
 {
 	m_pathLabel->setText(m_configPath.isEmpty() ? "Not saved" : ((m_isFullPath ? m_configPath : QFileInfo(m_configPath).fileName()) + (m_isConfigModified ? "*" : "")));
+	m_pathLabel->setToolTip(m_configPath);
 }
 
 void ConfigurationView::setConfig(const Config* config)
@@ -134,7 +146,6 @@ void ConfigurationView::setConfig(const Config* config)
 		m_configPath = config->getPath();
 		m_isConfigModified = true; // set to true to be sure next updateUiConfig(false) will be applied
 		updateUiConfig(false);
-		m_pathLabel->setToolTip(m_configPath);
 		QList<ParameterBase*> params = config->getParameters();
 		QList<const ParameterBase*> constParams;
 		for (auto* param : params)
@@ -210,11 +221,5 @@ void ConfigurationView::onConfigCanceled()
 void ConfigurationView::onConfigSaved(const Config* config)
 {
 	m_configPath = config->getPath();
-	updateUiConfig(false);
-}
-
-void ConfigurationView::onConfigOpened(const QString& path)
-{
-	m_configPath = path;
 	updateUiConfig(false);
 }

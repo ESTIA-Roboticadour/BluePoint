@@ -142,6 +142,7 @@
     <ClCompile Include="ImageTransformer.cpp" />
     <ClCompile Include="LightControl.cpp" />
     <ClCompile Include="LightControlConfig.cpp" />
+    <ClCompile Include="MockConfig.cpp" />
     <ClCompile Include="ModelBase.cpp" />
     <ClCompile Include="RoiConfig.cpp" />
     <ClCompile Include="RoiTransformer.cpp" />
@@ -200,11 +201,13 @@
     <QtMoc Include="DeviceController.h" />
     <QtMoc Include="DeviceModel.h" />
     <QtMoc Include="BaslerCamera.h" />
+    <ClInclude Include="CallbackTypes.h" />
     <ClInclude Include="CameraFactory.h" />
     <QtMoc Include="ConfigurationView.h" />
     <QtMoc Include="ConfigurationController.h" />
     <QtMoc Include="ConfigurationModel.h" />
     <ClInclude Include="Helper.h" />
+    <QtMoc Include="MockConfig.h" />
     <ClInclude Include="ViewFactory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

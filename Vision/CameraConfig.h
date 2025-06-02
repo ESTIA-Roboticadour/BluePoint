@@ -21,6 +21,7 @@ public:
 	void setFps(const int fps);
 
 	void reset() override;
+	Config* copy(QObject* parent = nullptr) override;
 
 protected:
 	bool setFromConfig(const Config* src, bool copyPath) override;

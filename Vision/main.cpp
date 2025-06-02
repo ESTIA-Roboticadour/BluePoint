@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
         status = app.exec();
 
         // Nettoyage de fin
-        AppConfig::deleteBackupConfig();
+        //AppConfig::deleteBackupConfig();
     }
     else
     {

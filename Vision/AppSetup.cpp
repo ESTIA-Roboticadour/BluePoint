@@ -123,24 +123,24 @@ AppConfig* AppSetup::createAppConfig(const QString& filepath)
 {
 	AppConfig* result = nullptr;
 
-	if (AppConfig::backupConfigFound() &&
-		QMessageBox::question(nullptr,
-			"Backup config",
-			"A configuration backup file has been found. "
-			"Would you like to recover this configuration? "
-			"If you click \"No\", this backup will be lost.")
-		== QMessageBox::Yes)
-	{
-		result = AppConfig::openBackupConfig();
-		if (result)
-			return result;
-		else
-		{
-			QMessageBox::warning(nullptr, "Backup config", "Backup file not loaded.");
-			addWarning("Backup file not loaded.");
-		}
-	}
-	AppConfig::deleteBackupConfig();
+	//if (AppConfig::backupConfigFound() &&
+	//	QMessageBox::question(nullptr,
+	//		"Backup config",
+	//		"A configuration backup file has been found. "
+	//		"Would you like to recover this configuration? "
+	//		"If you click \"No\", this backup will be lost.")
+	//	== QMessageBox::Yes)
+	//{
+	//	result = AppConfig::openBackupConfig();
+	//	if (result)
+	//		return result;
+	//	else
+	//	{
+	//		QMessageBox::warning(nullptr, "Backup config", "Backup file not loaded.");
+	//		addWarning("Backup file not loaded.");
+	//	}
+	//}
+	//AppConfig::deleteBackupConfig();
 
 	if (filepath.isEmpty())
 	{

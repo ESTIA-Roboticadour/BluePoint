@@ -13,7 +13,7 @@ class ConfigurationView : public TransparentScrollArea
 	Q_OBJECT
 
 public:
-	explicit ConfigurationView(const QString& title, QWidget* parent = nullptr);
+	ConfigurationView(const QString& title, bool isReadOnly = false, QWidget* parent = nullptr);
 
 	void setConfig(const Config* config);
 
@@ -21,7 +21,6 @@ public slots:
 	void onConfigModified();
 	void onConfigCanceled();
 	void onConfigSaved(const Config* config);
-	void onConfigOpened(const QString& path);
 
 private slots:
 	void onFullPathButtonClicked();
@@ -29,7 +28,7 @@ private slots:
 	void onOpenButtonClicked();
 
 private:
-	void buildUi(const QString& titleStr);
+	void buildUi(const QString& titleStr, bool isReadOnly);
 	void updateUiConfig(bool isModified);
 	void updateFileLabel();
 

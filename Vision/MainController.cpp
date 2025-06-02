@@ -5,16 +5,22 @@
 #include "ViewFactory.h"
 #include "AppConfig.h"
 #include "CameraConfig.h"
+#include "BaslerCameraConfig.h"
 #include "LightControlConfig.h"
+#include "StringParameter.h"
+#include "ListParameter.h"
 
 #include <QLabel>
 #include <QMessageBox>
+#include <functional> // std::bind
+#include <memory>
 
 MainController::MainController(MainModel* model, MainWindow* view, QObject* parent) :
 	WindowControllerBase(model, view, parent),
 	m_view(view),
 	m_model(model),
 	m_tempConfig(nullptr),
+	m_mockConfig(this),
 	m_tree(nullptr),
 	m_rootNode(nullptr),
 	m_deviceNode(nullptr),
@@ -60,6 +66,8 @@ void MainController::setupConnections()
 
 	connect(m_tree, &NavigationTree::navigationRequest, this, &MainController::onNavigationRequest);
 	connect(m_tree, &NavigationTree::currentNodeChanged, this, &MainController::onNavigationDone);
+
+	connect(AppStore::getAppConfig(), &AppConfig::pathChanged, this, &MainController::appConfigPathChanged);
 }
 
 void MainController::onViewCloseRequested()
@@ -121,16 +129,60 @@ void MainController::updateCentralWidget(NavigationNode* node)
 	m_view->setBackgroundOpacity(opacity);
 }
 
-void MainController::appConfigSaved(const Config* config)
+void MainController::appConfigValidator(const ParameterBase* parameterChanged, Config* config)
 {
-	QString path = config->getPath();
-	int a = 0;
+	static bool settingConfig = false;
+
+	if (settingConfig)
+		return;
+
+	AppConfig* appConfig = (AppConfig*)config;
+
+	ParameterBase* pCameraConfigPath = ((GroupParameter*)appConfig->getParameter("Paths"))->getParameter("Camera Config Path");
+	ParameterBase* pCameraType = ((GroupParameter*)appConfig->getParameter("Devices"))->getParameter("Camera Type");
+
+	QString cameraConfigPath = appConfig->getCameraConfigPath();
+	QString cameraType = appConfig->getCameraType();
+
+	if (parameterChanged == pCameraType)
+	{
+		// changement de type de caméra implique forcément une autre config
+		if (!cameraConfigPath.isEmpty())
+		{
+			settingConfig = true;
+			appConfig->setCameraConfigPath("");
+			settingConfig = false;
+			QMessageBox::warning(m_view, "Invalid camera configuration", "Camera type changed to: " + appConfig->getCameraType() + "\nPrevious config (" + cameraConfigPath + ") is now invalid.");
+		}
+	}
+	else if (parameterChanged == pCameraConfigPath)
+	{
+		bool fullyLoaded;
+		if (cameraType == "Basler")
+		{
+			std::unique_ptr<BaslerCameraConfig> c = BaslerCameraConfig::loadFromFile<BaslerCameraConfig>(cameraConfigPath, fullyLoaded);
+			if (!(c.get() && fullyLoaded))
+			{
+				settingConfig = true;
+				appConfig->setCameraConfigPath("");
+				QMessageBox::warning(m_view, "Invalid camera configuration", "Config (" + cameraConfigPath + ") is not valid.\nCamera type is: " + cameraType);
+				settingConfig = false;
+			}
+		}
+		else if (cameraType == "RealSense")
+		{
+
+		}
+	}
+}
+
+void MainController::appConfigPathChanged(const QString& path)
+{
+	AppStore::setAppConfigPath(path);
 }
 
 void MainController::lightControlConfigSaved(const Config* config)
 {
-	QString path = config->getPath();
-	int a = 0;
 	if (!AppStore::getLightControlConfig())
 	{
 		if (LightControlConfig* lightConfig = (LightControlConfig*)dynamic_cast<const LightControlConfig*>(config))
@@ -138,18 +190,33 @@ void MainController::lightControlConfigSaved(const Config* config)
 			AppStore::setLightControlConfig(lightConfig);
 		}
 	}
+	AppStore::getAppConfig()->setLightControlConfigPath(config->getPath());
 }
 
 void MainController::cameraConfigSaved(const Config* config)
 {
-	QString path = config->getPath();
-	int a = 0;
+	// @Todo: Verifier le type de la camera pour voir si ça correspond avec la config sélectionnée
+
+	if (!AppStore::getCameraConfig())
+	{
+		if (CameraConfig* cameraConfig = (CameraConfig*)dynamic_cast<const CameraConfig*>(config))
+		{
+			AppStore::setCameraConfig(cameraConfig);
+		}
+	}
+	AppStore::getAppConfig()->setCameraConfigPath(config->getPath());
 }
 
 void MainController::roiConfigSaved(const Config* config)
 {
-	QString path = config->getPath();
-	int a = 0;
+	if (!AppStore::getRoiConfig())
+	{
+		if (RoiConfig* roiConfig = (RoiConfig*)dynamic_cast<const RoiConfig*>(config))
+		{
+			AppStore::setRoiConfig(roiConfig);
+		}
+	}
+	AppStore::getAppConfig()->setRoiConfigPath(config->getPath());
 }
 
 void MainController::navigateDeviceNode()
@@ -163,15 +230,7 @@ void MainController::navigateDeviceNode()
 
 void MainController::navigateConfigurationNode()
 {
-	AppConfig* config = AppStore::getAppConfig();
-	if (!config)
-	{
-		config = new AppConfig();
-		m_tempConfig = config;
-	}
-	auto* configView = ViewFactory::createConfigurationView("Configuration", config, m_view);
-	connect(config, &Config::saved, this, &MainController::appConfigSaved);
-	m_view->setCentralWidget(configView);
+	m_view->setCentralWidget(ViewFactory::createConfigurationView("Configuration", AppStore::getAppConfig(), m_view, std::bind(&MainController::appConfigValidator, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 void MainController::navigateLightNode()
@@ -182,9 +241,8 @@ void MainController::navigateLightNode()
 		config = new LightControlConfig();
 		m_tempConfig = config;
 	}
-	auto* configView = ViewFactory::createConfigurationView("Light configuration", config, m_view);
-	connect(config, &Config::saved, this, &MainController::lightControlConfigSaved);
-	m_view->setCentralWidget(configView);
+	connect(m_tempConfig, &Config::saved, this, &MainController::lightControlConfigSaved);
+	m_view->setCentralWidget(ViewFactory::createConfigurationView("Light configuration", m_tempConfig, m_view));
 }
 
 void MainController::navigateCameraNode()
@@ -195,9 +253,8 @@ void MainController::navigateCameraNode()
 		config = new CameraConfig();
 		m_tempConfig = config;
 	}
-	auto* configView = ViewFactory::createConfigurationView("Camera configuration", AppStore::getCameraConfig(), m_view);
-	connect(config, &Config::saved, this, &MainController::cameraConfigSaved);
-	m_view->setCentralWidget(configView);
+	connect(m_tempConfig, &Config::saved, this, &MainController::cameraConfigSaved);
+	m_view->setCentralWidget(ViewFactory::createConfigurationView("Camera configuration", m_tempConfig, m_view));
 }
 
 void MainController::navigateRoiNode()
@@ -208,7 +265,6 @@ void MainController::navigateRoiNode()
 		config = new RoiConfig();
 		m_tempConfig = config;
 	}
-	auto* configView = ViewFactory::createConfigurationView("ROI configuration", AppStore::getRoiConfig(), m_view);
-	connect(config, &Config::saved, this, &MainController::roiConfigSaved);
-	m_view->setCentralWidget(configView);
+	connect(m_tempConfig, &Config::saved, this, &MainController::roiConfigSaved);
+	m_view->setCentralWidget(ViewFactory::createConfigurationView("ROI configuration", m_tempConfig, m_view));
 }

@@ -66,6 +66,13 @@ void CameraConfig::reset()
 	setFromConfig(&newConfig, false);
 }
 
+Config* CameraConfig::copy(QObject* parent)
+{
+	CameraConfig* newConfig = new CameraConfig(parent);
+	newConfig->setFromConfig(this, true);
+	return newConfig;
+}
+
 void CameraConfig::defineBounds()
 {
 	m_width.setMinimum(2);

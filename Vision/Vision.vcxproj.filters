@@ -208,6 +208,9 @@
     <ClCompile Include="Helper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MockConfig.cpp">
+      <Filter>Services\Config</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainController.h">
@@ -282,6 +285,9 @@
     <QtMoc Include="ConfigurationController.h">
       <Filter>Features\ConfigurationView\Controllers</Filter>
     </QtMoc>
+    <QtMoc Include="MockConfig.h">
+      <Filter>Services\Config</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppStore.h">
@@ -333,6 +339,9 @@
       <Filter>BaslerAPI</Filter>
     </ClInclude>
     <ClInclude Include="Helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CallbackTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

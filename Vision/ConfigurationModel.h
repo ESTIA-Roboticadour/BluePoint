@@ -2,6 +2,7 @@
 #include "ModelBase.h"
 #include "Config.h"
 #include "ParameterBase.h"
+#include "CallbackTypes.h"
 
 #include <QObject>
 #include <QString>
@@ -10,7 +11,7 @@ class ConfigurationModel : public ModelBase
 {
 	Q_OBJECT
 public:
-	explicit ConfigurationModel(Config* srcConfig, QObject* parent = nullptr);
+	explicit ConfigurationModel(Config* srcConfig, QObject* parent = nullptr, ConfigValidatorCallback validator = {});
 
 	Config* getEditableConfig() const;
 
@@ -27,9 +28,9 @@ signals:
 	void canceled();
 	void changed();
 	void saved(const Config* config);
-	void opened(const QString& path);
 
 private:
 	Config* m_srcConfig;
 	Config* m_editableConfig;
+	ConfigValidatorCallback m_validator;
 };

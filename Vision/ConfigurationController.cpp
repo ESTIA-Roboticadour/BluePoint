@@ -20,7 +20,6 @@ void ConfigurationController::setupConnections()
 
 	connect(m_model, &ConfigurationModel::changed, m_view, &ConfigurationView::onConfigModified);
 	connect(m_model, &ConfigurationModel::saved, m_view, &ConfigurationView::onConfigSaved);
-	connect(m_model, &ConfigurationModel::opened, m_view, &ConfigurationView::onConfigOpened);
 	connect(m_model, &ConfigurationModel::canceled, m_view, &ConfigurationView::onConfigCanceled);
 
 	connect(m_view, &ConfigurationView::cancelRequested, m_model, &ConfigurationModel::cancel);
