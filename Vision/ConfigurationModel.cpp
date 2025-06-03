@@ -55,6 +55,7 @@ void ConfigurationModel::reset()
 		disconnect(m_editableConfig, &Config::parameterChanged, this, &ConfigurationModel::onConfigChanged);
 		m_editableConfig->reset();
 		connect(m_editableConfig, &Config::parameterChanged, this, &ConfigurationModel::onConfigChanged);
+		emit changed();
 	}
 }
 
@@ -68,8 +69,10 @@ void ConfigurationModel::save(const QString& path)
 
 		if (m_srcConfig->save(path))
 		{
-			AppStore::setIsInEdition(false);
+			disconnect(m_editableConfig, &Config::parameterChanged, this, &ConfigurationModel::onConfigChanged);
 			m_editableConfig->setFromConfig(m_srcConfig, true); // be sure of config path
+			connect(m_editableConfig, &Config::parameterChanged, this, &ConfigurationModel::onConfigChanged);
+			AppStore::setIsInEdition(false);
 			emit saved(m_editableConfig);
 		}
 		else

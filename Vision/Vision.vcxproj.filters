@@ -211,6 +211,9 @@
     <ClCompile Include="MockConfig.cpp">
       <Filter>Services\Config</Filter>
     </ClCompile>
+    <ClCompile Include="RealSenseCameraConfig.cpp">
+      <Filter>Services\Config</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainController.h">
@@ -286,6 +289,9 @@
       <Filter>Features\ConfigurationView\Controllers</Filter>
     </QtMoc>
     <QtMoc Include="MockConfig.h">
+      <Filter>Services\Config</Filter>
+    </QtMoc>
+    <QtMoc Include="RealSenseCameraConfig.h">
       <Filter>Services\Config</Filter>
     </QtMoc>
   </ItemGroup>

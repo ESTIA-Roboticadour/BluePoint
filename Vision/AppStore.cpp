@@ -60,6 +60,7 @@ void AppStore::init(
 		s_cameraConfig = cameraConfig;
 		s_roiConfig = roiConfig;
 
+		setAppConfigPath(s_appConfig->getPath());
 		s_initialized = true;
 	}
 }

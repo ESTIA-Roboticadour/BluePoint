@@ -6,6 +6,7 @@
 #include "AppConfig.h"
 #include "CameraConfig.h"
 #include "BaslerCameraConfig.h"
+#include "RealSenseCameraConfig.h"
 #include "LightControlConfig.h"
 #include "StringParameter.h"
 #include "ListParameter.h"
@@ -68,6 +69,8 @@ void MainController::setupConnections()
 	connect(m_tree, &NavigationTree::currentNodeChanged, this, &MainController::onNavigationDone);
 
 	connect(AppStore::getAppConfig(), &AppConfig::pathChanged, this, &MainController::appConfigPathChanged);
+	connect(AppStore::getAppConfig(), &AppConfig::parameterChanged, this, &MainController::appConfigParameterChanged);
+	connect(AppStore::getAppConfig(), &Config::saved, this, &MainController::appConfigSaved, Qt::UniqueConnection);
 }
 
 void MainController::onViewCloseRequested()
@@ -87,6 +90,8 @@ void MainController::onNavigationRequest(NavigationNode* newNode, NavigationNode
 		// Prevent navigation if in edition mode and not on root or app node
 		*accept = QMessageBox::question(m_view, "File not saved!", "You're still editing a file! Are you sure to quit the page? Modifications will be lost.",
 			QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes;
+		if (*accept)
+			AppStore::setIsInEdition(false);
 	}
 }
 
@@ -138,47 +143,80 @@ void MainController::appConfigValidator(const ParameterBase* parameterChanged, C
 
 	AppConfig* appConfig = (AppConfig*)config;
 
-	ParameterBase* pCameraConfigPath = ((GroupParameter*)appConfig->getParameter("Paths"))->getParameter("Camera Config Path");
+	GroupParameter* path = (GroupParameter*)appConfig->getParameter("Paths");
+
+	ParameterBase* pLightControlConfigPath = path->getParameter("Light Control Config Path");
+	ParameterBase* pCameraConfigPath = path->getParameter("Camera Config Path");
+	ParameterBase* pRoiConfigPath = path->getParameter("ROI Config Path");
+
 	ParameterBase* pCameraType = ((GroupParameter*)appConfig->getParameter("Devices"))->getParameter("Camera Type");
 
-	QString cameraConfigPath = appConfig->getCameraConfigPath();
-	QString cameraType = appConfig->getCameraType();
-
-	if (parameterChanged == pCameraType)
+	if (parameterChanged == pLightControlConfigPath)
 	{
-		// changement de type de caméra implique forcément une autre config
-		if (!cameraConfigPath.isEmpty())
+		if (!appConfig->isLightControlConfigValid())
 		{
+			QMessageBox::warning(m_view, "Invalid light control configuration", "The light control configuration file is incompatible.\nConfig file:"
+				+ appConfig->getLightControlConfigPath() + "\n\nConfig file selection will be erased.");
+			settingConfig = true;
+			appConfig->setLightControlConfigPath("");
+			settingConfig = false;
+		}
+	}
+	else if (parameterChanged == pCameraType || parameterChanged == pCameraConfigPath)
+	{
+		if (!appConfig->areCameraTypeAndCameraConfigValid())
+		{
+			QMessageBox::warning(m_view, "Invalid camera configuration", "The camera type and the camera configuration file are incompatible.\nCamera type:" + appConfig->getCameraType() +
+				"\nConfig file:" + appConfig->getCameraConfigPath() + "\n\nConfig file selection will be erased.");
+
 			settingConfig = true;
 			appConfig->setCameraConfigPath("");
 			settingConfig = false;
-			QMessageBox::warning(m_view, "Invalid camera configuration", "Camera type changed to: " + appConfig->getCameraType() + "\nPrevious config (" + cameraConfigPath + ") is now invalid.");
 		}
 	}
-	else if (parameterChanged == pCameraConfigPath)
+	else if (parameterChanged == pRoiConfigPath)
 	{
-		bool fullyLoaded;
-		if (cameraType == "Basler")
-		{
-			std::unique_ptr<BaslerCameraConfig> c = BaslerCameraConfig::loadFromFile<BaslerCameraConfig>(cameraConfigPath, fullyLoaded);
-			if (!(c.get() && fullyLoaded))
-			{
-				settingConfig = true;
-				appConfig->setCameraConfigPath("");
-				QMessageBox::warning(m_view, "Invalid camera configuration", "Config (" + cameraConfigPath + ") is not valid.\nCamera type is: " + cameraType);
-				settingConfig = false;
-			}
-		}
-		else if (cameraType == "RealSense")
-		{
-
-		}
+		QMessageBox::warning(m_view, "Invalid roi configuration", "The roi configuration file is incompatible.\nConfig file:"
+			+ appConfig->getRoiConfigPath() + "\n\nConfig file selection will be erased.");
+		settingConfig = true;
+		appConfig->setRoiConfigPath("");
+		settingConfig = false;
 	}
 }
 
 void MainController::appConfigPathChanged(const QString& path)
 {
 	AppStore::setAppConfigPath(path);
+}
+
+void MainController::appConfigParameterChanged(const ParameterBase* sender)
+{
+	AppStore::getAppConfig()->save();
+}
+
+void MainController::appConfigSaved(const Config* config)
+{
+	AppConfig* appConfig = AppStore::getAppConfig();
+	if (!appConfig->isLightControlConfigValid())
+	{
+		QMessageBox::warning(m_view, "Invalid light controll configuration", "The light control configuration file is incompatible.\nConfig file:"
+			+ appConfig->getLightControlConfigPath() + "\n\nConfig file selection will be erased.");
+		appConfig->setLightControlConfigPath("");
+	}
+	if (!appConfig->areCameraTypeAndCameraConfigValid())
+	{
+		QMessageBox::warning(m_view, "Invalid camera configuration", "The camera type and the camera configuration file are incompatible.\nCamera type:" + appConfig->getCameraType() +
+			"\nConfig file:" + appConfig->getCameraConfigPath() + "\n\nConfig file selection will be erased.");
+		appConfig->setCameraConfigPath("");
+
+		AppStore::eraseCameraConfig();
+	}
+	if (!appConfig->isRoiConfigValid())
+	{
+		QMessageBox::warning(m_view, "Invalid roi configuration", "The roi configuration file is incompatible.\nConfig file:" 
+			+ appConfig->getRoiConfigPath() + "\n\nConfig file selection will be erased.");
+		appConfig->setRoiConfigPath("");
+	}
 }
 
 void MainController::lightControlConfigSaved(const Config* config)
@@ -241,8 +279,8 @@ void MainController::navigateLightNode()
 		config = new LightControlConfig();
 		m_tempConfig = config;
 	}
-	connect(m_tempConfig, &Config::saved, this, &MainController::lightControlConfigSaved);
-	m_view->setCentralWidget(ViewFactory::createConfigurationView("Light configuration", m_tempConfig, m_view));
+	connect(config, &Config::saved, this, &MainController::lightControlConfigSaved, Qt::UniqueConnection);
+	m_view->setCentralWidget(ViewFactory::createConfigurationView("Light configuration", config, m_view));
 }
 
 void MainController::navigateCameraNode()
@@ -250,11 +288,16 @@ void MainController::navigateCameraNode()
 	CameraConfig* config = AppStore::getCameraConfig();
 	if (!config)
 	{
-		config = new CameraConfig();
+		QString cameraType = AppStore::getAppConfig()->getCameraType();
+		if (cameraType == "Basler")
+			config = new BaslerCameraConfig();
+		else if (cameraType == "RealSense")
+			config = new RealSenseCameraConfig();
+
 		m_tempConfig = config;
 	}
-	connect(m_tempConfig, &Config::saved, this, &MainController::cameraConfigSaved);
-	m_view->setCentralWidget(ViewFactory::createConfigurationView("Camera configuration", m_tempConfig, m_view));
+	connect(config, &Config::saved, this, &MainController::cameraConfigSaved, Qt::UniqueConnection);
+	m_view->setCentralWidget(ViewFactory::createConfigurationView("Camera configuration", config, m_view));
 }
 
 void MainController::navigateRoiNode()
@@ -265,6 +308,6 @@ void MainController::navigateRoiNode()
 		config = new RoiConfig();
 		m_tempConfig = config;
 	}
-	connect(m_tempConfig, &Config::saved, this, &MainController::roiConfigSaved);
-	m_view->setCentralWidget(ViewFactory::createConfigurationView("ROI configuration", m_tempConfig, m_view));
+	connect(config, &Config::saved, this, &MainController::roiConfigSaved, Qt::UniqueConnection);
+	m_view->setCentralWidget(ViewFactory::createConfigurationView("ROI configuration", config, m_view));
 }

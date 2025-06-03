@@ -144,6 +144,7 @@
     <ClCompile Include="LightControlConfig.cpp" />
     <ClCompile Include="MockConfig.cpp" />
     <ClCompile Include="ModelBase.cpp" />
+    <ClCompile Include="RealSenseCameraConfig.cpp" />
     <ClCompile Include="RoiConfig.cpp" />
     <ClCompile Include="RoiTransformer.cpp" />
     <ClCompile Include="ViewFactory.cpp" />
@@ -208,6 +209,7 @@
     <QtMoc Include="ConfigurationModel.h" />
     <ClInclude Include="Helper.h" />
     <QtMoc Include="MockConfig.h" />
+    <QtMoc Include="RealSenseCameraConfig.h" />
     <ClInclude Include="ViewFactory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

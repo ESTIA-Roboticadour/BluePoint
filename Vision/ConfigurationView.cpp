@@ -78,6 +78,7 @@ void ConfigurationView::buildUi(const QString& titleStr, bool isReadOnly)
 	boxLayout->addWidget(m_parametersView);
 
 	vMain->addWidget(box);
+	vMain->addStretch();
 
 	/* ---- boutons ---- */
 	auto* hBtns = new QHBoxLayout();
@@ -156,6 +157,7 @@ void ConfigurationView::setConfig(const Config* config)
 
 		m_resetButton->setEnabled(true);
 		m_openButton->setEnabled(true);
+		m_saveButton->setEnabled(true);
 	}
 	else
 	{
@@ -221,5 +223,6 @@ void ConfigurationView::onConfigCanceled()
 void ConfigurationView::onConfigSaved(const Config* config)
 {
 	m_configPath = config->getPath();
+	m_isConfigModified = true; // to force UI to refresh
 	updateUiConfig(false);
 }

@@ -1,5 +1,10 @@
 #pragma once
 #include "CameraConfig.h"
+#include "ListParameter.h"
+#include "NumericalParameter.h"
+
+#include <QString>
+#include <QStringList>
 
 class BaslerCameraConfig : public CameraConfig
 {
@@ -10,7 +15,14 @@ public:
 	BaslerCameraConfig(const BaslerCameraConfig& config, QObject* parent = nullptr);
 	~BaslerCameraConfig() override = default;
 
+	QString getSelectedFormat() const;
+	QStringList getFormats() const;
+
+	int getExposureTime() const;
+	int getGainDB() const;
+
 	void reset() override;
+	Config* copy(QObject* parent = nullptr) override;
 
 protected:
 	bool setFromConfig(const Config* src, bool copyPath) override;
@@ -18,4 +30,9 @@ protected:
 private:
 	void defineBounds();
 	void addParameters();
+
+private:
+	ListParameter<QString> m_formats;
+	NumericalParameter m_exposureTime;
+	NumericalParameter m_gainDB;
 };

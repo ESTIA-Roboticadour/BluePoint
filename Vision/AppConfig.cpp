@@ -1,5 +1,10 @@
 #include "AppConfig.h"
 #include "ListParameterBase.h"
+#include "BaslerCameraConfig.h"
+#include "RealSenseCameraConfig.h"
+#include "RoiConfig.h"
+#include "LightControlConfig.h"
+
 #include <QFile>
 #include <QVariant>
 #include <QPair>
@@ -22,7 +27,7 @@ AppConfig::AppConfig(QObject* parent) :
 {
 	m_cameraType.addItem("Basler", "Basler");
 	m_cameraType.addItem("RealSense", "RealSense");
-	
+
 	m_lightControlConfigPath.setCanEditPath(false);
 	m_cameraConfigPath.setCanEditPath(false);
 	m_roiConfigPath.setCanEditPath(false);
@@ -54,10 +59,18 @@ AppConfig::AppConfig(const AppConfig& config, QObject* parent) :
 	m_cameraConfigPath.setKind(StringParameter::Kind::FilePath);
 	m_roiConfigPath.setKind(StringParameter::Kind::FilePath);
 
-	for (const auto& camera : config.m_cameraType.items())
+	m_cameraType.addItem("Basler", "Basler");
+	m_cameraType.addItem("RealSense", "RealSense");
+
+	if (config.m_cameraType.getSelectedIndex() != -1)
 	{
-		m_cameraType.addItem(camera.first, camera.second.toString());
+		QString selectedKey = config.m_cameraType.getSelectedKey();
+		if (m_cameraType.containsKey(selectedKey))
+		{
+			m_cameraType.selectByKey(selectedKey);
+		}
 	}
+
 	m_lightControlConfigPath.setCanEditPath(false);
 	m_cameraConfigPath.setCanEditPath(false);
 	m_roiConfigPath.setCanEditPath(false);
@@ -155,6 +168,71 @@ Config* AppConfig::copy(QObject* parent)
 	AppConfig* newConfig = new AppConfig(parent);
 	newConfig->setFromConfig(this, true);
 	return newConfig;
+}
+
+bool AppConfig::areCameraTypeAndCameraConfigValid() const
+{
+	QString cameraConfigPath = getCameraConfigPath();
+	bool isValid = true;
+	if (!cameraConfigPath.isEmpty())
+	{
+		QString cameraType = getCameraType();
+		bool fullyLoaded;
+		if (cameraType == "Basler")
+		{
+			std::unique_ptr<BaslerCameraConfig> cameraConfig = BaslerCameraConfig::loadFromFile<BaslerCameraConfig>(cameraConfigPath, fullyLoaded);
+			if (!(cameraConfig.get() && fullyLoaded))
+			{
+				isValid = false;
+			}
+		}
+		else if (cameraType == "RealSense")
+		{
+			std::unique_ptr<RealSenseCameraConfig> cameraConfig = RealSenseCameraConfig::loadFromFile<RealSenseCameraConfig>(cameraConfigPath, fullyLoaded);
+			if (!(cameraConfig.get() && fullyLoaded))
+			{
+				isValid = false;
+			}
+		}
+		else
+		{
+			isValid = false;
+		}
+	}
+
+	return isValid;
+}
+
+bool AppConfig::isRoiConfigValid() const
+{
+	QString roiConfigPath = getRoiConfigPath();
+	bool isValid = true;
+	if (!roiConfigPath.isEmpty())
+	{
+		bool fullyLoaded;
+		std::unique_ptr<RoiConfig> roiConfig = RoiConfig::loadFromFile<RoiConfig>(roiConfigPath, fullyLoaded);
+		if (!(roiConfig.get() && fullyLoaded))
+		{
+			isValid = false;
+		}
+	}
+	return isValid;
+}
+
+bool AppConfig::isLightControlConfigValid() const
+{
+	QString lightControlConfigPath = getLightControlConfigPath();
+	bool isValid = true;
+	if (!lightControlConfigPath.isEmpty())
+	{
+		bool fullyLoaded;
+		std::unique_ptr<LightControlConfig> lightControlConfig = LightControlConfig::loadFromFile<LightControlConfig>(lightControlConfigPath, fullyLoaded);
+		if (!(lightControlConfig.get() && fullyLoaded))
+		{
+			isValid = false;
+		}
+	}
+	return isValid;
 }
 
 //bool AppConfig::backupConfigFound()
@@ -269,6 +347,7 @@ bool AppConfig::setFromConfig(const Config* src, bool copyPath)
 				{
 					m_cameraType.addItem(item.first, item.second.toString());
 				}
+				m_cameraType.selectValueByIndex(cameraList->getSelectedIndex());
 				numberOfParametersSet++;
 			}
 		}

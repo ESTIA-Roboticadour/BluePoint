@@ -49,6 +49,10 @@ public:
 	void reset() override;
 	Config* copy(QObject* parent=nullptr) override;
 
+	bool areCameraTypeAndCameraConfigValid() const;
+	bool isRoiConfigValid() const;
+	bool isLightControlConfigValid() const;
+
 	// static
 
 	//static bool backupConfigFound();

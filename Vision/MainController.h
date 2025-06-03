@@ -26,6 +26,8 @@ private slots:
 	void appConfigValidator(const ParameterBase* parameterChanged, Config* config);
 
 	void appConfigPathChanged(const QString& path);
+	void appConfigParameterChanged(const ParameterBase* sender);
+	void appConfigSaved(const Config* config);
 	void lightControlConfigSaved(const Config* config);
 	void cameraConfigSaved(const Config* config);
 	void roiConfigSaved(const Config* config);

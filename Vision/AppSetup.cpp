@@ -5,6 +5,7 @@
 #include "LightControlConfig.h"
 #include "RoiConfig.h"
 #include "BaslerCameraConfig.h"
+#include "RealSenseCameraConfig.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -252,6 +253,12 @@ CameraConfig* AppSetup::tryLoadCameraConfig(const QString& camera, const QString
 		BaslerCameraConfig* baslerConfig = tryLoadConfig<BaslerCameraConfig>("Basler camera config", filePath);
 		if (baslerConfig)
 			config = baslerConfig;
+	}
+	else if (camera == "RealSense")
+	{
+		RealSenseCameraConfig* realSenseConfig = tryLoadConfig<RealSenseCameraConfig>("RealSense camera config", filePath);
+		if (realSenseConfig)
+			config = realSenseConfig;
 	}
 	else
 	{
