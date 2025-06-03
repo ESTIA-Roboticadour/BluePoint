@@ -19,6 +19,12 @@ private slots:
 
 	void onModelReleased();
 
+	void onLightConnected() const;
+	void onLightDisconnected() const;
+
+	void onLightOnRequested() const;
+	void onLightOffRequested() const;
+
 private:
 	void setupConnections();
 

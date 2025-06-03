@@ -7,6 +7,7 @@ ConfigurationController::ConfigurationController(ConfigurationModel* model, Conf
 	m_view(view)
 {
 	setupConnections();
+	m_view->setConfig(m_model->getEditableConfig());
 }
 
 ConfigurationController::~ConfigurationController()

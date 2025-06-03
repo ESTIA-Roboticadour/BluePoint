@@ -15,14 +15,17 @@ LightControl::LightControl(QObject* parent) :
 
 void LightControl::release()
 {
-    if (m_serial.isOpen()) 
+    if (m_serial.isOpen())
+    {
+        turnOffAllRelays();
         m_serial.close();
+    }
     m_pollTimer.stop();
 
     emit released();
 }
 
-QStringList LightControl::getAvailablePorts() const
+QStringList LightControl::getAvailablePorts()
 {
     QStringList ports;
     for (const QSerialPortInfo& info : QSerialPortInfo::availablePorts()) {
@@ -60,6 +63,8 @@ void LightControl::connectToPort(const QString& portName)
         return;
     }
 
+    emit connected(portName);
+
     // Get module info
     sendCommand(0x5A); // ID and version
     if (m_serial.waitForReadyRead(500)) 
@@ -81,10 +86,33 @@ void LightControl::toggleRelay(int relayIndex)
     if (!m_serial.isOpen()) 
         return;
 
+	if (relayIndex < 0 || relayIndex >= 4)
+	{
+		qCritical() << "Invalid relay index:" << relayIndex;
+		return;
+	}
+
     static const int cmdOn[4] = { 0x65, 0x66, 0x67, 0x68 };
     static const int cmdOff[4] = { 0x6F, 0x70, 0x71, 0x72 };
 
     bool on = (m_relayStates & states[relayIndex]) == 0;
+    sendCommand(on ? cmdOn[relayIndex] : cmdOff[relayIndex]);
+}
+
+void LightControl::setRelay(int relayIndex, bool on)
+{
+    if (!m_serial.isOpen())
+        return;
+
+    if (relayIndex < 0 || relayIndex >= 4)
+    {
+        qCritical() << "Invalid relay index:" << relayIndex;
+        return;
+    }
+
+	static const int cmdOn[4] = { 0x65, 0x66, 0x67, 0x68 };
+    static const int cmdOff[4] = { 0x6F, 0x70, 0x71, 0x72 };
+
     sendCommand(on ? cmdOn[relayIndex] : cmdOff[relayIndex]);
 }
 
@@ -114,4 +142,17 @@ void LightControl::sendCommand(int command)
         m_serial.write(data);
         m_serial.waitForBytesWritten(500);
     }
+}
+
+void LightControl::turnOffAllRelays()
+{
+	for (int i = 0; i < 4; ++i)
+	{
+		if (m_relayStates & states[i])
+		{
+			sendCommand(0x6F + i); // Turn off relay
+			m_relayStates &= ~states[i];
+			emit relayStateChanged(i, false);
+		}
+	}
 }

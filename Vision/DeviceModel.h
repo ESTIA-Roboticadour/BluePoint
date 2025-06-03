@@ -1,8 +1,9 @@
 #pragma once
 #include "ModelBase.h"
 #include "CameraConfig.h"
-#include "LightControlConfig.h"
 #include "Camera.h"
+#include "LightControlConfig.h"
+#include "LightControl.h"
 
 #include <QString>
 
@@ -16,11 +17,17 @@ public:
 	CameraConfig* getCameraConfig() const { return m_cameraConfig; }
 	LightControlConfig* getLightConfig() const { return m_lightConfig; }
 	Camera* getCamera() const { return m_camera; }
+	LightControl* getLightControl() const { return m_lightControl; }
 
 	void release() override;
 
 	void open();
 	void close();
+
+	void connectLight() const;
+
+	void turnOnLight() const;
+	void turnOffLight() const;
 
 private slots:
 	void onCameraOpened();
@@ -29,21 +36,31 @@ private slots:
 	void onCameraFailedToClose(const QString& message);
 	void onCameraErrorThrown(const QString& error, const QString& message);
 
+	void onLightControlConnected(const QString& portName);
+	void onLightControlConnectionFailed(const QString& portName, const QString& error);
+	void onLightControlModuleInfoReceived(int id, int version);
+
 	void restartOpenCamera();
 	void restartCloseCamera();
 
 private:
 	void setupCamera(const QString& cameraType, CameraConfig* cameraConfig);
+	void setupLightControl(LightControlConfig* lightConfig);
 	void setupConnections();
 
 signals:
 	void cameraOpened();
 	void cameraClosed();
 
+	void lightControlConnected();
+	void lightControlDisconnected();
+
 private:
 	CameraConfig* m_cameraConfig;
 	LightControlConfig* m_lightConfig;
 	Camera* m_camera;
+	LightControl* m_lightControl;
 
 	bool m_isReleasing;
+	bool m_isLightOn;
 };

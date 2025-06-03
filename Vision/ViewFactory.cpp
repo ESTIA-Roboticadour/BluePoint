@@ -35,7 +35,6 @@ ConfigurationView* ViewFactory::createConfigurationView(const QString& title, Co
 {
 	ConfigurationModel* model = new ConfigurationModel(config, nullptr, validator);
 	ConfigurationView* view = new ConfigurationView(title, isReadOnly, parent);
-	view->setConfig(model->getEditableConfig());
 	ConfigurationController* controller = new ConfigurationController(model, view);
 	return view;
 }

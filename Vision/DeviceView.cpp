@@ -74,9 +74,6 @@ void DeviceView::buildUi()
     form->addRow(tr("Relay:"), m_relayLabel);
     vLight->addLayout(form);
 
-	m_errorLabel = new QLabel("", lightBox);
-	vLight->addWidget(m_errorLabel);
-
     auto* hBtns = new QHBoxLayout();
     m_onButton = new QPushButton(tr("On"), lightBox);
     m_offButton = new QPushButton(tr("Off"), lightBox);
@@ -111,16 +108,6 @@ void DeviceView::setButtonsState(bool enabled)
 {
 	m_onButton->setEnabled(enabled);
 	m_offButton->setEnabled(enabled);
-}
-
-void DeviceView::setError(const QString& error)
-{
-	m_errorLabel->setText(error);
-}
-
-void DeviceView::clearError()
-{
-    m_errorLabel->clear();
 }
 
 void DeviceView::setCameraConfig(const CameraConfig* cameraConfig)
