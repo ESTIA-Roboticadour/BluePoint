@@ -64,11 +64,6 @@ public:
         return added;
     }
 
-    const QStringList& getKeys() const override
-    {
-        return m_keys;
-    }
-
     QVariant getSelectedValue() const override
     {
         return (m_selectedIndex >= 0 && m_selectedIndex < m_values.size()) ?

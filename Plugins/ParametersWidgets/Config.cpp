@@ -29,8 +29,8 @@ Config::Config(const QList<ParameterBase*>& parameters, QObject* parent) :
 Config::Config(const Config& other, QObject* parent) :
 QObject(parent ? parent : other.parent()),
     m_parameters(),
-    m_path(),
-    m_isEditable(true)
+    m_path(other.m_path),
+    m_isEditable(other.m_isEditable)
 {
     cloneFrom(*this, other);
 }
@@ -38,8 +38,8 @@ QObject(parent ? parent : other.parent()),
 Config::Config(const Config& other) :
     QObject(other.parent()),
     m_parameters(),
-    m_path(),
-    m_isEditable(true)
+    m_path(other.m_path),
+    m_isEditable(other.m_isEditable)
 {
     cloneFrom(*this, other);
 }
@@ -247,19 +247,7 @@ std::unique_ptr<Config> Config::loadFromFile(const QString& filePath, QObject* p
 
 Config* Config::copy(QObject* parent)
 {
-    // 1) Nouvelle config, même parent
     auto clone = new Config(parent);
-
-    // 2) Copie la valeur du chemin
-    clone->m_path = this->m_path;
-    clone->m_isEditable = this->m_isEditable;
-
-    // 3) Copie profonde des paramètres
-    for (const ParameterBase* p : m_parameters)
-    {
-        if (p)
-            clone->addParameter(p->copy(clone));   // parent = clone
-    }
-
+    cloneFrom(*clone, *this);
     return clone;
 }

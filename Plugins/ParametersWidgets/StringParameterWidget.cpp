@@ -64,6 +64,11 @@ void StringParameterWidget::setFrom(const StringParameter* parameter)
     setKind(parameter->getKind());
     setCanEditPath(parameter->getCanEditPath());
 	setEnabled(parameter->getIsEditable());
+
+    if (!parameter->getCanEditPath())
+    {
+        connect(m_lineEdit, &QLineEdit::textChanged, this, &StringParameterWidget::valueChanged);
+    }
 }
 
 void StringParameterWidget::setValue(const QString& val) { m_lineEdit->setText(val); }

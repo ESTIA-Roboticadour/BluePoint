@@ -10,6 +10,16 @@ ListParameterBase::ListParameterBase(const QString& name, QObject* parent) :
     m_selectedIndex(-1)
 {}
 
+const QStringList& ListParameterBase::getKeys() const
+{
+    return m_keys;
+}
+
+const QVariantList& ListParameterBase::getValues() const
+{
+    return m_values;
+}
+
 int ListParameterBase::getSelectedIndex() const
 {
     return m_selectedIndex;
@@ -31,6 +41,26 @@ bool ListParameterBase::selectByKey(const QString& key)
         return true;
     }
     return false;
+}
+
+bool ListParameterBase::containsKey(const QString& key) const
+{
+    return m_keys.contains(key);
+}
+
+int ListParameterBase::indexOfKey(const QString& key) const
+{
+    return m_keys.indexOf(key);
+}
+
+bool ListParameterBase::containsValue(const QVariant& value) const
+{
+    return m_values.contains(value);
+}
+
+int ListParameterBase::indexOfValue(const QVariant& value) const
+{
+    return m_values.indexOf(value);
 }
 
 QList<QPair<QString, QVariant>> ListParameterBase::items() const

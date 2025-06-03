@@ -21,12 +21,21 @@ public:
     explicit ListParameterBase(const QString& name, QObject* parent = nullptr);
     virtual ~ListParameterBase() = default;
 
-    virtual const QStringList& getKeys() const = 0;
+    const QStringList& getKeys() const;
+    const QVariantList& getValues() const;
+
     virtual QVariant getSelectedValue() const = 0;
     virtual void selectValueByIndex(int index) = 0;
+
     int getSelectedIndex() const;
     QString getSelectedKey() const;
     bool selectByKey(const QString& key);
+
+    bool containsKey(const QString& key) const;
+    int indexOfKey(const QString& key) const;
+
+    bool containsValue(const QVariant& value) const;
+    int indexOfValue(const QVariant& value) const;
 
     QList<QPair<QString, QVariant>> items() const;
     void clear();

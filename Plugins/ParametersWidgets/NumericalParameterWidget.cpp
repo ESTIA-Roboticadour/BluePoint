@@ -110,9 +110,13 @@ double NumericalParameterWidget::getValue() const
 
 void NumericalParameterWidget::setValue(double val)
 {
-    if (m_value != val)
+    double k = std::round((val - m_minValue) / m_increment);
+    val = m_minValue + k * m_increment; // to be sure val is reachable
+
+    if (!qFuzzyCompare(1.0 + m_value, 1.0 + val))   // évite le cas où m_value == 0
     {
         m_value = val;
+
         if (m_doubleSpinBox)
             m_doubleSpinBox->setValue(val);
         else
@@ -167,9 +171,18 @@ void NumericalParameterWidget::setFrom(const NumericalParameter* parameter)
 
 void NumericalParameterWidget::onSpinBoxValueChanged(double value)
 {
-    m_isSliderUpdating = true;
-	m_slider->setValue(value);
-	m_isSliderUpdating = false;
+    double k = std::round((value - m_minValue) / m_increment);
+    double val = m_minValue + k * m_increment; // to be sure val is reachable
+    if (val != value)
+    {
+        m_doubleSpinBox->setValue(val);
+    }
+    else
+    {
+        m_isSliderUpdating = true;
+        m_slider->setValue(value);
+        m_isSliderUpdating = false;
+    }
 }
 
 void NumericalParameterWidget::onSliderValueChanged(int value)

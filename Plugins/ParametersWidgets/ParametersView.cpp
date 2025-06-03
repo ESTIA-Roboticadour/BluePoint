@@ -249,7 +249,6 @@ QWidget* ParametersView::createStringParameterWidget(const StringParameter* para
         connect(stringWidget, &StringParameterWidget::kindChanged, parameter, &StringParameter::setKind);
         connect(stringWidget, &StringParameterWidget::canEditPathChanged, parameter, &StringParameter::setCanEditPath);
 
-
         connect(parameter, &StringParameter::kindChanged, stringWidget, &StringParameterWidget::setKind);
         connect(parameter, &StringParameter::canEditPathChanged, stringWidget, &StringParameterWidget::setCanEditPath);
         connect(parameter, &ParameterBase::isEditableChanged, stringWidget, &QWidget::setEnabled);
