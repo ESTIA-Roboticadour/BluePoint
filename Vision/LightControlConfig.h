@@ -1,7 +1,7 @@
 #pragma once
 #include "Config.h"
 #include "NumericalParameter.h"
-#include "StringParameter.h"
+#include "ListParameter.h"
 
 #include <QString>
 
@@ -31,7 +31,6 @@ private:
 	void addParameters();
 
 private:
-	StringParameter m_comPort;
+	ListParameter<QString> m_comPort;
 	NumericalParameter m_relay;
 };
-

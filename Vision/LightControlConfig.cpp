@@ -1,29 +1,50 @@
 #include "LightControlConfig.h"
+#include "LightControl.h"
+#include "ListParameterBase.h"
+#include <QStringList>
 
 LightControlConfig::LightControlConfig(QObject* parent) :
 	Config(parent),
-	m_comPort("COM Port", "", StringParameter::Kind::Plain, this),
+	m_comPort("COM Port", this),
 	m_relay("Relay", 1, this)
 {
+	QStringList ports = LightControl::getAvailablePorts();
+	for (auto& port : ports)
+		m_comPort.addItem(port, port);
+
 	defineBounds();
 	addParameters();
 }
 
 LightControlConfig::LightControlConfig(const QString& comPort, int relay, QObject* parent) :
 	Config(parent),
-	m_comPort("COM Port", comPort, StringParameter::Kind::Plain, this),
+	m_comPort("COM Port", this),
 	m_relay("Relay", relay, this)
 {
+	QStringList ports = LightControl::getAvailablePorts();
+	for (auto& port : ports)
+		m_comPort.addItem(port, port);
+
+	if (m_comPort.containsKey(comPort))
+		m_comPort.selectByKey(comPort);
+
 	defineBounds();
 	addParameters();
 }
 
 LightControlConfig::LightControlConfig(const LightControlConfig& config, QObject* parent) :
 	Config(parent),
-	m_comPort("COM Port", config.m_comPort, this),
+	m_comPort("COM Port", this),
 	m_relay("Relay", config.m_relay, this)
 {
-	m_comPort.setKind(StringParameter::Kind::Plain);
+	QStringList ports = LightControl::getAvailablePorts();
+	for (auto& port : ports)
+		m_comPort.addItem(port, port);
+	
+	QString otherSelectedPort = config.m_comPort.getSelectedKey();
+	if (m_comPort.containsKey(otherSelectedPort))
+		m_comPort.selectByKey(otherSelectedPort);
+
 	defineBounds();
 	addParameters();
 }
@@ -43,7 +64,7 @@ void LightControlConfig::addParameters()
 
 QString LightControlConfig::getComPort() const
 {
-	return m_comPort.getValue();
+	return m_comPort.getSelectedKey();
 }
 
 int LightControlConfig::getRelay() const
@@ -53,7 +74,8 @@ int LightControlConfig::getRelay() const
 
 void LightControlConfig::setComPort(const QString& comPort)
 {
-	m_comPort.setValue(comPort);
+	if (m_comPort.containsKey(comPort))
+		m_comPort.selectByKey(comPort);
 }
 
 void LightControlConfig::setRelay(const int relay)
@@ -75,9 +97,16 @@ bool LightControlConfig::setFromConfig(const Config* src, bool copyPath)
 	Config::setFromConfig(src, copyPath);
 	if (src)
 	{
-		if (StringParameter* com = qobject_cast<StringParameter*>(src->getParameter("COM Port")))
+		if (ListParameterBase* portList = qobject_cast<ListParameterBase*>(src->getParameter("COM Port")))
 		{
-			m_comPort.setValue(com->getValue());
+			m_comPort.clear();
+			QStringList ports = LightControl::getAvailablePorts();
+			for (auto& port : ports)
+				m_comPort.addItem(port, port);
+
+			QString otherSelection = portList->getSelectedKey();
+			if (m_comPort.containsKey(otherSelection))
+				m_comPort.selectByKey(otherSelection);
 			numberOfParametersSet++;
 		}
 
