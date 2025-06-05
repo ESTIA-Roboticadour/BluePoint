@@ -127,3 +127,13 @@ void DeviceView::setCameraConfig(const CameraConfig* cameraConfig)
         m_parametersView->setParameters(QList<const ParameterBase*>());
     }
 }
+
+void DeviceView::onImageProvided(const QImage& image)
+{
+	m_frameViewer->setImage(image);
+}
+
+void DeviceView::clearImage()
+{
+    m_frameViewer->clear();
+}

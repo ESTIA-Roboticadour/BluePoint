@@ -11,6 +11,7 @@ DeviceController::DeviceController(DeviceModel* model, DeviceView* view, QObject
 	setupConnections();
 
 	m_model->connectLight();
+	m_model->openCamera();
 }
 
 DeviceController::~DeviceController()
@@ -24,6 +25,7 @@ void DeviceController::setupConnections()
 
 	connect(m_model, &DeviceModel::lightControlConnected, this, &DeviceController::onLightConnected);
 	connect(m_model, &DeviceModel::lightControlDisconnected, this, &DeviceController::onLightDisconnected);
+	connect(m_model, &DeviceModel::imageProvided, m_view, &DeviceView::onImageProvided);
 
 	connect(m_view, &DeviceView::lightOnRequested, this, &DeviceController::onLightOnRequested);
 	connect(m_view, &DeviceView::lightOffRequested, this, &DeviceController::onLightOffRequested);

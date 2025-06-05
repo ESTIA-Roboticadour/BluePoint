@@ -31,6 +31,7 @@ These are the main applications of the BluePoint project:
 
 - `CameraHeight` — Estimates the height of a camera.
 - `CameraAcquisition` — Opens and records video streams from a laptop webcam or Basler camera.
+- `LightControl` — Tool to identify the COM Port and relay used to control the light.
 - `Vision` — Handles the computer vision logic for the BluePoint robotic system.
 
 ---
@@ -88,7 +89,7 @@ BluePoint/
 ├── Plugins/                          # Qt Designer plugins and shared libraries
 │   ├── ParametersWidgets/
 │   ├── other plugins to compile ...
-|   ...
+│   ...
 ├── CameraAcquisition/                # Visual Studio app: capture and record video
 ├── Vision/                           # Visual Studio app: computer vision logic
 ├── other projects...

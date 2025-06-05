@@ -36,9 +36,17 @@ void FrameViewer::setSource(const QString &path)
 
 void FrameViewer::setImage(const QImage &img)
 {
+    clear();
     m_image = img;
-    m_source.clear();
     updateScaledImage();
+    update();
+}
+
+void FrameViewer::clear()
+{
+    m_source.clear();
+    m_image = QImage();
+    m_scaledImage = m_image;
     update();
 }
 

@@ -66,10 +66,11 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
       <AdditionalLibraryDirectories>C:\opencv\build\x64\vc16\lib;C:\Program Files\Basler\pylon 8\Development\lib\x64;$(SolutionDir)Libraries\FrameViewer\lib;$(SolutionDir)Libraries\LayeredWidget\lib;$(SolutionDir)Libraries\LogoWidget\lib;$(SolutionDir)Libraries\LogTool\lib;$(SolutionDir)Libraries\NavigationWidgets\lib;$(SolutionDir)Libraries\ParametersWidgets\lib;$(SolutionDir)Libraries\TogglePanel\lib;$(SolutionDir)Libraries\TransparentScrollArea\lib;$(SolutionDir)Libraries\XAppLayout\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opencv_world4110d.lib;PylonBase_v10.lib;PylonC_v10.lib;GCBase_MD_VC141_v3_1_Basler_pylon_v3.lib;GenApi_MD_VC141_v3_1_Basler_pylon_v3.lib;FrameViewerd.lib;LayeredWidgetd.lib;LogoWidgetd.lib;LogToold.lib;ParametersWidgetsd.lib;NavigationWidgetsd.lib;TogglePaneld.lib;TransparentScrollAread.lib;XAppLayoutd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opencv_world4110d.lib;PylonBase_v10.lib;PylonC_v10.lib;GCBase_MD_VC141_v3_1_Basler_pylon_v3.lib;GenApi_MD_VC141_v3_1_Basler_pylon_v3.lib;PylonUtility_v10.lib;FrameViewerd.lib;LayeredWidgetd.lib;LogoWidgetd.lib;LogToold.lib;ParametersWidgetsd.lib;NavigationWidgetsd.lib;TogglePaneld.lib;TransparentScrollAread.lib;XAppLayoutd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <AdditionalIncludeDirectories>C:\opencv\build\include;C:\Program Files\Basler\pylon 8\Development\include;$(SolutionDir)Libraries\FrameViewer\include;$(SolutionDir)Libraries\LayeredWidget\include;$(SolutionDir)Libraries\LogoWidget\include;$(SolutionDir)Libraries\LogTool\include;$(SolutionDir)Libraries\NavigationWidgets\include;$(SolutionDir)Libraries\ParametersWidgets\include;$(SolutionDir)Libraries\TogglePanel\include;$(SolutionDir)Libraries\TransparentScrollArea\include;$(SolutionDir)Libraries\XAppLayout\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <PostBuildEvent>
       <Command>
@@ -79,10 +80,11 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
       <AdditionalLibraryDirectories>C:\opencv\build\x64\vc16\lib;C:\Program Files\Basler\pylon 8\Development\lib\x64;$(SolutionDir)Libraries\FrameViewer\lib;$(SolutionDir)Libraries\LayeredWidget\lib;$(SolutionDir)Libraries\LogoWidget\lib;$(SolutionDir)Libraries\LogTool\lib;$(SolutionDir)Libraries\NavigationWidgets\lib;$(SolutionDir)Libraries\ParametersWidgets\lib;$(SolutionDir)Libraries\TogglePanel\lib;$(SolutionDir)Libraries\TransparentScrollArea\lib;$(SolutionDir)Libraries\XAppLayout\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opencv_world4110.lib;PylonBase_v10.lib;PylonC_v10.lib;GCBase_MD_VC141_v3_1_Basler_pylon_v3.lib;GenApi_MD_VC141_v3_1_Basler_pylon_v3.lib;FrameViewer.lib;LayeredWidget.lib;LogoWidget.lib;LogTool.lib;ParametersWidgets.lib;NavigationWidgets.lib;TogglePanel.lib;TransparentScrollArea.lib;XAppLayout.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opencv_world4110.lib;PylonBase_v10.lib;PylonC_v10.lib;GCBase_MD_VC141_v3_1_Basler_pylon_v3.lib;GenApi_MD_VC141_v3_1_Basler_pylon_v3.lib;PylonUtility_v10.lib;FrameViewer.lib;LayeredWidget.lib;LogoWidget.lib;LogTool.lib;ParametersWidgets.lib;NavigationWidgets.lib;TogglePanel.lib;TransparentScrollArea.lib;XAppLayout.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <AdditionalIncludeDirectories>C:\opencv\build\include;C:\Program Files\Basler\pylon 8\Development\include;$(SolutionDir)Libraries\FrameViewer\include;$(SolutionDir)Libraries\LayeredWidget\include;$(SolutionDir)Libraries\LogoWidget\include;$(SolutionDir)Libraries\LogTool\include;$(SolutionDir)Libraries\NavigationWidgets\include;$(SolutionDir)Libraries\ParametersWidgets\include;$(SolutionDir)Libraries\TogglePanel\include;$(SolutionDir)Libraries\TransparentScrollArea\include;$(SolutionDir)Libraries\XAppLayout\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <PostBuildEvent>
       <Command>
@@ -118,11 +120,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\BaslerAPI\BaslerCameraCameraParams.cpp" />
-    <ClCompile Include="..\BaslerAPI\BaslerCameraChunkDataParams.cpp" />
-    <ClCompile Include="..\BaslerAPI\BaslerCameraEventParams.cpp" />
-    <ClCompile Include="..\BaslerAPI\BaslerCameraStreamParams.cpp" />
-    <ClCompile Include="..\BaslerAPI\BaslerCameraTLParams.cpp" />
     <ClCompile Include="AppConfig.cpp" />
     <ClCompile Include="AppSetup.cpp" />
     <ClCompile Include="AppStore.cpp" />
@@ -175,18 +172,6 @@
   <ItemGroup>
     <QtMoc Include="WidgetControllerBase.h" />
     <QtMoc Include="AppConfig.h" />
-    <ClInclude Include="..\BaslerAPI\BaslerCamera.h" />
-    <ClInclude Include="..\BaslerAPI\BaslerCameraArray.h" />
-    <ClInclude Include="..\BaslerAPI\BaslerCameraCameraEventHandler.h" />
-    <ClInclude Include="..\BaslerAPI\BaslerCameraCameraParams.h" />
-    <ClInclude Include="..\BaslerAPI\BaslerCameraChunkDataParams.h" />
-    <ClInclude Include="..\BaslerAPI\BaslerCameraConfigurationEventHandler.h" />
-    <ClInclude Include="..\BaslerAPI\BaslerCameraEventParams.h" />
-    <ClInclude Include="..\BaslerAPI\BaslerCameraGrabResultData.h" />
-    <ClInclude Include="..\BaslerAPI\BaslerCameraGrabResultPtr.h" />
-    <ClInclude Include="..\BaslerAPI\BaslerCameraImageEventHandler.h" />
-    <ClInclude Include="..\BaslerAPI\BaslerCameraStreamParams.h" />
-    <ClInclude Include="..\BaslerAPI\BaslerCameraTLParams.h" />
     <ClInclude Include="AppSetup.h" />
     <ClInclude Include="AppStore.h" />
     <QtMoc Include="ImageProvider.h" />

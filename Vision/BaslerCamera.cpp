@@ -1,44 +1,298 @@
+﻿//========================================================
+//  BaslerCamera.cpp     (projet Vision)
+//========================================================
 #include "BaslerCamera.h"
 
-BaslerCamera::BaslerCamera(QObject* parent) :
-	Camera(parent)
+#include <pylon/PylonUtilityIncludes.h>   // CPylonImage, CImageFormatConverter
+#include <GenApi/GenApi.h>                // NodeMap helpers
+#include <QImage>
+#include <QString>
+#include <opencv2/imgproc.hpp>
+#include <thread>
+#include <chrono>
+
+//------------- init static --------------------------------------------------
+std::atomic_int BaslerCamera::s_pylonUsers{ 0 };
+
+//------------- ctor / dtor --------------------------------------------------
+BaslerCamera::BaslerCamera(QObject* parent) : Camera(parent)
 {
+	pylonInit();
 }
 
 BaslerCamera::~BaslerCamera()
 {
+	if (isOpened())
+		close();
 	if (isConnected())
 		disconnect();
+	pylonFini();
 }
 
-bool BaslerCamera::isConnected() const
+void BaslerCamera::setConfig(const CameraConfig* cfg)
 {
-	return false;
+	if (auto* baslerCfg = dynamic_cast<const BaslerCameraConfig*>(cfg))
+	{
+		setConfig(baslerCfg);
+	}
+	else
+	{
+		qWarning() << "[BaslerCamera] Invalid config type, expected BaslerCameraConfig";
+	}
 }
 
-bool BaslerCamera::isOpened() const
+//------------- config -------------------------------------------------------
+void BaslerCamera::setConfig(const BaslerCameraConfig* cfg)
 {
-	return false;
+	m_cfg = cfg;
+	if (isOpened())
+		applyConfig();
 }
 
+//------------- status -------------------------------------------------------
+bool BaslerCamera::isConnected() const { return m_cam && m_cam->IsPylonDeviceAttached(); }
+bool BaslerCamera::isOpened()   const { return m_cam && m_cam->IsOpen(); }
+
+//------------- connect / disconnect ----------------------------------------
 void BaslerCamera::connect()
 {
-	emit failedToConnect("Not implemented");
-	//emit connected();
+	if (isConnected())
+		return;
+
+	try
+	{
+		m_cam = std::make_unique<Pylon::CInstantCamera>(Pylon::CTlFactory::GetInstance().CreateFirstDevice());
+		emit connected();
+	}
+	catch (const Pylon::GenericException& e)
+	{
+		emit failedToConnect(tr("[BaslerCamera] Failed to connect:") + e.GetDescription());
+		m_cam.reset();
+	}
 }
 
 void BaslerCamera::disconnect()
 {
-	emit disconnected();
+	if (!isConnected())
+		return;
+
+	try
+	{
+		close();
+		m_cam->DetachDevice();
+		m_cam.reset();
+		emit disconnected();
+	}
+	catch (const Pylon::GenericException& e)
+	{
+		emit failedToDisconnect(tr("[BaslerCamera] Failed to disconnect:") + e.GetDescription());
+	}
 }
 
-void BaslerCamera::open()
+//------------- open / close -------------------------------------------------
+void BaslerCamera::open(const CameraConfig* cfg)
 {
-	emit failedToOpen("Not implemented");
-	//emit opened();
+	if (!isConnected())
+	{
+		emit failedToOpen("[BaslerCamera] Failed to open: Camera not connected");
+		return;
+	}
+	if (!isOpened())
+	{
+		try
+		{
+			try
+			{
+				m_cam->Open();
+			}
+			catch (const Pylon::GenericException& e)
+			{
+				emit failedToOpen(tr("[BaslerCamera] Failed to open: ") + e.GetDescription());
+				return;
+			}
+
+			if (m_cam->IsOpen())
+			{
+				if (cfg)
+				{
+					try
+					{
+						setConfig(cfg);
+					}
+					catch (const Pylon::GenericException& e)
+					{
+						emit failedToOpen(tr("[BaslerCamera] Invalid configuration: ") + e.GetDescription());
+						close();
+						return;
+					}
+				}
+				startGrabbing();
+				if (isGrabbing())
+				{
+					emit opened();
+				}
+				else
+				{
+					emit failedToOpen("[BaslerCamera] Failed to start grabbing");
+					close();
+				}
+			}
+			else
+			{
+				emit failedToOpen("[BaslerCamera] Failed to close");
+			}
+		}
+		catch (const Pylon::GenericException& e)
+		{
+			emit failedToOpen(QString::fromLatin1(e.GetDescription()));
+			if (isOpened())
+				close();
+		}
+	}
 }
 
 void BaslerCamera::close()
 {
-	emit closed();
+	if (!isOpened())
+		return;
+
+	try
+	{
+		stopGrabbing();
+		m_cam->Close();
+		emit closed();
+	}
+	catch (const Pylon::GenericException& e)
+	{
+		emit failedToClose(tr("[BaslerCamera] Failed to close: ") + e.GetDescription());
+	}
+}
+
+//------------- grabbing -----------------------------------------------------
+void BaslerCamera::startGrabbing(Pylon::EGrabStrategy strat, Pylon::EGrabLoop loop)
+{
+	if (!isOpened())
+		return;
+
+	if (isGrabbing())
+		return;
+
+	m_cam->MaxNumBuffer = 10;
+	m_cam->StartGrabbing(strat, loop);
+
+	qDebug() << "startGrabbing";
+
+	std::thread([this]
+		{
+			Pylon::CGrabResultPtr        ptr;
+			Pylon::CImageFormatConverter conv;
+			conv.OutputPixelFormat = Pylon::PixelType_BGR8packed;
+			Pylon::CPylonImage           pyImg;
+			cv::Mat                      matRGB;
+			
+			while (m_cam && m_cam->IsGrabbing())
+			{
+				try
+				{
+					m_cam->RetrieveResult(5000, ptr, Pylon::TimeoutHandling_ThrowException);
+					if (!ptr->GrabSucceeded())
+					{
+						emit errorThrown("[BaslerCamera] Grab error 1", ptr->GetErrorDescription().c_str());
+						continue;
+					}
+
+					// BGR header sur buffer Pylon
+					conv.Convert(pyImg, ptr);
+
+					cv::Mat matBGR(ptr->GetHeight(), ptr->GetWidth(), CV_8UC3,
+						const_cast<std::uint8_t*>(
+							static_cast<const std::uint8_t*>(pyImg.GetBuffer())),
+						ptr->GetWidth() * 3);
+
+					// BGR -> RGB (tampon ré-utilisable)
+					matRGB.create(matBGR.rows, matBGR.cols, CV_8UC3);
+					cv::cvtColor(matBGR, matRGB, cv::COLOR_BGR2RGB);
+
+					// sauvegarde thread-safe
+					{
+						std::scoped_lock lk(m_frameMtx);
+						matRGB.copyTo(m_lastFrame);
+					}
+
+					// QImage header puis pipeline
+					QImage header(matRGB.data, matRGB.cols, matRGB.rows, static_cast<int>(matRGB.step), QImage::Format_RGB888);
+
+					//QImage processed = applyPipeline(header);
+
+					//emit imageProvided(processed.copy());   // deep-copy -> sûr pour Qt
+					emit imageProvided(header.copy());   // deep-copy -> sûr pour Qt
+
+					// si besoin d'un signal OpenCV :
+					emit cvFrameReady();
+
+				}
+				catch (const Pylon::GenericException& e)
+				{
+					emit errorThrown("[BaslerCamera] Grab error 2", e.GetDescription());
+					continue;
+				}
+			}
+		}).detach();
+}
+
+void BaslerCamera::stopGrabbing()
+{
+	if (isGrabbing())
+		m_cam->StopGrabbing();
+}
+
+bool BaslerCamera::retrieveLastFrame(cv::Mat& dst)
+{
+	std::scoped_lock lk(m_frameMtx);
+	if (m_lastFrame.empty())
+		return false;
+	m_lastFrame.copyTo(dst);
+	return true;
+}
+
+//------------- applyConfig --------------------------------------------------
+void BaslerCamera::applyConfig()
+{
+	if (!m_cfg || !isOpened())
+		return;
+
+	GenApi::INodeMap& nmap = m_cam->GetNodeMap();
+
+	if (auto w = GenApi::CIntegerPtr(nmap.GetNode("Width")))  w->SetValue(m_cfg->getWidth());
+	if (auto h = GenApi::CIntegerPtr(nmap.GetNode("Height"))) h->SetValue(m_cfg->getHeight());
+	if (auto ox = GenApi::CIntegerPtr(nmap.GetNode("OffsetX"))) ox->SetValue(m_cfg->getOffsetX());
+	if (auto oy = GenApi::CIntegerPtr(nmap.GetNode("OffsetY"))) oy->SetValue(m_cfg->getOffsetY());
+
+	if (auto fmt = GenApi::CEnumerationPtr(nmap.GetNode("PixelFormat")))
+		fmt->FromString(m_cfg->getSelectedFormat().toStdString().c_str());
+
+	if (auto enFps = GenApi::CBooleanPtr(nmap.GetNode("AcquisitionFrameRateEnable")))
+		enFps->SetValue(true);
+	if (auto fps = GenApi::CFloatPtr(nmap.GetNode("AcquisitionFrameRate")))
+		fps->SetValue(m_cfg->getFps());
+
+	if (auto exp = GenApi::CFloatPtr(nmap.GetNode("ExposureTime")))
+		exp->SetValue(m_cfg->getExposureTime() * 1000);
+	if (auto gain = GenApi::CFloatPtr(nmap.GetNode("Gain")))
+		gain->SetValue(m_cfg->getGainDB());
+	if (auto wb = GenApi::CEnumerationPtr(nmap.GetNode("BalanceWhiteAuto")))
+		wb->FromString("Once");
+}
+
+//------------- SDK init/fini -----------------------------------------------
+void BaslerCamera::pylonInit()
+{
+	if (s_pylonUsers.fetch_add(1) == 0)
+		Pylon::PylonInitialize();
+}
+
+void BaslerCamera::pylonFini()
+{
+	if (s_pylonUsers.fetch_sub(1) == 1)
+		Pylon::PylonTerminate();
 }

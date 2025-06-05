@@ -21,8 +21,8 @@ public:
 
 	void release() override;
 
-	void open();
-	void close();
+	void openCamera();
+	void closeCamera();
 
 	void connectLight() const;
 
@@ -30,8 +30,12 @@ public:
 	void turnOffLight() const;
 
 private slots:
+	void onCameraConnected();
+	void onCameraDisconnected();
 	void onCameraOpened();
 	void onCameraClosed();
+	void onCameraFailedToConnect(const QString& message);
+	void onCameraFailedToDisconnect(const QString& message);
 	void onCameraFailedToOpen(const QString& message);
 	void onCameraFailedToClose(const QString& message);
 	void onCameraErrorThrown(const QString& error, const QString& message);
@@ -51,6 +55,8 @@ private:
 signals:
 	void cameraOpened();
 	void cameraClosed();
+
+	void imageProvided(const QImage& image);
 
 	void lightControlConnected();
 	void lightControlDisconnected();

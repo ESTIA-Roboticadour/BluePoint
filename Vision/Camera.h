@@ -5,6 +5,8 @@
 
 #include <QObject>
 #include <QList>
+#include <opencv2/core.hpp>        // cv::Mat
+#include <opencv2/imgproc.hpp>
 
 class Camera : public ImageProvider
 {
@@ -13,8 +15,7 @@ public :
 	explicit Camera(QObject* parent = nullptr);
 	~Camera() = default;
 
-	CameraConfig* getConfig() const;
-	void setConfig(CameraConfig* config);
+	virtual void setConfig(const CameraConfig* cfg) = 0;
 
 	virtual bool isConnected() const = 0;
 	virtual bool isOpened() const = 0;
@@ -22,18 +23,21 @@ public :
 	virtual void connect() = 0;
 	virtual void disconnect() = 0;
 
-	virtual void open() = 0;
+	virtual void open(const CameraConfig* cfg = nullptr) = 0;
 	virtual void close() = 0;
 
-	void addTransformer(ImageTransformer* t);
-	void clearTransformers(bool deleteTransformers=false);
-	QList<ImageTransformer*> transformers() const;
+	virtual bool retrieveLastFrame(cv::Mat& dst) = 0;
 
-protected:
-	QImage applyPipeline(const QImage& raw);
+	//void addTransformer(ImageTransformer* t);
+	//void clearTransformers(bool deleteTransformers=false);
+	//QList<ImageTransformer*> transformers() const;
+
+//protected:
+//	QImage applyPipeline(const QImage& raw);
+//	bool hasTransformer() const;
 
 signals:
-	void transformError(ImageTransformer* transformer, const int index, const QString& message);
+	//void transformError(ImageTransformer* transformer, const int index, const QString& message);
 	void connected();
 	void disconnected();
 	void opened();
@@ -43,8 +47,7 @@ signals:
 	void failedToOpen(const QString& message);
 	void failedToClose(const QString& message);
 	void errorThrown(const QString& error, const QString& message);
-
-private:
-	QList<ImageTransformer*> m_transformers;
-	CameraConfig* m_config;
+	void cvFrameReady();
+//private:
+//	QList<ImageTransformer*> m_transformers;
 };

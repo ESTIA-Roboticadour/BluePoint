@@ -6,6 +6,7 @@
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
+#include <QImage>
 
 class DeviceView : public QWidget
 {
@@ -16,6 +17,10 @@ public:
     void setLightInfo(const QString& comPort, int relay);   // update labels
     void setButtonsState(bool enabled);
     void setCameraConfig(const CameraConfig* cameraConfig);
+
+public slots:
+    void onImageProvided(const QImage& image);
+    void clearImage();
 
 signals:
     void lightOnRequested();

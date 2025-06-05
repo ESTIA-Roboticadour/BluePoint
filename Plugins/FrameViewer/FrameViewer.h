@@ -23,6 +23,7 @@ public:
     void setSource(const QString &path);
 
     void setImage(const QImage &img);
+    void clear();
 
     QColor backgroundColor() const;
     void setBackgroundColor(const QColor &color);

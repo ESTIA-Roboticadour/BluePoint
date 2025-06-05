@@ -78,9 +78,6 @@
     <Filter Include="Services\Factories\CameraFactory">
       <UniqueIdentifier>{bd3bc2e5-01c1-48cb-90a5-c03742e8adea}</UniqueIdentifier>
     </Filter>
-    <Filter Include="BaslerAPI">
-      <UniqueIdentifier>{8189a36a-9075-4e27-a273-3931ef6476ab}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Features\ConfigurationView">
       <UniqueIdentifier>{e74abee2-02f7-40de-8c16-0c55a64ae886}</UniqueIdentifier>
     </Filter>
@@ -180,21 +177,6 @@
     </ClCompile>
     <ClCompile Include="CameraFactory.cpp">
       <Filter>Services\Factories\CameraFactory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\BaslerAPI\BaslerCameraCameraParams.cpp">
-      <Filter>BaslerAPI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\BaslerAPI\BaslerCameraChunkDataParams.cpp">
-      <Filter>BaslerAPI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\BaslerAPI\BaslerCameraEventParams.cpp">
-      <Filter>BaslerAPI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\BaslerAPI\BaslerCameraStreamParams.cpp">
-      <Filter>BaslerAPI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\BaslerAPI\BaslerCameraTLParams.cpp">
-      <Filter>BaslerAPI</Filter>
     </ClCompile>
     <ClCompile Include="ConfigurationView.cpp">
       <Filter>Features\ConfigurationView\Views</Filter>
@@ -307,42 +289,6 @@
     </ClInclude>
     <ClInclude Include="CameraFactory.h">
       <Filter>Services\Factories\CameraFactory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BaslerAPI\BaslerCamera.h">
-      <Filter>BaslerAPI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BaslerAPI\BaslerCameraArray.h">
-      <Filter>BaslerAPI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BaslerAPI\BaslerCameraCameraEventHandler.h">
-      <Filter>BaslerAPI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BaslerAPI\BaslerCameraCameraParams.h">
-      <Filter>BaslerAPI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BaslerAPI\BaslerCameraChunkDataParams.h">
-      <Filter>BaslerAPI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BaslerAPI\BaslerCameraConfigurationEventHandler.h">
-      <Filter>BaslerAPI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BaslerAPI\BaslerCameraEventParams.h">
-      <Filter>BaslerAPI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BaslerAPI\BaslerCameraGrabResultData.h">
-      <Filter>BaslerAPI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BaslerAPI\BaslerCameraGrabResultPtr.h">
-      <Filter>BaslerAPI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BaslerAPI\BaslerCameraImageEventHandler.h">
-      <Filter>BaslerAPI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BaslerAPI\BaslerCameraStreamParams.h">
-      <Filter>BaslerAPI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BaslerAPI\BaslerCameraTLParams.h">
-      <Filter>BaslerAPI</Filter>
     </ClInclude>
     <ClInclude Include="Helper.h">
       <Filter>Header Files</Filter>

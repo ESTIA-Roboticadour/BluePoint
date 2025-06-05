@@ -27,10 +27,10 @@ void DeviceModel::release()
 		m_lightControl->release();
 	}
 
-	if (m_camera && m_camera->isOpened())
+	if (m_camera && m_camera->isConnected())
 	{
 		m_isReleasing = true;
-		m_camera->close();
+		m_camera->disconnect();
 	}
 	else
 	{
@@ -38,39 +38,6 @@ void DeviceModel::release()
 	}
 }
 
-void DeviceModel::open()
-{
-	if (m_camera && !m_camera->isOpened())
-	{
-		m_camera->open();
-	}
-}
-
-void DeviceModel::close()
-{
-	if (m_camera && m_camera->isOpened())
-	{
-		m_camera->close();
-	}
-}
-
-void DeviceModel::connectLight() const
-{
-	if (m_lightControl)
-		m_lightControl->connectToPort(m_lightConfig->getComPort());
-}
-
-void DeviceModel::turnOnLight() const
-{
-	if (m_lightControl)
-		m_lightControl->setRelay(m_lightConfig->getRelay() - 1, true);
-}
-
-void DeviceModel::turnOffLight() const
-{
-	if (m_lightControl)
-		m_lightControl->setRelay(m_lightConfig->getRelay() - 1, false);
-}
 
 void DeviceModel::setupCamera(const QString& cameraType, CameraConfig* cameraConfig)
 {
@@ -105,11 +72,16 @@ void DeviceModel::setupConnections()
 {
 	if (m_camera)
 	{
+		connect(m_camera, &Camera::connected, this, &DeviceModel::onCameraConnected);
+		connect(m_camera, &Camera::disconnected, this, &DeviceModel::onCameraDisconnected);
 		connect(m_camera, &Camera::opened, this, &DeviceModel::onCameraOpened);
 		connect(m_camera, &Camera::closed, this, &DeviceModel::onCameraClosed);
+		connect(m_camera, &Camera::failedToConnect, this, &DeviceModel::onCameraFailedToConnect);
 		connect(m_camera, &Camera::failedToOpen, this, &DeviceModel::onCameraFailedToOpen);
 		connect(m_camera, &Camera::failedToClose, this, &DeviceModel::onCameraFailedToClose);
+		connect(m_camera, &Camera::failedToDisconnect, this, &DeviceModel::onCameraFailedToDisconnect);
 		connect(m_camera, &Camera::errorThrown, this, &DeviceModel::onCameraErrorThrown);
+		connect(m_camera, &Camera::imageProvided, this, &DeviceModel::imageProvided);
 	}
 	if (m_lightControl)
 	{
@@ -120,36 +92,122 @@ void DeviceModel::setupConnections()
 	}
 }
 
-void DeviceModel::onCameraOpened()
+
+void DeviceModel::openCamera()
 {
-	qInfo() << "Camera opened successfully.";
-	m_isReleasing = false; // Reset releasing state
-	emit cameraOpened();
+	if (m_camera)
+	{
+		if (m_camera->isConnected())
+		{
+			if (m_camera->isOpened())
+			{
+				qInfo() << "Camera already opened";
+			}
+			else
+			{
+				m_camera->open(m_cameraConfig);
+			}
+		}
+		else
+		{
+			m_camera->connect();
+		}
+	}
 }
 
-void DeviceModel::onCameraClosed()
+void DeviceModel::closeCamera()
 {
-	qInfo() << "Camera closed successfully.";
+	if (m_camera)
+	{
+		if (m_camera->isOpened())
+			m_camera->close();
+
+		if (m_camera->isConnected())
+			m_camera->disconnect();
+	}
+}
+
+void DeviceModel::connectLight() const
+{
+	if (m_lightControl)
+		m_lightControl->connectToPort(m_lightConfig->getComPort());
+}
+
+void DeviceModel::turnOnLight() const
+{
+	if (m_lightControl)
+		m_lightControl->setRelay(m_lightConfig->getRelay() - 1, true);
+}
+
+void DeviceModel::turnOffLight() const
+{
+	if (m_lightControl)
+		m_lightControl->setRelay(m_lightConfig->getRelay() - 1, false);
+}
+
+void DeviceModel::onCameraConnected()
+{
+	qInfo() << "Camera connected successfully";
+	m_isReleasing = false; // Reset releasing state
+	openCamera();
+}
+
+void DeviceModel::onCameraDisconnected()
+{
+	qInfo() << "Camera disconnected successfully";
 	emit cameraClosed();
 	if (m_isReleasing)
 		ModelBase::release();
 }
 
+void DeviceModel::onCameraOpened()
+{
+	qInfo() << "Camera opened successfully";
+	emit cameraOpened();
+}
+
+void DeviceModel::onCameraClosed()
+{
+	qInfo() << "Camera closed successfully";
+}
+
+void DeviceModel::onCameraFailedToConnect(const QString& message)
+{
+	qWarning() << message;
+	QTimer::singleShot(1000, this, &DeviceModel::restartOpenCamera);
+}
+
+void DeviceModel::onCameraFailedToDisconnect(const QString& message)
+{
+	qWarning() << message;
+	QTimer::singleShot(1000, this, &DeviceModel::restartCloseCamera);
+}
+
 void DeviceModel::onCameraFailedToOpen(const QString& message)
 {
-	qWarning() << "Failed to open camera:" << message;
+	qWarning() << message;
 	QTimer::singleShot(1000, this, &DeviceModel::restartOpenCamera);
 }
 
 void DeviceModel::onCameraFailedToClose(const QString& message)
 {
-	qWarning() << "Failed to close camera:" << message;
+	qWarning() << message;
 	QTimer::singleShot(1000, this, &DeviceModel::restartCloseCamera);
 }
 
 void DeviceModel::onCameraErrorThrown(const QString& error, const QString& message)
 {
-	qWarning() << "Camera error:" << error << "Message:" << message;
+	qWarning() << error + ": " + message;
+}
+
+void DeviceModel::restartOpenCamera()
+{
+	openCamera();
+}
+
+void DeviceModel::restartCloseCamera()
+{
+	closeCamera();
 }
 
 void DeviceModel::onLightControlConnected(const QString& portName)
@@ -166,14 +224,4 @@ void DeviceModel::onLightControlConnectionFailed(const QString& portName, const 
 void DeviceModel::onLightControlModuleInfoReceived(int id, int version)
 {
 	qInfo() << "Light control id:" << id  << " | Version: " << version;
-}
-
-void DeviceModel::restartOpenCamera()
-{
-	open();
-}
-
-void DeviceModel::restartCloseCamera()
-{
-	close();
 }
