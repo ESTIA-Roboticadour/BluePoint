@@ -39,7 +39,7 @@ public:
 	bool isGrabbing() const { return m_cam && m_cam->IsGrabbing(); }
 
 private:
-    void applyConfig();                    ///< pousse BaslerCameraConfig -> NodeMap
+    void applyConfig();
     static void pylonInit();               ///< init ref-countée
     static void pylonFini();
 

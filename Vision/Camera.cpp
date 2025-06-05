@@ -1,6 +1,6 @@
 #include "Camera.h"
-#include <QDebug>
-#include <exception>
+//#include <QDebug>
+//#include <exception>
 
 Camera::Camera(QObject* parent) :
 	ImageProvider(parent)
@@ -40,7 +40,7 @@ Camera::Camera(QObject* parent) :
 //            return QImage();
 //        }
 //
-//        if (img.isNull()) {                  // transformer a "échoué" silencieusement
+//        if (img.isNull()) {                  // transformer a "Ã©chouÃ©" silencieusement
 //            emit transformError(t, i, QStringLiteral("Transformer returned null image"));
 //            return QImage();
 //        }

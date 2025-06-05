@@ -180,8 +180,6 @@ void BaslerCamera::startGrabbing(Pylon::EGrabStrategy strat, Pylon::EGrabLoop lo
 	m_cam->MaxNumBuffer = 10;
 	m_cam->StartGrabbing(strat, loop);
 
-	qDebug() << "startGrabbing";
-
 	std::thread([this]
 		{
 			Pylon::CGrabResultPtr        ptr;
@@ -189,12 +187,22 @@ void BaslerCamera::startGrabbing(Pylon::EGrabStrategy strat, Pylon::EGrabLoop lo
 			conv.OutputPixelFormat = Pylon::PixelType_BGR8packed;
 			Pylon::CPylonImage           pyImg;
 			cv::Mat                      matRGB;
-			
+
+#ifdef _DEBUG
+			std::chrono::steady_clock::time_point start;
+			std::chrono::steady_clock::time_point end;
+			double deltaMs;
+			int displayCounter = 0;
+#endif // _DEBUG
+
 			while (m_cam && m_cam->IsGrabbing())
 			{
 				try
 				{
-					m_cam->RetrieveResult(5000, ptr, Pylon::TimeoutHandling_ThrowException);
+#ifdef _DEBUG
+					start = std::chrono::steady_clock::now();
+#endif // _DEBUG
+					m_cam->RetrieveResult(2000, ptr, Pylon::TimeoutHandling_ThrowException);
 					if (!ptr->GrabSucceeded())
 					{
 						emit errorThrown("[BaslerCamera] Grab error 1", ptr->GetErrorDescription().c_str());
@@ -219,13 +227,21 @@ void BaslerCamera::startGrabbing(Pylon::EGrabStrategy strat, Pylon::EGrabLoop lo
 						matRGB.copyTo(m_lastFrame);
 					}
 
-					// QImage header puis pipeline
-					QImage header(matRGB.data, matRGB.cols, matRGB.rows, static_cast<int>(matRGB.step), QImage::Format_RGB888);
+					// QImage
+					QImage image(matRGB.data, matRGB.cols, matRGB.rows, static_cast<int>(matRGB.step), QImage::Format_RGB888);
 
-					//QImage processed = applyPipeline(header);
+#ifdef _DEBUG
+					end = std::chrono::steady_clock::now();
+					deltaMs = std::chrono::duration<double, std::milli>(end - start).count();
+					displayCounter++;
+					if (displayCounter == 15)
+					{
+						qDebug() << deltaMs;
+						displayCounter = 0;
+					}
+#endif // _DEBUG
 
-					//emit imageProvided(processed.copy());   // deep-copy -> sûr pour Qt
-					emit imageProvided(header.copy());   // deep-copy -> sûr pour Qt
+					emit imageProvided(image.copy());   // deep-copy -> sûr pour Qt
 
 					// si besoin d'un signal OpenCV :
 					emit cvFrameReady();

@@ -38,7 +38,6 @@ void DeviceModel::release()
 	}
 }
 
-
 void DeviceModel::setupCamera(const QString& cameraType, CameraConfig* cameraConfig)
 {
 	if (m_camera)
