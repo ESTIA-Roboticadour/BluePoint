@@ -1,5 +1,4 @@
 #include "MainWindow.h"
-#include "NavigationTree.h"
 
 MainWindow::MainWindow(QWidget* parent) :
 	WindowBase(parent),

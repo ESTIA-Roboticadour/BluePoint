@@ -1,6 +1,4 @@
 #include "MainController.h"
-#include "NavigationTree.h"
-#include "NavigationNode.h"
 #include "AppStore.h"
 #include "ViewFactory.h"
 #include "AppConfig.h"

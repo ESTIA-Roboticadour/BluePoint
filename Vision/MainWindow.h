@@ -1,7 +1,7 @@
 #pragma once
-
 #include "ui_MainWindow.h"
 #include "WindowBase.h"
+#include "NavigationTree.h"
 
 #include <QWidget>
 #include <QtWidgets/QMainWindow>

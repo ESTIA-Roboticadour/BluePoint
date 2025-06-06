@@ -1,6 +1,5 @@
 #include "MainModel.h"
 #include "AppStore.h"
-#include "Camera.h"
 
 MainModel::MainModel(NavigationTree* tree, QObject* parent) :
 	ModelBase(parent),
@@ -15,10 +14,5 @@ NavigationTree* MainModel::tree() const
 
 void MainModel::release()
 {
-	// if camera open
-	// close cam, wait signal to call ModelBase::release()
-	// else
-	//AppStore::getCamera();
-
 	ModelBase::release();
 }

@@ -1,5 +1,4 @@
 #include "ViewFactory.h"
-#include "NavigationTree.h"
 
 #include "MainModel.h"
 #include "MainController.h"
