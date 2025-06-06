@@ -32,7 +32,7 @@ public:
 	double getIncrement() const;
     int getLabelWidth() const override;
 
-	void setFrom(const NumericalParameter* boolParameter);
+    void setFrom(const NumericalParameter* numericalParameter);
 
 public slots:
 	void setName(const QString& newName);

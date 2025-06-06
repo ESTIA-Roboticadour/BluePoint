@@ -13,6 +13,8 @@ HEADERS += \
     Config.h \
     GroupParameter.h \
     IParametrable.h \
+    Matrix4x4Parameter.h \
+    Matrix4x4ParameterWidget.h \
     ParameterWidget.h \
     ParametersWidgetCollectionPlugin.h \
     ParametersWidgetCollection_global.h \
@@ -37,6 +39,8 @@ SOURCES += \
     Config.cpp \
     GroupParameter.cpp \
     ListParameterBase.cpp \
+    Matrix4x4Parameter.cpp \
+    Matrix4x4ParameterWidget.cpp \
     ParameterBase.cpp \
     BoolParameter.cpp \
     BoolParameterWidget.cpp \
