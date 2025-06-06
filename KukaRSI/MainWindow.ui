@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindowClass</class>
+ <widget class="QMainWindow" name="MainWindowClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>996</width>
+    <height>551</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Kuka RSI</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>Resources/icon.ico</normaloff>Resources/icon.ico</iconset>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="AppLayoutWidget" name="appLayoutWidget">
+      <property name="logoPixmap">
+       <pixmap resource="MainWindow.qrc">:/MainWindow/Resources/logo.png</pixmap>
+      </property>
+      <property name="logoWidth">
+       <number>200</number>
+      </property>
+      <property name="logoHeight">
+       <number>66</number>
+      </property>
+      <property name="backgroundLogo">
+       <pixmap resource="MainWindow.qrc">:/MainWindow/Resources/icon.png</pixmap>
+      </property>
+      <property name="treeDef" stdset="0">
+       <string notr="true">{
+    &quot;name&quot;: &quot;Kuka RSI&quot;,
+    &quot;children&quot;: [
+        { &quot;name&quot;: &quot;Configuration&quot; },
+        { &quot;name&quot;: &quot;Application&quot;  }
+    ]
+}</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>AppLayoutWidget</class>
+   <extends>QWidget</extends>
+   <header>AppLayoutWidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="MainWindow.qrc"/>
+ </resources>
+ <connections/>
+</ui>

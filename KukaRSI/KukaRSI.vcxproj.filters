@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>qml;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>qrc;rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Translation Files">
+      <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
+      <Extensions>ts</Extensions>
+    </Filter>
+    <Filter Include="Features">
+      <UniqueIdentifier>{9718fdd0-b90b-448a-bd15-74e3d24263ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\MVCBase">
+      <UniqueIdentifier>{f88f0c42-d79c-4a7a-8381-95ffcfd552d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\MVCBase\Models">
+      <UniqueIdentifier>{6f8da8fb-8df2-4ecb-9e71-effb5dc9b1ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\MVCBase\Views">
+      <UniqueIdentifier>{d2a341e5-7a42-4797-b85c-7c460a040843}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\MVCBase\Controllers">
+      <UniqueIdentifier>{4a3119f5-f022-49ee-b786-2ddd33d42b8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\MainWindow">
+      <UniqueIdentifier>{04eea237-02b4-4874-a9df-a13d7e5f2ab5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\MainWindow\Views">
+      <UniqueIdentifier>{870d7bd8-f52c-4cb5-aa58-e7e7c0be4787}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\MainWindow\Models">
+      <UniqueIdentifier>{663a0a52-d9ab-449d-8522-96d37d77b8c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\MainWindow\Controllers">
+      <UniqueIdentifier>{4079ae11-0320-468e-b1a1-0679b69df2ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Services">
+      <UniqueIdentifier>{cd0224cf-a810-4a60-921c-bf654f0d58e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Services\Factories">
+      <UniqueIdentifier>{9ca10382-cc05-4cda-89d7-72c4584dc795}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Services\Factories\ViewFactory">
+      <UniqueIdentifier>{e6e7106c-ea3f-44cc-9fff-b6f225956b25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\ConfigurationView">
+      <UniqueIdentifier>{ce0d0012-04b7-48c6-9903-b25bd865ff11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\ConfigurationView\Models">
+      <UniqueIdentifier>{9580618e-83ef-41c4-bc11-72bc76c21630}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\ConfigurationView\Controllers">
+      <UniqueIdentifier>{74cd424e-e9b0-4ce2-b847-d6f867729960}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\ConfigurationView\Views">
+      <UniqueIdentifier>{15dea1df-ea3e-483d-b88b-fb5345409801}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Services\Config">
+      <UniqueIdentifier>{3dc1e3a1-6966-45d3-b6ef-95f1002752e6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="MainWindow.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+    <QtUic Include="MainWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelBase.cpp">
+      <Filter>Features\MVCBase\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowBase.cpp">
+      <Filter>Features\MVCBase\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="WidgetControllerBase.cpp">
+      <Filter>Features\MVCBase\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowControllerBase.cpp">
+      <Filter>Features\MVCBase\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="MainWindow.cpp">
+      <Filter>Features\MainWindow\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewFactory.cpp">
+      <Filter>Services\Factories\ViewFactory</Filter>
+    </ClCompile>
+    <ClCompile Include="MainModel.cpp">
+      <Filter>Features\MainWindow\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="MainController.cpp">
+      <Filter>Features\MainWindow\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="AppStore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Helper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigurationView.cpp">
+      <Filter>Features\ConfigurationView\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigurationModel.cpp">
+      <Filter>Features\ConfigurationView\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigurationController.cpp">
+      <Filter>Features\ConfigurationView\Controllers</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="ModelBase.h">
+      <Filter>Features\MVCBase\Models</Filter>
+    </QtMoc>
+    <QtMoc Include="WindowBase.h">
+      <Filter>Features\MVCBase\Views</Filter>
+    </QtMoc>
+    <QtMoc Include="WidgetControllerBase.h">
+      <Filter>Features\MVCBase\Controllers</Filter>
+    </QtMoc>
+    <QtMoc Include="WindowControllerBase.h">
+      <Filter>Features\MVCBase\Controllers</Filter>
+    </QtMoc>
+    <QtMoc Include="MainWindow.h">
+      <Filter>Features\MainWindow\Views</Filter>
+    </QtMoc>
+    <QtMoc Include="MainModel.h">
+      <Filter>Features\MainWindow\Models</Filter>
+    </QtMoc>
+    <QtMoc Include="MainController.h">
+      <Filter>Features\MainWindow\Controllers</Filter>
+    </QtMoc>
+    <QtMoc Include="ConfigurationView.h">
+      <Filter>Features\ConfigurationView\Views</Filter>
+    </QtMoc>
+    <QtMoc Include="ConfigurationModel.h">
+      <Filter>Features\ConfigurationView\Models</Filter>
+    </QtMoc>
+    <QtMoc Include="ConfigurationController.h">
+      <Filter>Features\ConfigurationView\Controllers</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ViewFactory.h">
+      <Filter>Services\Factories\ViewFactory</Filter>
+    </ClInclude>
+    <ClInclude Include="AppStore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CallbackTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

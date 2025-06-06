@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LightControl", "LightControl\LightControl.vcxproj", "{63A15AE6-5D4E-45CB-ADF3-C3CD110C708F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KukaRSI", "KukaRSI\KukaRSI.vcxproj", "{50C0B08F-8C66-44B4-B610-582FBC70A7CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -39,6 +41,10 @@ Global
 		{63A15AE6-5D4E-45CB-ADF3-C3CD110C708F}.Debug|x64.Build.0 = Debug|x64
 		{63A15AE6-5D4E-45CB-ADF3-C3CD110C708F}.Release|x64.ActiveCfg = Release|x64
 		{63A15AE6-5D4E-45CB-ADF3-C3CD110C708F}.Release|x64.Build.0 = Release|x64
+		{50C0B08F-8C66-44B4-B610-582FBC70A7CA}.Debug|x64.ActiveCfg = Debug|x64
+		{50C0B08F-8C66-44B4-B610-582FBC70A7CA}.Debug|x64.Build.0 = Debug|x64
+		{50C0B08F-8C66-44B4-B610-582FBC70A7CA}.Release|x64.ActiveCfg = Release|x64
+		{50C0B08F-8C66-44B4-B610-582FBC70A7CA}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
