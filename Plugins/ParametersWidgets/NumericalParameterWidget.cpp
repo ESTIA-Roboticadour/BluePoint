@@ -26,6 +26,7 @@ NumericalParameterWidget::NumericalParameterWidget(bool readOnly, QWidget* paren
     {
         m_lineEdit = new QLineEdit(this);
         m_lineEdit->setPlaceholderText("Value");
+        m_lineEdit->setEnabled(false);
         layoutControls->addWidget(m_lineEdit);
     }
     else

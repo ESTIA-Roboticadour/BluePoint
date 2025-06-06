@@ -19,7 +19,7 @@ class PARAMETERS_WIDGETS_API Matrix4x4ParameterWidget : public ParameterWidget
     Q_PROPERTY(QMatrix4x4 matrix READ getMatrix WRITE setMatrix NOTIFY matrixChanged)
 
 public:
-    explicit Matrix4x4ParameterWidget(QWidget* parent = nullptr);
+    explicit Matrix4x4ParameterWidget(bool readOnly = false, QWidget* parent = nullptr);
     ~Matrix4x4ParameterWidget() override = default;
 
     QString getName() const;
@@ -33,6 +33,7 @@ public slots:
     void setTranslation(const QVector3D& translation);
     void setLabelWidth(int width) override;
     void setFrom(const Matrix4x4Parameter* matrix4x4Parameter);
+    void setEnabled(bool enabled);
 
 private slots:
     void onLineEditEdited();
@@ -48,6 +49,7 @@ signals:
 private:
     QString m_name;
     QMatrix4x4 m_matrix;
+    bool m_readOnly;
     QVector<QLineEdit*> m_lineEdits;
     QLabel* m_label;
     QGridLayout* m_layout;

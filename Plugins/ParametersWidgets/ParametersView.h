@@ -15,6 +15,7 @@
 #include "NumericalParameter.h"
 #include "StringParameter.h"
 #include "ListParameterBase.h"
+#include "Matrix4x4Parameter.h"
 
 class PARAMETERS_WIDGETS_API ParametersView : public QWidget
 {
@@ -56,6 +57,7 @@ private:
     QWidget* createNumericalParameterWidget(const NumericalParameter* parameter, int* width) const;
     QWidget* createStringParameterWidget(const StringParameter* parameter, int* width) const;
     QWidget* createListParameterWidget(const ListParameterBase* parameter, int* width) const;
+    QWidget* createMatrix4X4ParameterWidget(const Matrix4x4Parameter* parameter, int* width) const;
     QWidget* createUnknowParameterWidget(const ParameterBase* parameter, int* width) const;
 
     void updateWidgetsAlignment();

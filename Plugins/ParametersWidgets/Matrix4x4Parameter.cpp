@@ -45,13 +45,14 @@ QVector3D Matrix4x4Parameter::getTranslation() const
 
 void Matrix4x4Parameter::setMatrix(const QMatrix4x4& matrix)
 {
-    if (getIsEditable())
+    if (getIsEditable() && m_matrix != matrix)
         emitIfChanged(matrix);
 }
 
 void Matrix4x4Parameter::setRotationMatrix(const QMatrix4x4& rotation)
 {
-    if (!getIsEditable()) return;
+    if (!getIsEditable())
+        return;
 
     QMatrix4x4 newMatrix = m_matrix;
     for (int row = 0; row < 3; ++row)
@@ -63,7 +64,8 @@ void Matrix4x4Parameter::setRotationMatrix(const QMatrix4x4& rotation)
 
 void Matrix4x4Parameter::setTranslation(const QVector3D& translation)
 {
-    if (!getIsEditable()) return;
+    if (!getIsEditable())
+        return;
 
     QMatrix4x4 newMatrix = m_matrix;
     newMatrix(0, 3) = translation.x();

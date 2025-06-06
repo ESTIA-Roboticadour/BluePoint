@@ -2,11 +2,12 @@
 
 #include <QDoubleValidator>
 
-Matrix4x4ParameterWidget::Matrix4x4ParameterWidget(QWidget* parent) :
+Matrix4x4ParameterWidget::Matrix4x4ParameterWidget(bool readOnly, QWidget* parent) :
     ParameterWidget(parent),
     m_name("Matrix 4x4"),
     m_label(new QLabel("Matrix 4x4:", this)),
-    m_layout(new QGridLayout(this))
+    m_layout(new QGridLayout(this)),
+    m_readOnly(readOnly)
 {
     setupUI();
 }
@@ -28,8 +29,21 @@ void Matrix4x4ParameterWidget::setupUI()
             m_layout->addWidget(edit, row + 1, col);
             m_lineEdits.append(edit);
 
-            connect(edit, &QLineEdit::editingFinished, this, &Matrix4x4ParameterWidget::onLineEditEdited);
+            if (m_readOnly)
+            {
+                edit->setEnabled(false);
+            }
+            else
+            {
+                connect(edit, &QLineEdit::editingFinished, this, &Matrix4x4ParameterWidget::onLineEditEdited);
+            }
         }
+    }
+
+    for (int col = 0; col < 3; ++col)
+    {
+        int index = 3 * 4 + col;
+        m_lineEdits[index]->setEnabled(false);
     }
 
     setLayout(m_layout);
@@ -109,6 +123,24 @@ void Matrix4x4ParameterWidget::updateUIFromMatrix(const QMatrix4x4& matrix)
     }
 }
 
+void Matrix4x4ParameterWidget::setEnabled(bool enabled)
+{
+    QWidget::setEnabled(enabled);
+    if (m_readOnly)
+    {
+        for (auto& edit : m_lineEdits)
+            edit->setEnabled(false);
+    }
+    else
+    {
+        for (int col = 0; col < 3; ++col)
+        {
+            int index = 3 * 4 + col;
+            m_lineEdits[index]->setEnabled(false);
+        }
+    }
+}
+
 void Matrix4x4ParameterWidget::setFrom(const Matrix4x4Parameter* matrix4x4Parameter)
 {
     if (!matrix4x4Parameter)
@@ -116,6 +148,7 @@ void Matrix4x4ParameterWidget::setFrom(const Matrix4x4Parameter* matrix4x4Parame
 
     setName(matrix4x4Parameter->getName());
     setMatrix(matrix4x4Parameter->getMatrix());
+    setEnabled(matrix4x4Parameter->getIsEditable());
 }
 
 void Matrix4x4ParameterWidget::onLineEditEdited()

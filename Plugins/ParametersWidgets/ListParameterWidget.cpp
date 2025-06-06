@@ -16,6 +16,7 @@ ListParameterWidget::ListParameterWidget(bool readOnly, QWidget* parent) :
     if (m_readOnly)
     {
         m_lineEdit = new QLineEdit(this);
+        m_lineEdit->setEnabled(false);
         layoutControls->addWidget(m_lineEdit);
     }
     else

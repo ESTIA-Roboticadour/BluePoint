@@ -4,6 +4,7 @@
 #include "NumericalParameterWidget.h"
 #include "StringParameterWidget.h"
 #include "ListParameterWidget.h"
+#include "Matrix4x4ParameterWidget.h"
 
 #include <QHBoxLayout>
 #include <QGroupBox>
@@ -186,6 +187,11 @@ QWidget* ParametersView::createParameterWidget(const ParameterBase* parameter, i
 	{
         return createListParameterWidget(listParam, width);
 	}
+    // Matrix4X4
+    if (auto matrixParam = qobject_cast<const Matrix4x4Parameter*>(parameter))
+    {
+        return createMatrix4X4ParameterWidget(matrixParam, width);
+    }
 	// Unknown
     return createUnknowParameterWidget(parameter, width);
 }
@@ -251,7 +257,7 @@ QWidget* ParametersView::createStringParameterWidget(const StringParameter* para
 
         connect(parameter, &StringParameter::kindChanged, stringWidget, &StringParameterWidget::setKind);
         connect(parameter, &StringParameter::canEditPathChanged, stringWidget, &StringParameterWidget::setCanEditPath);
-        connect(parameter, &ParameterBase::isEditableChanged, stringWidget, &QWidget::setEnabled);
+        connect(parameter, &ParameterBase::isEditableChanged, stringWidget, &StringParameterWidget::setEnabled);
 	}
     return stringWidget;
 }
@@ -267,9 +273,25 @@ QWidget* ParametersView::createListParameterWidget(const ListParameterBase* para
     if (!m_isReadOnly)
 	{
 		connect(listWidget, &ListParameterWidget::selectedIndexChanged, parameter, &ListParameterBase::selectValueByIndex);
-		connect(parameter, &ParameterBase::isEditableChanged, listWidget, &QWidget::setEnabled);
+        connect(parameter, &ParameterBase::isEditableChanged, listWidget, &ListParameterWidget::setEnabled);
 	}
     return listWidget;
+}
+
+QWidget* ParametersView::createMatrix4X4ParameterWidget(const Matrix4x4Parameter* parameter, int* width) const
+{
+    Matrix4x4ParameterWidget* matrixWidget = new Matrix4x4ParameterWidget();
+    matrixWidget->setFrom(parameter);
+    *width = matrixWidget->getLabelWidth();
+
+    connect(parameter, &Matrix4x4Parameter::matrixChanged, matrixWidget, &Matrix4x4ParameterWidget::setMatrix);
+
+    if (!m_isReadOnly)
+    {
+        connect(matrixWidget, &Matrix4x4ParameterWidget::matrixChanged, parameter, &Matrix4x4Parameter::setMatrix);
+        connect(parameter, &ParameterBase::isEditableChanged, matrixWidget, &Matrix4x4ParameterWidget::setEnabled);
+    }
+    return matrixWidget;
 }
 
 QWidget* ParametersView::createUnknowParameterWidget(const ParameterBase* parameter, int* width) const
