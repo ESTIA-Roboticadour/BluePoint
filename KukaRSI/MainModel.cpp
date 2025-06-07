@@ -22,8 +22,8 @@ MainModel::MainModel(NavigationTree* tree, QObject* parent) :
 
 MainModel::~MainModel()
 {
-	if (m_tempConfig)
-		m_tempConfig->deleteLater();
+	if (!isReleased())
+		release();
 }
 
 NavigationTree* MainModel::tree() const
