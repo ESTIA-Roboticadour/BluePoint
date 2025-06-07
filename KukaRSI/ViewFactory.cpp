@@ -30,9 +30,9 @@ ConfigurationView* ViewFactory::createConfigurationView(const QString& title, Co
 	return view;
 }
 
-AppView* ViewFactory::createAppView(RobotKuka* robot, const RobotConfig* config, QWidget* parent)
+AppView* ViewFactory::createAppView(const RobotConfig* config, QWidget* parent)
 {
-	AppModel* model = new AppModel(robot, *config);
+	AppModel* model = new AppModel(config);
 	AppView* view = new AppView(parent);
 	AppController* controller = new AppController(model, view);
 	return view;

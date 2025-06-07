@@ -13,7 +13,7 @@ public:
     virtual ~RobotKuka();
 
     // Connexion / déconnexion
-    virtual void connectToRobot(const RobotConfig& config);
+    virtual void connectToRobot();
     virtual void disconnectFromRobot();
     virtual bool isConnected() const;
 

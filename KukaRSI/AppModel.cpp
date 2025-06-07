@@ -1,36 +1,53 @@
 #include "AppModel.h"
 
-AppModel::AppModel(RobotKuka* robot, const RobotConfig& config, QObject* parent)
-    : ModelBase(parent),
-    m_robot(robot),
-    m_config(config)
+AppModel::AppModel(const RobotConfig* config, QObject* parent) :
+    ModelBase(parent),
+    m_robot(nullptr),
+    m_config(),
+    m_uiConfig()
 {
-    connect(m_robot, &RobotKuka::poseUpdated, this, &AppModel::onPoseUpdated);
-    connect(m_robot, &RobotKuka::errorOccurred, this, &AppModel::onErrorOccurred);
-    connect(m_robot, &RobotKuka::connected, this, &AppModel::robotStateChanged);
-    connect(m_robot, &RobotKuka::disconnected, this, &AppModel::robotStateChanged);
-    connect(m_robot, &RobotKuka::started, this, &AppModel::robotStateChanged);
-    connect(m_robot, &RobotKuka::stopped, this, &AppModel::robotStateChanged);
+    if (m_robot)
+    {
+        connect(m_robot, &RobotKuka::poseUpdated, this, &AppModel::onPoseUpdated);
+        connect(m_robot, &RobotKuka::errorOccurred, this, &AppModel::onErrorOccurred);
+        connect(m_robot, &RobotKuka::connected, this, &AppModel::robotStateChanged);
+        connect(m_robot, &RobotKuka::disconnected, this, &AppModel::robotStateChanged);
+        connect(m_robot, &RobotKuka::started, this, &AppModel::robotStateChanged);
+        connect(m_robot, &RobotKuka::stopped, this, &AppModel::robotStateChanged);
+    }
 }
 
 AppModel::~AppModel()
 {
+    if (!isReleased())
+    {
+        release();
+    }
 }
 
-RobotKuka* AppModel::robot() const
+void AppModel::release()
 {
-    return m_robot;
+    if (m_robot)
+    {
+        disconnectFromRobot();
+        ModelBase::release();
+    }
 }
 
-const RobotConfig& AppModel::config() const
+const Config* AppModel::getConfig() const
 {
-    return m_config;
+    return &m_config;
+}
+
+const Config* AppModel::getUiConfig() const
+{
+    return &m_uiConfig;
 }
 
 void AppModel::connectToRobot()
 {
     if (m_robot)
-        m_robot->connectToRobot(m_config);
+        m_robot->connectToRobot();
 }
 
 void AppModel::disconnectFromRobot()
@@ -51,10 +68,8 @@ void AppModel::stopRobot()
         m_robot->stop();
 }
 
-void AppModel::release()
+void AppModel::stopMove()
 {
-    //stopRobot();
-    //disconnectFromRobot();
 }
 
 void AppModel::onPoseUpdated(const QMatrix4x4& pose)

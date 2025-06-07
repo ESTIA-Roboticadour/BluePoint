@@ -16,9 +16,9 @@ RobotConfig::RobotConfig(const RobotConfig& config, QObject* parent) :
 	Config(parent),
 	m_address("Address", config.m_address, this),
 	m_port("Port", config.m_port, this),
-	m_maxSpeed("Max. speed (deg/s)", config.m_maxSpeed, this),
-	m_maxAccel("Max. accel (deg/s^2)", config.m_maxAccel, this),
-	m_matrix("Tool matrix", config.m_matrix, this)
+	m_maxSpeed("Max. Speed (%)", config.m_maxSpeed, this),
+	m_maxAccel("Max. Accel (%)", config.m_maxAccel, this),
+	m_matrix("Tool Matrix", config.m_matrix, this)
 {
 	m_address.setKind(StringParameter::Kind::Plain);
 	
@@ -62,7 +62,7 @@ int RobotConfig::getMaxAccel() const
 
 QMatrix4x4 RobotConfig::getMatrix() const
 {
-	return m_matrix.getMatrix();
+	return m_matrix.getValue();
 }
 
 void RobotConfig::setAddress(const QString& address)
@@ -87,7 +87,7 @@ void RobotConfig::setMaxAccel(const int maxAccel)
 
 void RobotConfig::setMatrix(const QMatrix4x4& matrix) 
 {
-	m_matrix.setMatrix(matrix);
+	m_matrix.setValue(matrix);
 }
 
 void RobotConfig::reset()
@@ -133,7 +133,7 @@ bool RobotConfig::setFromConfig(const Config* src, bool copyPath)
 		}
 		if (Matrix4x4Parameter* matrix = qobject_cast<Matrix4x4Parameter*>(src->getParameter("Tool Matrix")))
 		{
-			m_matrix.setMatrix(matrix->getMatrix());
+			m_matrix.setValue(matrix->getValue());
 			numberOfParametersSet++;
 		}
 	}

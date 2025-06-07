@@ -12,7 +12,7 @@ RobotKuka::~RobotKuka()
 {
 }
 
-void RobotKuka::connectToRobot(const RobotConfig& config)
+void RobotKuka::connectToRobot()
 {
     // TODO : Implémenter la connexion
 }

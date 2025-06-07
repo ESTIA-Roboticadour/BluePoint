@@ -12,6 +12,12 @@ AppController::~AppController()
 {
 }
 
+void AppController::onViewDestroyed()
+{
+	m_view = nullptr;
+	m_model->release();
+}
+
 void AppController::onModelReleased()
 {
 	deleteLater();
@@ -35,23 +41,15 @@ void AppController::setupConnections()
 	connect(m_model, &AppModel::errorOccurred, this, &AppController::onErrorOccurred);
 }
 
-void AppController::onViewDestroyed()
-{
-	m_view = nullptr;
-	m_model->release();
-}
 
 void AppController::onMovementPressed(const QString& dir)
 {
-	if (m_model && m_model->robot())
-		m_model->robot()->move(dir);
+	
 }
 
 void AppController::onMovementReleased(const QString& dir)
 {
 	Q_UNUSED(dir);
-	if (m_model && m_model->robot())
-		m_model->robot()->stopMovement();
 }
 
 void AppController::onRobotStateChanged()
