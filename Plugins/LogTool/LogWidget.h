@@ -34,6 +34,7 @@ public:
     void setFatalColor   (const QColor&);
 
 private slots:
+    void onLogAppended(const LogEntry& entry);
     void copySelectedRow();
     void showContextMenu(const QPoint&);
 

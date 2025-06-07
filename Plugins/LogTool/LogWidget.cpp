@@ -23,7 +23,7 @@ LogWidget::LogWidget(QWidget* parent) :
     lay->setContentsMargins(0, 0, 0, 0);
     lay->addWidget(m_view);
 
-    connect(&LogDispatcher::instance(), &LogDispatcher::newEntry, m_model, &LogModel::append);
+    connect(&LogDispatcher::instance(), &LogDispatcher::newEntry, this, &LogWidget::onLogAppended);
 
     auto* scCopy = new QShortcut(QKeySequence::Copy, m_view);
     connect(scCopy, &QShortcut::activated, this, &LogWidget::copySelectedRow);
@@ -50,6 +50,11 @@ void LogWidget::setWarningColor (const QColor& c) { m_model->setColor(QtWarningM
 void LogWidget::setCriticalColor(const QColor& c) { m_model->setColor(QtCriticalMsg, c); }
 void LogWidget::setFatalColor   (const QColor& c) { m_model->setColor(QtFatalMsg,    c); }
 
+void LogWidget::onLogAppended(const LogEntry& entry)
+{
+    m_model->append(entry);
+    m_view->scrollToBottom();
+}
 
 void LogWidget::copySelectedRow()
 {
