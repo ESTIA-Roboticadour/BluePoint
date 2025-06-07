@@ -78,9 +78,7 @@ void ConfigurationView::buildUi(const QString& titleStr, bool isReadOnly)
 	m_parametersView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	boxLayout->addWidget(m_parametersView);
-
 	vMain->addWidget(box);
-
 	vMain->addSpacerItem(new QSpacerItem(0, 20, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
 	/* ---- boutons ---- */

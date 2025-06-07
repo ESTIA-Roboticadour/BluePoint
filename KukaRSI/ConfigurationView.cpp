@@ -12,6 +12,7 @@
 #include <QColor>
 #include <QFileDialog>
 #include <QGroupBox>
+#include <QSpacerItem>
 
 ConfigurationView::ConfigurationView(const QString& title, bool isReadOnly, QWidget* parent) :
 	TransparentScrollArea(parent),
@@ -68,6 +69,7 @@ void ConfigurationView::buildUi(const QString& titleStr, bool isReadOnly)
 
 	/* ---- vue des paramètres ---- */
 	QGroupBox* box = new QGroupBox("Parameters", content);
+	box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
 	auto* boxLayout = new QVBoxLayout(box);
 
 	m_parametersView = new ParametersView(box);
@@ -76,12 +78,12 @@ void ConfigurationView::buildUi(const QString& titleStr, bool isReadOnly)
 	m_parametersView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	boxLayout->addWidget(m_parametersView);
-
 	vMain->addWidget(box);
-	vMain->addStretch();
+	vMain->addSpacerItem(new QSpacerItem(0, 20, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
 	/* ---- boutons ---- */
 	auto* hBtns = new QHBoxLayout();
+	hBtns->setAlignment(Qt::AlignRight);
 	m_cancelButton = new QPushButton(tr("Cancel"), content);
 	m_resetButton = new QPushButton(tr("Reset"), content);
 	m_openButton = new QPushButton(tr("Open"), content);
@@ -92,15 +94,13 @@ void ConfigurationView::buildUi(const QString& titleStr, bool isReadOnly)
 	m_openButton->setEnabled(false);
 	m_saveButton->setEnabled(false);
 
+	hBtns->addStretch();
 	hBtns->addWidget(m_cancelButton);
 	hBtns->addWidget(m_resetButton);
 	hBtns->addWidget(m_openButton);
 	hBtns->addWidget(m_saveButton);
-	hBtns->addStretch();
 
 	vMain->addLayout(hBtns);
-
-	vMain->addStretch();
 
 	/* ---- connexions ---- */
 	connect(m_fullPathButton, &QPushButton::clicked, this, &ConfigurationView::onFullPathButtonClicked);
