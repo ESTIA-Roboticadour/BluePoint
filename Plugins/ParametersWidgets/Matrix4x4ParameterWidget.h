@@ -40,7 +40,7 @@ private slots:
 
 private:
     void setupUI();
-    void updateUIFromMatrix(const QMatrix4x4& matrix);
+    void updateUIFromMatrix();
 
 signals:
     void nameChanged(const QString& name);

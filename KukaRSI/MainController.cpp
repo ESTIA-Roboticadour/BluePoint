@@ -50,6 +50,7 @@ void MainController::setupConnections()
 
 void MainController::onViewCloseRequested()
 {
+	m_view->clearCentralWidget();
 	m_model->release();
 }
 

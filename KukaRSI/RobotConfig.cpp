@@ -2,16 +2,12 @@
 
 RobotConfig::RobotConfig(QObject* parent) :
 	Config(parent),
-	m_address("Address", "192.168.1.xxx", StringParameter::Kind::Plain, this),
+	m_address("Address", "172.31.2.100", StringParameter::Kind::Plain, this),
 	m_port("Port", 12345, this),
-	m_maxSpeed("Max. Speed (deg/s)", 0, this),
-	m_maxAccel("Max. Accel (deg/s^2)", 0, this),
+	m_maxSpeed("Max. Speed (%)", 10, this),
+	m_maxAccel("Max. Accel (%)", 50, this),
 	m_matrix("Tool Matrix", QMatrix4x4(), this)
 {
-	QMatrix4x4 matrix;
-	matrix.setToIdentity();
-	m_matrix.setMatrix(matrix);
-
 	defineBounds();
 	addParameters();
 }
@@ -32,11 +28,7 @@ RobotConfig::RobotConfig(const RobotConfig& config, QObject* parent) :
 
 void RobotConfig::defineBounds()
 {
-	m_port.setMinimum(0);
-	m_port.setMinimum(65535);
-
-	m_maxSpeed.setMaximum(200);
-	m_maxAccel.setMaximum(200);
+	m_port.setMaximum(65535);
 }
 
 void RobotConfig::addParameters()
@@ -129,12 +121,12 @@ bool RobotConfig::setFromConfig(const Config* src, bool copyPath)
 			m_port.setValue(port->getValue());
 			numberOfParametersSet++;
 		}
-		if (NumericalParameter* maxSpeed = qobject_cast<NumericalParameter*>(src->getParameter("Max. Speed (deg/s)")))
+		if (NumericalParameter* maxSpeed = qobject_cast<NumericalParameter*>(src->getParameter("Max. Speed (%)")))
 		{
 			m_maxSpeed.setValue(maxSpeed->getValue());
 			numberOfParametersSet++;
 		}
-		if (NumericalParameter* maxAccel = qobject_cast<NumericalParameter*>(src->getParameter("Max. Accel (deg/s^2)")))
+		if (NumericalParameter* maxAccel = qobject_cast<NumericalParameter*>(src->getParameter("Max. Accel (%)")))
 		{
 			m_maxAccel.setValue(maxAccel->getValue());
 			numberOfParametersSet++;

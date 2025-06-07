@@ -5,11 +5,13 @@
 Matrix4x4ParameterWidget::Matrix4x4ParameterWidget(bool readOnly, QWidget* parent) :
     ParameterWidget(parent),
     m_name("Matrix 4x4"),
+    m_matrix(),
     m_label(new QLabel("Matrix 4x4:", this)),
     m_layout(new QGridLayout(this)),
     m_readOnly(readOnly)
 {
     setupUI();
+    updateUIFromMatrix();
 }
 
 void Matrix4x4ParameterWidget::setupUI()
@@ -23,9 +25,8 @@ void Matrix4x4ParameterWidget::setupUI()
     {
         for (int col = 0; col < 4; ++col)
         {
-            QLineEdit* edit = new QLineEdit("0.00", this);
+            QLineEdit* edit = new QLineEdit(this);
             edit->setValidator(validator);
-            //edit->setMaximumWidth(60);
             m_layout->addWidget(edit, row + 1, col);
             m_lineEdits.append(edit);
 
@@ -74,7 +75,7 @@ void Matrix4x4ParameterWidget::setMatrix(const QMatrix4x4& matrix)
     if (m_matrix != matrix)
     {
         m_matrix = matrix;
-        updateUIFromMatrix(m_matrix);
+        updateUIFromMatrix();
         emit matrixChanged(m_matrix);
     }
 }
@@ -111,14 +112,14 @@ int Matrix4x4ParameterWidget::getLabelWidth() const
     return m_label->sizeHint().width();
 }
 
-void Matrix4x4ParameterWidget::updateUIFromMatrix(const QMatrix4x4& matrix)
+void Matrix4x4ParameterWidget::updateUIFromMatrix()
 {
     for (int row = 0; row < 4; ++row)
     {
         for (int col = 0; col < 4; ++col)
         {
             int index = row * 4 + col;
-            m_lineEdits[index]->setText(QString::number(matrix(row, col), 'f', 3));
+            m_lineEdits[index]->setText(QString::number(m_matrix(row, col), 'f', 3));
         }
     }
 }
@@ -149,6 +150,7 @@ void Matrix4x4ParameterWidget::setFrom(const Matrix4x4Parameter* matrix4x4Parame
     setName(matrix4x4Parameter->getName());
     setMatrix(matrix4x4Parameter->getMatrix());
     setEnabled(matrix4x4Parameter->getIsEditable());
+    updateUIFromMatrix();
 }
 
 void Matrix4x4ParameterWidget::onLineEditEdited()
