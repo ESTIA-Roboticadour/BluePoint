@@ -284,11 +284,11 @@ QWidget* ParametersView::createMatrix4X4ParameterWidget(const Matrix4x4Parameter
     matrixWidget->setFrom(parameter);
     *width = matrixWidget->getLabelWidth();
 
-    connect(parameter, &Matrix4x4Parameter::matrixChanged, matrixWidget, &Matrix4x4ParameterWidget::setMatrix);
+    connect(parameter, &Matrix4x4Parameter::matrixChanged, matrixWidget, &Matrix4x4ParameterWidget::setValue);
 
     if (!m_isReadOnly)
     {
-        connect(matrixWidget, &Matrix4x4ParameterWidget::matrixChanged, parameter, &Matrix4x4Parameter::setMatrix);
+        connect(matrixWidget, &Matrix4x4ParameterWidget::matrixChanged, parameter, static_cast<void (Matrix4x4Parameter::*)(const QMatrix4x4&)>(&Matrix4x4Parameter::setValue));
         connect(parameter, &ParameterBase::isEditableChanged, matrixWidget, &Matrix4x4ParameterWidget::setEnabled);
     }
     return matrixWidget;

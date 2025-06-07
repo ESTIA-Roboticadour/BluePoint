@@ -9,6 +9,7 @@
 #include <QMatrix4x4>
 #include <QLineEdit>
 #include <QLabel>
+#include <QPushButton>
 #include <QGridLayout>
 #include <QVector>
 #include <QString>
@@ -16,19 +17,19 @@
 class PARAMETERS_WIDGETS_API Matrix4x4ParameterWidget : public ParameterWidget
 {
     Q_OBJECT
-    Q_PROPERTY(QMatrix4x4 matrix READ getMatrix WRITE setMatrix NOTIFY matrixChanged)
+    Q_PROPERTY(QMatrix4x4 matrix READ getValue WRITE setValue NOTIFY matrixChanged)
 
 public:
     explicit Matrix4x4ParameterWidget(bool readOnly = false, QWidget* parent = nullptr);
     ~Matrix4x4ParameterWidget() override = default;
 
     QString getName() const;
-    QMatrix4x4 getMatrix() const;
+    QMatrix4x4 getValue() const;
     int getLabelWidth() const override;
 
 public slots:
     void setName(const QString& newName);
-    void setMatrix(const QMatrix4x4& matrix);
+    void setValue(const QMatrix4x4& matrix);
     void setRotationMatrix(const QMatrix4x4& rotation);
     void setTranslation(const QVector3D& translation);
     void setLabelWidth(int width) override;
@@ -37,6 +38,7 @@ public slots:
 
 private slots:
     void onLineEditEdited();
+    void onButtonClicked();
 
 private:
     void setupUI();
@@ -53,6 +55,7 @@ private:
     QVector<QLineEdit*> m_lineEdits;
     QLabel* m_label;
     QGridLayout* m_layout;
+    QPushButton* m_button;
 };
 
 #endif // MATRIX4X4PARAMETERWIDGET_H

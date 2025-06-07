@@ -20,16 +20,19 @@ public:
 
     ParameterBase* copy(QObject* parent = nullptr) const override;
 
-    QMatrix4x4 getMatrix() const;
+    QMatrix4x4 getValue() const;
     QMatrix4x4 getRotationMatrix() const;
     QVector3D  getTranslation() const;
+
+    void normalizeRotation();
 
     QJsonObject toJson() const override;
     static std::unique_ptr<ParameterBase> fromJson(const QJsonObject& obj, QObject* parent = nullptr);
 
 public slots:
-    void setMatrix(const QMatrix4x4& matrix);
-    void setRotationMatrix(const QMatrix4x4& rotation);
+    void setValue(const QMatrix4x4& matrix);
+    void setValue(QMatrix4x4& matrix, bool normalizeRotation=false);
+    void setRotationMatrix(QMatrix4x4& rotation, bool normalizeRotation=false);
     void setTranslation(const QVector3D& translation);
 
 signals:

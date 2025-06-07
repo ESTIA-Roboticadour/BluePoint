@@ -24,7 +24,7 @@ ParameterBase* Matrix4x4Parameter::copy(QObject* parent) const
     return new Matrix4x4Parameter(*this, parent);
 }
 
-QMatrix4x4 Matrix4x4Parameter::getMatrix() const
+QMatrix4x4 Matrix4x4Parameter::getValue() const
 {
     return m_matrix;
 }
@@ -43,16 +43,46 @@ QVector3D Matrix4x4Parameter::getTranslation() const
     return { m_matrix(0, 3), m_matrix(1, 3), m_matrix(2, 3) };
 }
 
-void Matrix4x4Parameter::setMatrix(const QMatrix4x4& matrix)
+void Matrix4x4Parameter::setValue(const QMatrix4x4& matrix)
 {
-    if (getIsEditable() && m_matrix != matrix)
-        emitIfChanged(matrix);
+    setValue(*(QMatrix4x4*)(&matrix), false);
 }
 
-void Matrix4x4Parameter::setRotationMatrix(const QMatrix4x4& rotation)
+void Matrix4x4Parameter::setValue(QMatrix4x4& matrix, bool normalizeRotation)
+{
+    if (getIsEditable())
+    {
+        if (normalizeRotation)
+        {
+            for (int i = 0; i < 3; ++i) {
+                QVector3D col = matrix.column(i).toVector3D().normalized();
+                matrix.setColumn(i, QVector4D(col, 0.0f));
+            }
+        }
+        emitIfChanged(matrix);
+    }
+}
+
+void Matrix4x4Parameter::normalizeRotation()
+{
+    for (int i = 0; i < 3; ++i) {
+        QVector3D col = m_matrix.column(i).toVector3D().normalized();
+        m_matrix.setColumn(i, QVector4D(col, 0.0f));
+    }
+}
+
+void Matrix4x4Parameter::setRotationMatrix(QMatrix4x4& rotation, bool normalizeRotation)
 {
     if (!getIsEditable())
         return;
+
+    if (normalizeRotation)
+    {
+        for (int i = 0; i < 3; ++i) {
+            QVector3D col = rotation.column(i).toVector3D().normalized();
+            rotation.setColumn(i, QVector4D(col, 0.0f));
+        }
+    }
 
     QMatrix4x4 newMatrix = m_matrix;
     for (int row = 0; row < 3; ++row)

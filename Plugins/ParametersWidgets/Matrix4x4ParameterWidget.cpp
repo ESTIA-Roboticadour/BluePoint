@@ -1,14 +1,16 @@
 #include "Matrix4x4ParameterWidget.h"
 
+#include <QHBoxLayout>
 #include <QDoubleValidator>
 
 Matrix4x4ParameterWidget::Matrix4x4ParameterWidget(bool readOnly, QWidget* parent) :
     ParameterWidget(parent),
     m_name("Matrix 4x4"),
     m_matrix(),
+    m_readOnly(readOnly),
     m_label(new QLabel("Matrix 4x4:", this)),
     m_layout(new QGridLayout(this)),
-    m_readOnly(readOnly)
+    m_button(nullptr)
 {
     setupUI();
     updateUIFromMatrix();
@@ -16,7 +18,18 @@ Matrix4x4ParameterWidget::Matrix4x4ParameterWidget(bool readOnly, QWidget* paren
 
 void Matrix4x4ParameterWidget::setupUI()
 {
-    m_layout->addWidget(m_label, 0, 0, 1, 4); // Label spanning 4 columns
+    QHBoxLayout* hBox = new QHBoxLayout();
+    hBox->addWidget(m_label);
+
+    if (!m_readOnly)
+    {
+        m_button = new QPushButton("Normalize", this);
+        hBox->addWidget(m_button);
+        hBox->addStretch();
+        connect(m_button, &QPushButton::clicked, this, &Matrix4x4ParameterWidget::onButtonClicked);
+    }
+
+    m_layout->addLayout(hBox, 0, 0, 1, 4); // Label spanning 4 columns
 
     QDoubleValidator* validator = new QDoubleValidator(this);
     validator->setNotation(QDoubleValidator::StandardNotation);
@@ -65,12 +78,12 @@ void Matrix4x4ParameterWidget::setName(const QString& newName)
     }
 }
 
-QMatrix4x4 Matrix4x4ParameterWidget::getMatrix() const
+QMatrix4x4 Matrix4x4ParameterWidget::getValue() const
 {
     return m_matrix;
 }
 
-void Matrix4x4ParameterWidget::setMatrix(const QMatrix4x4& matrix)
+void Matrix4x4ParameterWidget::setValue(const QMatrix4x4& matrix)
 {
     if (m_matrix != matrix)
     {
@@ -82,24 +95,24 @@ void Matrix4x4ParameterWidget::setMatrix(const QMatrix4x4& matrix)
 
 void Matrix4x4ParameterWidget::setRotationMatrix(const QMatrix4x4& rotation)
 {
-    QMatrix4x4 current = getMatrix();
+    QMatrix4x4 current = getValue();
 
     for (int row = 0; row < 3; ++row)
         for (int col = 0; col < 3; ++col)
             current(row, col) = rotation(row, col);
 
-    setMatrix(current);
+    setValue(current);
 }
 
 void Matrix4x4ParameterWidget::setTranslation(const QVector3D& translation)
 {
-    QMatrix4x4 current = getMatrix();
+    QMatrix4x4 current = getValue();
 
     current(0, 3) = translation.x();
     current(1, 3) = translation.y();
     current(2, 3) = translation.z();
 
-    setMatrix(current);
+    setValue(current);
 }
 
 void Matrix4x4ParameterWidget::setLabelWidth(int width)
@@ -148,7 +161,7 @@ void Matrix4x4ParameterWidget::setFrom(const Matrix4x4Parameter* matrix4x4Parame
         return;
 
     setName(matrix4x4Parameter->getName());
-    setMatrix(matrix4x4Parameter->getMatrix());
+    setValue(matrix4x4Parameter->getValue());
     setEnabled(matrix4x4Parameter->getIsEditable());
     updateUIFromMatrix();
 }
@@ -170,7 +183,15 @@ void Matrix4x4ParameterWidget::onLineEditEdited()
             newMatrix(row, col) = value;
         }
     }
-
-    setMatrix(newMatrix);
+    setValue(newMatrix);
 }
 
+void Matrix4x4ParameterWidget::onButtonClicked()
+{
+    QMatrix4x4 newMatrix = m_matrix;
+    for (int i = 0; i < 3; ++i) {
+        QVector3D col = newMatrix.column(i).toVector3D().normalized();
+        newMatrix.setColumn(i, QVector4D(col, 0.0f));
+    }
+    setValue(newMatrix);
+}
