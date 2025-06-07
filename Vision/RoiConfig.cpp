@@ -31,11 +31,6 @@ RoiConfig::RoiConfig(const RoiConfig& config, QObject* parent) :
 	m_height("Height", config.m_height)
 {
 	defineBounds();
-	if (m_x.getValue() < 0)
-		m_x.setValue(0);
-
-	if (m_y.getValue() < 0)
-		m_y.setValue(0);
 	addParameters();
 }
 

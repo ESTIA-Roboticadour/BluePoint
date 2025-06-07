@@ -19,6 +19,8 @@ private slots:
 	void onNavigationRequest(NavigationNode* newNode, NavigationNode* currentNode, bool* accept);
 	void onNavigationDone(NavigationNode* node);
 
+	void robotConfigSaved(const Config* config);
+
 private:
 	void setupTreeNodes();
 	void setupConnections();

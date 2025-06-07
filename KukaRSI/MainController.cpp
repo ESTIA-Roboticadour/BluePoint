@@ -1,5 +1,7 @@
 #include "MainController.h"
 #include "AppStore.h"
+#include "ViewFactory.h"
+#include "RobotConfig.h"
 
 #include <QMessageBox>
 
@@ -46,7 +48,6 @@ void MainController::setupConnections()
 	connect(m_tree, &NavigationTree::currentNodeChanged, this, &MainController::onNavigationDone);
 }
 
-
 void MainController::onViewCloseRequested()
 {
 	m_model->release();
@@ -79,13 +80,24 @@ void MainController::onNavigationDone(NavigationNode* node)
 	updateCentralWidget(node);
 }
 
+void MainController::robotConfigSaved(const Config* config)
+{
+	if (!AppStore::getRobotConfig())
+	{
+		if (RobotConfig* lightConfig = (RobotConfig*)dynamic_cast<const RobotConfig*>(config))
+		{
+			AppStore::setRobotConfig(lightConfig);
+		}
+	}
+}
+
 void MainController::updateCentralWidget(NavigationNode* node)
 {
 	qreal opacity = 0.5;
 	if (node == m_configurationNode)
 		navigateConfigurationNode();
 
-	if (node == m_appNode)
+	else if (node == m_appNode)
 		navigateAppNode();
 
 	else
@@ -98,11 +110,27 @@ void MainController::updateCentralWidget(NavigationNode* node)
 	m_view->setBackgroundOpacity(opacity);
 }
 
-
 void MainController::navigateConfigurationNode() 
 {
+	RobotConfig* config = AppStore::getRobotConfig();
+	if (!config)
+	{
+		config = new RobotConfig();
+		m_tempConfig = config;
+	}
+	connect(config, &Config::saved, this, &MainController::robotConfigSaved, Qt::UniqueConnection);
+	m_view->setCentralWidget(ViewFactory::createConfigurationView("Robot configuration", config, m_view));
 }
 
 void MainController::navigateAppNode() 
 {
+	RobotConfig* config = AppStore::getRobotConfig();
+	if (config)
+	{
+		m_view->setCentralWidget(ViewFactory::createAppView(m_model->getRobot(), config, m_view));
+	}
+	else
+	{
+		qWarning() << "Robot config not set";
+	}
 }

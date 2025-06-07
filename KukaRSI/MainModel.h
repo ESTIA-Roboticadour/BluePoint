@@ -1,6 +1,7 @@
 #pragma once
 #include "ModelBase.h"
 #include "NavigationTree.h"
+#include "RobotKuka.h"
 
 #include <QObject>
 
@@ -13,10 +14,12 @@ public:
 
 	// getters
 	NavigationTree* tree() const;
+	RobotKuka* getRobot() const;
 
 	// public
 	void release() override;
 
 private:
 	NavigationTree* m_tree;
+	RobotKuka* m_robot;
 };

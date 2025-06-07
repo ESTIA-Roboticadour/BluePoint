@@ -113,7 +113,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AppController.cpp" />
+    <ClCompile Include="AppModel.cpp" />
     <ClCompile Include="AppStore.cpp" />
+    <ClCompile Include="AppView.cpp" />
     <ClCompile Include="ConfigurationController.cpp" />
     <ClCompile Include="ConfigurationModel.cpp" />
     <ClCompile Include="ConfigurationView.cpp" />
@@ -121,6 +124,8 @@
     <ClCompile Include="MainController.cpp" />
     <ClCompile Include="MainModel.cpp" />
     <ClCompile Include="ModelBase.cpp" />
+    <ClCompile Include="RobotConfig.cpp" />
+    <ClCompile Include="RobotKuka.cpp" />
     <ClCompile Include="ViewFactory.cpp" />
     <ClCompile Include="WidgetControllerBase.cpp" />
     <ClCompile Include="WindowBase.cpp" />
@@ -143,12 +148,17 @@
   <ItemGroup>
     <QtMoc Include="MainModel.h" />
     <QtMoc Include="MainController.h" />
+    <QtMoc Include="AppController.h" />
+    <QtMoc Include="AppModel.h" />
     <ClInclude Include="AppStore.h" />
     <QtMoc Include="ConfigurationController.h" />
     <QtMoc Include="ConfigurationModel.h" />
     <QtMoc Include="ConfigurationView.h" />
+    <QtMoc Include="AppView.h" />
     <ClInclude Include="CallbackTypes.h" />
     <ClInclude Include="Helper.h" />
+    <QtMoc Include="RobotConfig.h" />
+    <QtMoc Include="RobotKuka.h" />
     <ClInclude Include="ViewFactory.h" />
     <QtMoc Include="WindowControllerBase.h" />
   </ItemGroup>

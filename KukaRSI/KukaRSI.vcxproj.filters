@@ -72,6 +72,21 @@
     <Filter Include="Services\Config">
       <UniqueIdentifier>{3dc1e3a1-6966-45d3-b6ef-95f1002752e6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Features\AppView">
+      <UniqueIdentifier>{16cdb39e-55a6-438c-b2bd-2669b2462191}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\AppView\Models">
+      <UniqueIdentifier>{3a2fe44c-2f97-4d72-9729-28dac284a2e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\AppView\Views">
+      <UniqueIdentifier>{23917a52-1d01-4bd9-b779-1488cd13b6cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\AppView\Controllers">
+      <UniqueIdentifier>{99d898d5-4041-4630-aabd-30d9aed15e12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Services\Robot">
+      <UniqueIdentifier>{886c8a34-a4c1-43f5-9242-298ab0b49537}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="MainWindow.qrc">
@@ -124,6 +139,21 @@
     <ClCompile Include="ConfigurationController.cpp">
       <Filter>Features\ConfigurationView\Controllers</Filter>
     </ClCompile>
+    <ClCompile Include="RobotConfig.cpp">
+      <Filter>Services\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="AppController.cpp">
+      <Filter>Features\AppView\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="AppModel.cpp">
+      <Filter>Features\AppView\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="AppView.cpp">
+      <Filter>Features\AppView\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="RobotKuka.cpp">
+      <Filter>Services\Robot</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ModelBase.h">
@@ -155,6 +185,21 @@
     </QtMoc>
     <QtMoc Include="ConfigurationController.h">
       <Filter>Features\ConfigurationView\Controllers</Filter>
+    </QtMoc>
+    <QtMoc Include="RobotConfig.h">
+      <Filter>Services\Config</Filter>
+    </QtMoc>
+    <QtMoc Include="AppView.h">
+      <Filter>Features\AppView\Views</Filter>
+    </QtMoc>
+    <QtMoc Include="RobotKuka.h">
+      <Filter>Services\Robot</Filter>
+    </QtMoc>
+    <QtMoc Include="AppModel.h">
+      <Filter>Features\AppView\Models</Filter>
+    </QtMoc>
+    <QtMoc Include="AppController.h">
+      <Filter>Features\AppView\Controllers</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
