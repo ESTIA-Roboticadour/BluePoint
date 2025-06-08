@@ -20,8 +20,6 @@ private slots:
 
 	void onModelReleased();
 
-	void onMovementPressed(const QString& dir);
-	void onMovementReleased(const QString& dir);
 	void onRobotStateChanged();
 	void onRobotPoseChanged(const QMatrix4x4& pose);
 	void onErrorOccurred(const QString& msg);

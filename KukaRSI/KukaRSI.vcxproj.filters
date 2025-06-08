@@ -215,5 +215,8 @@
     <ClInclude Include="CallbackTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MovementDirection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -159,6 +159,7 @@
     <ClInclude Include="Helper.h" />
     <QtMoc Include="RobotConfig.h" />
     <QtMoc Include="RobotKuka.h" />
+    <ClInclude Include="MovementDirection.h" />
     <ClInclude Include="ViewFactory.h" />
     <QtMoc Include="WindowControllerBase.h" />
   </ItemGroup>

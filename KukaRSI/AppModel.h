@@ -2,6 +2,8 @@
 #include "ModelBase.h"
 #include "RobotKuka.h"
 #include "RobotConfig.h"
+#include "MovementDirection.h"
+#include "NumericalParameter.h"
 
 #include <QObject>
 
@@ -14,7 +16,6 @@ public:
     ~AppModel();
 
     const Config* getConfig() const;
-    const Config* getUiConfig() const;
 
     // Méthodes utilitaires
     void connectToRobot();
@@ -25,17 +26,20 @@ public:
 
     void release() override;
 
-signals:
-    void robotStateChanged();
-    void robotPoseChanged(const QMatrix4x4& pose);
-    void errorOccurred(const QString& message);
+public slots:
+    void onMovementPressed(MovementDirection direction);
+    void onMovementReleased(MovementDirection direction);
 
 private slots:
     void onPoseUpdated(const QMatrix4x4& pose);
     void onErrorOccurred(const QString& message);
 
+signals:
+    void robotStateChanged();
+    void robotPoseChanged(const QMatrix4x4& pose);
+    void errorOccurred(const QString& message);
+
 private:
     RobotKuka* m_robot;
     Config m_config;
-    Config m_uiConfig;
 };

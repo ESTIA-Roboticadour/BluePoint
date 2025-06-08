@@ -1,7 +1,13 @@
 #pragma once
+#include "MovementDirection.h"
+#include "ParametersView.h"
+#include "Config.h"
+
 #include <QWidget>
 #include <QPushButton>
+#include <QGroupBox>
 #include <QGridLayout>
+#include <QMap>
 
 class AppView : public QWidget
 {
@@ -10,26 +16,38 @@ class AppView : public QWidget
 public:
     explicit AppView(QWidget* parent = nullptr);
 
+    void setConfig(const Config* config);
+
+public slots:
+    void updatePose(double positions[6]);
+    void updateDelta(double positions[6]);
+
+private slots:
+    void handleMovementPressed();
+    void handleMovementReleased();
+
+private:
+    void setupUI();
+    void createMovementButtons(QGridLayout* layout);
+    void setupMovementSignals(QPushButton* button, MovementDirection direction) const;
+    QGroupBox* createPoseGroup(const QString& title, QList<QLineEdit*>& listToFeed);
+
 signals:
     void connectButtonClicked();
     void disconnectButtonClicked();
     void startButtonClicked();
     void stopButtonClicked();
 
-    void movementPressed(const QString& direction);
-    void movementReleased(const QString& direction);
+    void movementPressed(MovementDirection direction);
+    void movementReleased(MovementDirection direction);
 
 private:
-    void setupUI();
-    void createActionButtons(QGridLayout* layout);
-    void createMovementButtons(QGridLayout* layout);
-    void setupMovementSignals(QPushButton* button, const QString& direction);
-
     QPushButton* m_connectButton;
     QPushButton* m_disconnectButton;
     QPushButton* m_startButton;
     QPushButton* m_stopButton;
-
-    QMap<QString, QPushButton*> m_movementButtons;
+    ParametersView* m_parametersView;
+    QList<QLineEdit*> m_poseLineEdits;
+    QList<QLineEdit*> m_deltaLineEdits;
+    QMap<MovementDirection, QPushButton*> m_movementButtons;
 };
-

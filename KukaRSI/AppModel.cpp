@@ -3,8 +3,7 @@
 AppModel::AppModel(const RobotConfig* config, QObject* parent) :
     ModelBase(parent),
     m_robot(nullptr),
-    m_config(),
-    m_uiConfig()
+    m_config()
 {
     if (m_robot)
     {
@@ -34,14 +33,17 @@ void AppModel::release()
     }
 }
 
+void AppModel::onMovementPressed(MovementDirection direction)
+{
+}
+
+void AppModel::onMovementReleased(MovementDirection direction)
+{
+}
+
 const Config* AppModel::getConfig() const
 {
     return &m_config;
-}
-
-const Config* AppModel::getUiConfig() const
-{
-    return &m_uiConfig;
 }
 
 void AppModel::connectToRobot()

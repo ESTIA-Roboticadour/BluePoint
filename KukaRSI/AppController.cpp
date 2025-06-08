@@ -32,24 +32,13 @@ void AppController::setupConnections()
 	connect(m_view, &AppView::startButtonClicked, m_model, &AppModel::startRobot);
 	connect(m_view, &AppView::stopButtonClicked, m_model, &AppModel::stopRobot);
 
-	connect(m_view, &AppView::movementPressed, this, &AppController::onMovementPressed);
-	connect(m_view, &AppView::movementReleased, this, &AppController::onMovementReleased);
+	connect(m_view, &AppView::movementPressed, m_model, &AppModel::onMovementPressed);
+	connect(m_view, &AppView::movementReleased, m_model, &AppModel::onMovementReleased);
 		
 	// Connexions AppModel -> AppView ou autres
 	connect(m_model, &AppModel::robotStateChanged, this, &AppController::onRobotStateChanged);
 	connect(m_model, &AppModel::robotPoseChanged, this, &AppController::onRobotPoseChanged);
 	connect(m_model, &AppModel::errorOccurred, this, &AppController::onErrorOccurred);
-}
-
-
-void AppController::onMovementPressed(const QString& dir)
-{
-	
-}
-
-void AppController::onMovementReleased(const QString& dir)
-{
-	Q_UNUSED(dir);
 }
 
 void AppController::onRobotStateChanged()
