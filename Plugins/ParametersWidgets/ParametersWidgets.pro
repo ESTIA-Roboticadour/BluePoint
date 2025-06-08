@@ -33,7 +33,8 @@ HEADERS += \
     NumericalParameterWidgetPlugin.h \
     StringParameterWidgetPlugin.h \
     ListParameterWidgetPlugin.h \
-    ParametersViewPlugin.h
+    ParametersViewPlugin.h \
+    UnknownParameterWidget.h
 
 SOURCES += \
     Config.cpp \
@@ -56,7 +57,8 @@ SOURCES += \
     NumericalParameterWidgetPlugin.cpp \
     StringParameterWidgetPlugin.cpp \
     ListParameterWidgetPlugin.cpp \
-    ParametersViewPlugin.cpp
+    ParametersViewPlugin.cpp \
+    UnknownParameterWidget.cpp
 
 #RESOURCES +=
 #LIBS        += -L. -lListParameterWidget -lParametersView -lBoolParameterWidget -lStringParameterWidget -lNumericalParameterWidget

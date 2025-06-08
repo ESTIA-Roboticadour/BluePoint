@@ -8,6 +8,7 @@
 #include <QGroupBox>
 #include <QGridLayout>
 #include <QMap>
+#include <QLineEdit>
 
 class AppView : public QWidget
 {

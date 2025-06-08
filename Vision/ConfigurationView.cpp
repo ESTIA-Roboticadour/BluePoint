@@ -74,7 +74,7 @@ void ConfigurationView::buildUi(const QString& titleStr, bool isReadOnly)
 
 	m_parametersView = new ParametersView(box);
 	m_parametersView->setReadOnly(isReadOnly);
-	m_parametersView->setAlignment(ParametersView::Alignment::NoAlignment);
+	m_parametersView->setAlignment(ParametersView::Alignment::All);
 	m_parametersView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	boxLayout->addWidget(m_parametersView);
@@ -147,13 +147,7 @@ void ConfigurationView::setConfig(const Config* config)
 		m_configPath = config->getPath();
 		m_isConfigModified = true; // set to true to be sure next updateUiConfig(false) will be applied
 		updateUiConfig(false);
-		QList<ParameterBase*> params = config->getParameters();
-		QList<const ParameterBase*> constParams;
-		for (auto* param : params)
-		{
-			constParams.append(param);
-		}
-		m_parametersView->setParameters(constParams);
+		m_parametersView->setParameters(config->getParameters());
 
 		m_resetButton->setEnabled(true);
 		m_openButton->setEnabled(true);

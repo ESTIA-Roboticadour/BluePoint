@@ -1,9 +1,10 @@
 #ifndef PARAMETERWIDGET_H
 #define PARAMETERWIDGET_H
 
+#include "ParametersWidgetCollection_global.h"
 #include <QWidget>
 
-class ParameterWidget : public QWidget
+class PARAMETERS_WIDGETS_API ParameterWidget : public QWidget
 {
     Q_OBJECT
 public:

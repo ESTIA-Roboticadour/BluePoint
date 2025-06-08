@@ -1,10 +1,10 @@
 #include "ParametersView.h"
-#include "ParameterWidget.h"
 #include "BoolParameterWidget.h"
 #include "NumericalParameterWidget.h"
 #include "StringParameterWidget.h"
 #include "ListParameterWidget.h"
 #include "Matrix4x4ParameterWidget.h"
+#include "UnknownParameterWidget.h"
 
 #include <QHBoxLayout>
 #include <QGroupBox>
@@ -17,9 +17,10 @@ ParametersView::ParametersView(QWidget* parent) :
 	QWidget(parent),
 	m_isReadOnly(false),
 	m_layout(new QVBoxLayout(this)),
-    m_parameters(nullptr),
+    m_parameters(),
     m_alignment(ParametersView::Alignment::NoAlignment),
-    m_maxWidthPerLevel()
+    m_stackedGroupBoxes(),
+    m_groupsInfo()
 {
 	//setLayout(m_layout); fait automatiquement avec QVBoxLayout(this)
 	setBoxLayoutSpacing(m_layout, 2, 2, 2, 2, 2);
@@ -45,8 +46,7 @@ void ParametersView::setReadOnly(bool readonly)
 	if (m_isReadOnly != readonly)
 	{
 		m_isReadOnly = readonly;
-		if (m_parameters)
-			setParameters(*m_parameters, m_layout);
+        buildUI(m_parameters);
 		emit readOnlyChanged(m_isReadOnly);
 	}
 }
@@ -95,30 +95,6 @@ void ParametersView::clearLayout(QLayout* layout)
 		// Supprimer le QLayoutItem lui-même
 		delete item;
 	}
-    m_maxWidthPerLevel.clear();
-}
-
-void ParametersView::setParameters(const QList<const ParameterBase*>& parameters)
-{
-	clear();
-    m_parameters = &parameters;
-    //qDebug() << "--";
-    //qDebug() << findMaxDepth(parameters);
-    //qDebug() << "--";
-    m_maxWidthPerLevel.fill(0, findMaxDepth(parameters));
-	setParameters(parameters, m_layout);
-}
-
-void ParametersView::setParameters(const QList<const ParameterBase*>& parameters, QLayout* layout)
-{
-    //qDebug() << "--------------";
-    setParametersAndSetMaxWidth(parameters, layout, 0);
-    //qDebug() << "--------------";
-    //for (auto w : m_maxWidthPerLevel)
-    //    qDebug() << w;
-
-    if (m_alignment != ParametersView::Alignment::NoAlignment)
-        updateWidgetsAlignment();
 }
 
 int ParametersView::findMaxDepth(const QList<const ParameterBase*>& params) const
@@ -137,18 +113,44 @@ int ParametersView::findMaxDepth(const QList<const ParameterBase*>& params) cons
     return maxDepth;
 }
 
-void ParametersView::setParametersAndSetMaxWidth(const QList<const ParameterBase*>& parameters, QLayout* layout, int depth)
+void ParametersView::setParameters(const QList<ParameterBase*>& parameters)
+{
+    QList<const ParameterBase*> constParams;
+    for (auto* param : parameters)
+    {
+        constParams.append(param);
+    }
+    setParameters(constParams);
+}
+
+void ParametersView::setParameters(const QList<const ParameterBase*>& parameters)
+{
+    m_parameters = parameters;
+    buildUI(parameters);
+}
+
+void ParametersView::buildUI(const QList<const ParameterBase*>& parameters)
+{
+    clear();
+    m_stackedGroupBoxes.clear();
+    m_groupsInfo.clear();
+    m_groupsInfo.insert(nullptr, GroupInfo());
+    buildUI(parameters, m_layout);
+
+    if (m_alignment != ParametersView::Alignment::NoAlignment)
+        updateWidgetsAlignment();
+}
+
+void ParametersView::buildUI(const QList<const ParameterBase*>& parameters, QLayout* layout)
 {
     for (const ParameterBase* parameter : parameters)
     {
-        int width;
-        QWidget* widget = createParameterWidget(parameter, depth, &width);
+        QWidget* widget = createParameterWidget(parameter);
         if (widget)
         {
-            //qDebug() << parameter->getName() << ':' << width;
-            if (width > m_maxWidthPerLevel[depth])
+            if (auto paramWidget = qobject_cast<ParameterWidget*>(widget))
             {
-                m_maxWidthPerLevel[depth] = width;
+                feedGroupInfo(paramWidget);
             }
 
             if (auto boxLayout = qobject_cast<QBoxLayout*>(widget->layout()))
@@ -160,57 +162,57 @@ void ParametersView::setParametersAndSetMaxWidth(const QList<const ParameterBase
     }
 }
 
-QWidget* ParametersView::createParameterWidget(const ParameterBase* parameter, int depth, int* width)
+QWidget* ParametersView::createParameterWidget(const ParameterBase* parameter)
 {
 	// Group
 	if (auto groupParam = qobject_cast<const GroupParameter*>(parameter))
 	{
-        return createParameterGroupWidget(groupParam, depth, width);
+        return createParameterGroupWidget(groupParam);
 	}
 	// Boolean
 	if (auto boolParam = qobject_cast<const BoolParameter*>(parameter))
 	{
-        return createBoolParameterWidget(boolParam, width);
+        return createBoolParameterWidget(boolParam);
 	}
 	// Numerical
 	if (auto numericalParam = qobject_cast<const NumericalParameter*>(parameter))
 	{
-        return createNumericalParameterWidget(numericalParam, width);
+        return createNumericalParameterWidget(numericalParam);
 	}
 	// String
 	if (auto stringParam = qobject_cast<const StringParameter*>(parameter))
 	{
-        return createStringParameterWidget(stringParam, width);
+        return createStringParameterWidget(stringParam);
 	}
 	// List
 	if (auto listParam = qobject_cast<const ListParameterBase*>(parameter))
 	{
-        return createListParameterWidget(listParam, width);
+        return createListParameterWidget(listParam);
 	}
     // Matrix4X4
     if (auto matrixParam = qobject_cast<const Matrix4x4Parameter*>(parameter))
     {
-        return createMatrix4X4ParameterWidget(matrixParam, width);
+        return createMatrix4X4ParameterWidget(matrixParam);
     }
 	// Unknown
-    return createUnknowParameterWidget(parameter, width);
+    return createUnknownParameterWidget(parameter);
 }
 
-QWidget* ParametersView::createParameterGroupWidget(const GroupParameter* parameter, int depth, int* width)
+QWidget* ParametersView::createParameterGroupWidget(const GroupParameter* parameter)
 {
-    *width = -1;
     QGroupBox* box = new QGroupBox(parameter->getName());
+    createGroupInfo(box);
 	QVBoxLayout* layout = new QVBoxLayout();
 	box->setLayout(layout);
-    setParametersAndSetMaxWidth(parameter->getParameters(), layout, depth + 1);
+    buildUI(parameter->getParameters(), layout);
+    m_stackedGroupBoxes.pop();
 	return box;
 }
 
-QWidget* ParametersView::createBoolParameterWidget(const BoolParameter* parameter, int* width) const
+ParameterWidget* ParametersView::createBoolParameterWidget(const BoolParameter* parameter)
 {
     BoolParameterWidget* boolWidget = new BoolParameterWidget(m_isReadOnly);
     boolWidget->setFrom(parameter);
-    *width = boolWidget->getLabelWidth();
 
     connect(parameter, &BoolParameter::valueChanged, boolWidget, &BoolParameterWidget::setValue);
 
@@ -222,11 +224,10 @@ QWidget* ParametersView::createBoolParameterWidget(const BoolParameter* paramete
     return boolWidget;
 }
 
-QWidget* ParametersView::createNumericalParameterWidget(const NumericalParameter* parameter, int* width) const
+ParameterWidget* ParametersView::createNumericalParameterWidget(const NumericalParameter* parameter)
 {
     NumericalParameterWidget* numericalWidget = new NumericalParameterWidget(m_isReadOnly);
     numericalWidget->setFrom(parameter);
-    *width = numericalWidget->getLabelWidth();
 
     connect(parameter, &NumericalParameter::valueChanged, numericalWidget, &NumericalParameterWidget::setValue);
 
@@ -241,11 +242,10 @@ QWidget* ParametersView::createNumericalParameterWidget(const NumericalParameter
     return numericalWidget;
 }
 
-QWidget* ParametersView::createStringParameterWidget(const StringParameter* parameter, int* width) const
+ParameterWidget* ParametersView::createStringParameterWidget(const StringParameter* parameter)
 {
     StringParameterWidget* stringWidget = new StringParameterWidget(m_isReadOnly);
     stringWidget->setFrom(parameter);
-    *width = stringWidget->getLabelWidth();
 
     connect(parameter, &StringParameter::valueChanged, stringWidget, &StringParameterWidget::setValue);
 
@@ -262,11 +262,10 @@ QWidget* ParametersView::createStringParameterWidget(const StringParameter* para
     return stringWidget;
 }
 
-QWidget* ParametersView::createListParameterWidget(const ListParameterBase* parameter, int* width) const
+ParameterWidget* ParametersView::createListParameterWidget(const ListParameterBase* parameter)
 {
     ListParameterWidget* listWidget = new ListParameterWidget();
     listWidget->setFrom(parameter);
-    *width = listWidget->getLabelWidth();
 
     connect(parameter, &ListParameterBase::selectedIndexChanged, listWidget, &ListParameterWidget::setCurrentIndex);
 
@@ -278,11 +277,10 @@ QWidget* ParametersView::createListParameterWidget(const ListParameterBase* para
     return listWidget;
 }
 
-QWidget* ParametersView::createMatrix4X4ParameterWidget(const Matrix4x4Parameter* parameter, int* width) const
+ParameterWidget* ParametersView::createMatrix4X4ParameterWidget(const Matrix4x4Parameter* parameter)
 {
     Matrix4x4ParameterWidget* matrixWidget = new Matrix4x4ParameterWidget();
     matrixWidget->setFrom(parameter);
-    *width = matrixWidget->getLabelWidth();
 
     connect(parameter, &Matrix4x4Parameter::matrixChanged, matrixWidget, &Matrix4x4ParameterWidget::setValue);
 
@@ -294,91 +292,70 @@ QWidget* ParametersView::createMatrix4X4ParameterWidget(const Matrix4x4Parameter
     return matrixWidget;
 }
 
-QWidget* ParametersView::createUnknowParameterWidget(const ParameterBase* parameter, int* width) const
+ParameterWidget* ParametersView::createUnknownParameterWidget(const ParameterBase* parameter)
 {
-	QWidget* container = new QWidget();
-	QLabel* label = new QLabel(parameter->getName());
-    *width = label->sizeHint().width();
+    UnknownParameterWidget* widget = new UnknownParameterWidget();
+    widget->setFrom(parameter);
+	return widget;
+}
 
-    QHBoxLayout* layout = new QHBoxLayout(container);
-	layout->addWidget(label);
-	return container;
+void ParametersView::createGroupInfo(const QGroupBox* groupBox)
+{
+    GroupInfo groupInfo;
+    m_stackedGroupBoxes.push(groupBox);
+    int stackSize = m_stackedGroupBoxes.size();
+    groupInfo.level = stackSize;
+    int groupBoxThickness = QApplication::style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
+    int leftMarginPerLevel = 8; // 2 (spacing) + 6 (margin left)
+    groupInfo.leftMargin = stackSize * leftMarginPerLevel + (stackSize - 1) * groupBoxThickness;
+
+    m_groupsInfo.insert(groupBox, groupInfo);
+}
+
+void ParametersView::feedGroupInfo(ParameterWidget* widget)
+{
+    const QGroupBox* groupBox = m_stackedGroupBoxes.isEmpty() ? nullptr : m_stackedGroupBoxes.top();
+    auto groupInfoIt = m_groupsInfo.find(groupBox);
+    GroupInfo& info = groupInfoIt.value();
+    int width = widget->getLabelWidth();
+    if (width > info.maxWidth)
+    {
+        info.maxWidth = width;
+    }
+    info.children.append(widget);
 }
 
 void ParametersView::updateWidgetsAlignment()
 {
-    if (m_alignment == Alignment::NoAlignment || m_maxWidthPerLevel.isEmpty())
+    if (m_alignment == Alignment::NoAlignment)
         return;
 
-    // Décalage visuel pour l’alignement global "All" :
-    int INDENT_PER_DEPTH =
-        QApplication::style()->pixelMetric(QStyle::PM_DefaultFrameWidth)  // bordure du QGroupBox
-        + 6  // left-margin du layout de groupe (setContentsMargins)
-        + 6; // left-margin du layout interne de chaque ParameterWidget
-
-    // ---------------------------------------------------------------------
-    // Récursion : parcourt tous les widgets contenus dans 'layout'.
-    // ---------------------------------------------------------------------
-    std::function<void(QLayout*, int)> applyWidths =
-        [this, &applyWidths, INDENT_PER_DEPTH](QLayout* layout, int depth)
+    int longestWidth = 0;
+    if (m_alignment == Alignment::All)
     {
-        if (!layout) return;
-
-        const int itemCount = layout->count();
-        for (int i = 0; i < itemCount; ++i)
+        for (auto& group : m_groupsInfo)
         {
-            QLayoutItem* item = layout->itemAt(i);
-            if (!item)
-                continue;
+            int width = group.leftMargin + group.maxWidth;
+            if (width > longestWidth)
+                longestWidth = width;
+        }
+    }
+    int groupBoxThickness = QApplication::style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
+    int leftMarginPerLevel = 8; // 2 (spacing) + 6 (margin left)
 
-            QWidget* currentWidget = item->widget();
-
-            //-----------------------------------------------------------------
-            // 1) Sous-groupe : on descend d’un niveau
-            //-----------------------------------------------------------------
-            if (auto* box = qobject_cast<QGroupBox*>(currentWidget))
+    for (auto& group : m_groupsInfo)
+    {
+        for (auto& child : group.children)
+        {
+            if (m_alignment == Alignment::All)
             {
-                applyWidths(box->layout(), depth + 1);
-                continue;
+                int margin = group.level * leftMarginPerLevel + std::max(0, group.level - 1) * groupBoxThickness;
+                child->setLabelWidth(longestWidth - margin);
             }
-
-            //-----------------------------------------------------------------
-            // 2) Paramètre 'classique' (hérite de ParameterWidget)
-            //-----------------------------------------------------------------
-            if (auto* pWidget = qobject_cast<ParameterWidget*>(currentWidget))
+            else
             {
-                int targetWidth =
-                    (m_alignment == Alignment::ByGroup)
-                        ? m_maxWidthPerLevel[depth]                                   // largeur locale au niveau
-                        : m_maxWidthPerLevel[depth] + (m_maxWidthPerLevel.size() - depth - 1) * INDENT_PER_DEPTH;       // alignement global
-
-                pWidget->setLabelWidth(targetWidth);
-                continue;
-            }
-
-            //-----------------------------------------------------------------
-            // 3) Widget 'inconnu' : on cherche un QLabel en 1re position
-            //-----------------------------------------------------------------
-            if (currentWidget && currentWidget->layout())
-            {
-                QLayout* innerLayout = currentWidget->layout();
-                if (innerLayout->count() > 0)
-                {
-                    QWidget* maybeLabelW = innerLayout->itemAt(0)->widget();
-                    if (auto* lbl = qobject_cast<QLabel*>(maybeLabelW))
-                    {
-                        int targetWidth = (m_alignment == Alignment::ByGroup) ?
-                                              m_maxWidthPerLevel[depth] :
-                                              m_maxWidthPerLevel[depth] + (m_maxWidthPerLevel.size() - depth - 1) * INDENT_PER_DEPTH;
-
-                        lbl->setFixedWidth(targetWidth);
-                    }
-                }
+                child->setLabelWidth(group.maxWidth);
             }
         }
-    };
-
-    // Lancement à partir du layout racine
-    applyWidths(m_layout, 0);
+    }
 }
-

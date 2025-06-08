@@ -18,6 +18,7 @@ StringParameterWidget::StringParameterWidget(bool readOnly, QWidget* parent) :
     QHBoxLayout* layoutControls = new QHBoxLayout(this);
 	layoutControls->addWidget(m_label);
 	layoutControls->addWidget(m_lineEdit);
+
     if (m_readOnly)
     {
         m_lineEdit->setEnabled(false);

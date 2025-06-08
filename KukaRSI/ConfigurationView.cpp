@@ -74,7 +74,7 @@ void ConfigurationView::buildUi(const QString& titleStr, bool isReadOnly)
 
 	m_parametersView = new ParametersView(box);
 	m_parametersView->setReadOnly(isReadOnly);
-	m_parametersView->setAlignment(ParametersView::Alignment::NoAlignment);
+	m_parametersView->setAlignment(ParametersView::Alignment::All);
 	m_parametersView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	boxLayout->addWidget(m_parametersView);
