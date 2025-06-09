@@ -196,6 +196,9 @@
     <ClCompile Include="RealSenseCameraConfig.cpp">
       <Filter>Services\Config</Filter>
     </ClCompile>
+    <ClCompile Include="BaslerCamera2.cpp">
+      <Filter>Services\Camera</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainController.h">
@@ -275,6 +278,9 @@
     </QtMoc>
     <QtMoc Include="RealSenseCameraConfig.h">
       <Filter>Services\Config</Filter>
+    </QtMoc>
+    <QtMoc Include="BaslerCamera2.h">
+      <Filter>Services\Camera</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
