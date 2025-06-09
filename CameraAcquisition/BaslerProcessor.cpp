@@ -548,7 +548,7 @@ void BaslerProcessor::captureEnded()
 //			pixel[1] = G;
 //			pixel[2] = R;
 //
-//			// Écriture QImage (format RGB888 → ordre: R, G, B)
+//			// Écriture QImage (format RGB888 -> ordre: R, G, B)
 //			uint8_t* qPixel = &imgRow[(dstX + offsetX) * 3];
 //			qPixel[0] = R;
 //			qPixel[1] = G;
@@ -657,7 +657,7 @@ void BaslerProcessor::demosaicPixel2(const uint8_t* bayer, int& x, int& y, const
 //			pixel[1] = G;
 //			pixel[2] = R;
 //
-//			// Écriture QImage (format RGB888 → ordre: R, G, B)
+//			// Écriture QImage (format RGB888 -> ordre: R, G, B)
 //			qPixel = &imgRow[(dstX + offsetX) * 3];
 //			qPixel[0] = R;
 //			qPixel[1] = G;
@@ -743,7 +743,7 @@ void BaslerProcessor::convertAndResize3Task(const Pylon::CGrabResultPtr& ptrGrab
 			pixel[1] = G;
 			pixel[2] = R;
 
-			// Écriture QImage (format RGB888 → ordre: R, G, B)
+			// Écriture QImage (format RGB888 -> ordre: R, G, B)
 			qPixel = &imgRow[(dstX + offsetX) * 3];
 			qPixel[0] = R;
 			qPixel[1] = G;

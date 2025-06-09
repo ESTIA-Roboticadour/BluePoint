@@ -34,7 +34,6 @@ private slots:
 	void captureEnded();
 
 private:
-	
 	void configureCamera();
 	void getCameraSpecifications();
 	bool tryOpenWriter(const QString& filename);

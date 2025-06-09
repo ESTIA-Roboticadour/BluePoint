@@ -1,7 +1,4 @@
-﻿//========================================================
-//  BaslerCamera.cpp     (projet Vision)
-//========================================================
-#include "BaslerCamera.h"
+﻿#include "BaslerCamera.h"
 
 #include <pylon/PylonUtilityIncludes.h>   // CPylonImage, CImageFormatConverter
 #include <GenApi/GenApi.h>                // NodeMap helpers
