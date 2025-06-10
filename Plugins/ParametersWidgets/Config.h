@@ -61,7 +61,7 @@ public:
 
     virtual void reset() {}
 
-    virtual Config* copy(QObject* parent = nullptr);
+    virtual Config* copy(QObject* parent = nullptr) const;
 
 public slots:
     void setParameters(const QList<ParameterBase*>& parameters);

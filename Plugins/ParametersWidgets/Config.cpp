@@ -245,7 +245,7 @@ std::unique_ptr<Config> Config::loadFromFile(const QString& filePath, QObject* p
     return cfg;
 }
 
-Config* Config::copy(QObject* parent)
+Config* Config::copy(QObject* parent) const
 {
     auto clone = new Config(parent);
     cloneFrom(*clone, *this);

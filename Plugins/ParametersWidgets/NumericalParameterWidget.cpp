@@ -120,8 +120,12 @@ void NumericalParameterWidget::setValue(double val)
 
         if (m_doubleSpinBox)
             m_doubleSpinBox->setValue(val);
-        else
+        else if (m_lineEdit)
             m_lineEdit->setText(QString::number(m_value, 'f', 3));
+    }
+    else if (m_lineEdit && m_lineEdit->text().isEmpty())
+    {
+        m_lineEdit->setText(QString::number(m_value, 'f', 3));
     }
 }
 
