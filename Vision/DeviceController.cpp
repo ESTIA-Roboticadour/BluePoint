@@ -12,6 +12,7 @@ DeviceController::DeviceController(DeviceModel* model, DeviceView* view, QObject
 
 	m_model->connectLight();
 	m_model->openCamera();
+	m_view->setCameraConfig(m_model->getCameraConfig());
 }
 
 DeviceController::~DeviceController()
@@ -27,13 +28,34 @@ void DeviceController::setupConnections()
 	connect(m_model, &DeviceModel::lightControlDisconnected, this, &DeviceController::onLightDisconnected);
 	connect(m_model, &DeviceModel::imageProvided, m_view, &DeviceView::onImageProvided);
 
+	connect(m_view, &DeviceView::isDestroying, this, &DeviceController::onViewDestroying);
 	connect(m_view, &DeviceView::lightOnRequested, this, &DeviceController::onLightOnRequested);
 	connect(m_view, &DeviceView::lightOffRequested, this, &DeviceController::onLightOffRequested);
+}
+
+void DeviceController::onViewDestroying()
+{
+	m_model->release();
+	
+	disconnect(m_view, &DeviceView::isDestroying, this, &DeviceController::onViewDestroying);
+	disconnect(m_view, &DeviceView::lightOnRequested, this, &DeviceController::onLightOnRequested);
+	disconnect(m_view, &DeviceView::lightOffRequested, this, &DeviceController::onLightOffRequested);
 }
 
 void DeviceController::onModelReleased()
 {
 	deleteLater();
+
+	disconnect(m_model, &DeviceModel::lightControlConnected, this, &DeviceController::onLightConnected);
+	disconnect(m_model, &DeviceModel::lightControlDisconnected, this, &DeviceController::onLightDisconnected);
+	disconnect(m_model, &DeviceModel::imageProvided, this, &DeviceController::onImageProvided);
+	disconnect(m_model, &DeviceModel::released, this, &DeviceController::onModelReleased);
+}
+
+void DeviceController::onImageProvided(const QImage& image)
+{
+	if (m_view)
+		m_view->onImageProvided(image);
 }
 
 void DeviceController::onLightConnected() const
@@ -61,5 +83,4 @@ void DeviceController::onLightOffRequested() const
 void DeviceController::onViewDestroyed()
 {
 	m_view = nullptr;
-	m_model->release();
 }

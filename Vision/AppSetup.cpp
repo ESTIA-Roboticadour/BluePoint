@@ -274,7 +274,7 @@ bool AppSetup::setupApp()
 {
 	QCommandLineParser* parser = buildParser();
 	setupSettings();
-	LogDispatcher::setLogFile("Vision.log");
+	LogDispatcher::setLogFile(Helper::makePathAbsolute("Vision.log"));
 
 	QString path = getConfigPath(parser);
 	path = Helper::makePathAbsolute(path);

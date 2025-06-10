@@ -13,6 +13,7 @@ class DeviceView : public QWidget
     Q_OBJECT
 public:
     explicit DeviceView(QWidget* parent = nullptr);
+    ~DeviceView() override;
 
     void setLightInfo(const QString& comPort, int relay);   // update labels
     void setButtonsState(bool enabled);
@@ -22,12 +23,17 @@ public slots:
     void onImageProvided(const QImage& image);
     void clearImage();
 
+private:
+    void deleteCurrentCameraConfig();
+
 signals:
     void lightOnRequested();
     void lightOffRequested();
+    void isDestroying();
 
 private:
     void buildUi();
+    CameraConfig* m_cameraConfig;
 
     // cached widgets
 	FrameViewer* m_frameViewer{ nullptr };

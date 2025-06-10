@@ -28,6 +28,9 @@ public :
 
 	virtual bool retrieveLastFrame(cv::Mat& dst) = 0;
 
+	virtual void release();
+	bool isReleased() const;
+
 	//void addTransformer(ImageTransformer* t);
 	//void clearTransformers(bool deleteTransformers=false);
 	//QList<ImageTransformer*> transformers() const;
@@ -38,6 +41,7 @@ public :
 
 signals:
 	//void transformError(ImageTransformer* transformer, const int index, const QString& message);
+	void released();
 	void connected();
 	void disconnected();
 	void opened();
@@ -50,4 +54,7 @@ signals:
 	void cvFrameReady();
 //private:
 //	QList<ImageTransformer*> m_transformers;
+
+private:
+	bool m_isReleased;
 };

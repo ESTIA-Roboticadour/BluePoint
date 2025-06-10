@@ -196,15 +196,16 @@ void BaslerCamera::startGrabbing(Pylon::EGrabStrategy strat, Pylon::EGrabLoop lo
 			{
 				try
 				{
-#ifdef _DEBUG
-					start = std::chrono::steady_clock::now();
-#endif // _DEBUG
 					m_cam->RetrieveResult(2000, ptr, Pylon::TimeoutHandling_ThrowException);
 					if (!ptr->GrabSucceeded())
 					{
 						emit errorThrown("[BaslerCamera] Grab error 1", ptr->GetErrorDescription().c_str());
 						continue;
 					}
+
+#ifdef _DEBUG
+					start = std::chrono::steady_clock::now();
+#endif // _DEBUG
 
 					// BGR header sur buffer Pylon
 					conv.Convert(pyImg, ptr);
@@ -218,12 +219,6 @@ void BaslerCamera::startGrabbing(Pylon::EGrabStrategy strat, Pylon::EGrabLoop lo
 					matRGB.create(matBGR.rows, matBGR.cols, CV_8UC3);
 					cv::cvtColor(matBGR, matRGB, cv::COLOR_BGR2RGB);
 
-					// sauvegarde thread-safe
-					{
-						std::scoped_lock lk(m_frameMtx);
-						matRGB.copyTo(m_lastFrame);
-					}
-
 					// QImage
 					QImage image(matRGB.data, matRGB.cols, matRGB.rows, static_cast<int>(matRGB.step), QImage::Format_RGB888);
 
@@ -231,12 +226,18 @@ void BaslerCamera::startGrabbing(Pylon::EGrabStrategy strat, Pylon::EGrabLoop lo
 					end = std::chrono::steady_clock::now();
 					deltaMs = std::chrono::duration<double, std::milli>(end - start).count();
 					displayCounter++;
-					if (displayCounter == 15)
+					if (displayCounter == 1)
 					{
 						qDebug() << deltaMs;
 						displayCounter = 0;
 					}
 #endif // _DEBUG
+
+					// sauvegarde thread-safe
+					{
+						std::scoped_lock lk(m_frameMtx);
+						matRGB.copyTo(m_lastFrame);
+					}
 
 					emit imageProvided(image.copy());   // deep-copy -> sûr pour Qt
 

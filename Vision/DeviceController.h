@@ -1,5 +1,6 @@
 #pragma once
 #include <QObject>
+#include <QImage>
 
 #include "WidgetControllerBase.h"
 #include "DeviceModel.h"
@@ -16,8 +17,10 @@ public:
 private slots:
 	// Inherited via WidgetControllerBase
 	void onViewDestroyed() override;
+	void onViewDestroying();
 
 	void onModelReleased();
+	void onImageProvided(const QImage& image);
 
 	void onLightConnected() const;
 	void onLightDisconnected() const;

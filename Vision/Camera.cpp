@@ -3,7 +3,8 @@
 //#include <exception>
 
 Camera::Camera(QObject* parent) :
-	ImageProvider(parent)
+	ImageProvider(parent),
+    m_isReleased(false)
     //m_transformers()
 {
     //if (deleteTransformers)
@@ -47,3 +48,17 @@ Camera::Camera(QObject* parent) :
 //    }
 //    return img;
 //}
+
+void Camera::release()
+{
+    if (!m_isReleased)
+    {
+        m_isReleased = true;
+        emit released();
+    }
+}
+
+bool Camera::isReleased() const
+{
+    return m_isReleased;
+}

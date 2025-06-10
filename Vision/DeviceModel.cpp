@@ -22,19 +22,22 @@ DeviceModel::~DeviceModel()
 
 void DeviceModel::release()
 {
-	if (m_lightControl)
-	{
-		m_lightControl->release();
-	}
-
-	if (m_camera && m_camera->isConnected())
+	if (!isReleased())
 	{
 		m_isReleasing = true;
-		m_camera->disconnect();
-	}
-	else
-	{
-		ModelBase::release();
+		if (m_lightControl && !m_lightControl->isReleased())
+		{
+			m_lightControl->release();
+		}
+		else if (m_camera && !m_camera->isReleased())
+		{
+			m_camera->release();
+		}
+		else
+		{
+			ModelBase::release();
+			m_isReleasing = false;
+		}
 	}
 }
 
@@ -71,6 +74,7 @@ void DeviceModel::setupConnections()
 {
 	if (m_camera)
 	{
+		connect(m_camera, &Camera::released, this, &DeviceModel::onCameraReleased);
 		connect(m_camera, &Camera::connected, this, &DeviceModel::onCameraConnected);
 		connect(m_camera, &Camera::disconnected, this, &DeviceModel::onCameraDisconnected);
 		connect(m_camera, &Camera::opened, this, &DeviceModel::onCameraOpened);
@@ -84,13 +88,13 @@ void DeviceModel::setupConnections()
 	}
 	if (m_lightControl)
 	{
+		connect(m_lightControl, &LightControl::released, this, &DeviceModel::onLightControlReleased);
 		connect(m_lightControl, &LightControl::connected, this, &DeviceModel::onLightControlConnected);
 		connect(m_lightControl, &LightControl::connectionFailed, this, &DeviceModel::onLightControlConnectionFailed);
 		connect(m_lightControl, &LightControl::disconnected, this, &DeviceModel::lightControlDisconnected);
 		connect(m_lightControl, &LightControl::moduleInfoReceived, this, &DeviceModel::onLightControlModuleInfoReceived);
 	}
 }
-
 
 void DeviceModel::openCamera()
 {
@@ -144,6 +148,12 @@ void DeviceModel::turnOffLight() const
 		m_lightControl->setRelay(m_lightConfig->getRelay() - 1, false);
 }
 
+void DeviceModel::onCameraReleased()
+{
+	if (m_isReleasing)
+		release();
+}
+
 void DeviceModel::onCameraConnected()
 {
 	qInfo() << "Camera connected successfully";
@@ -156,7 +166,7 @@ void DeviceModel::onCameraDisconnected()
 	qInfo() << "Camera disconnected successfully";
 	emit cameraClosed();
 	if (m_isReleasing)
-		ModelBase::release();
+		release();
 }
 
 void DeviceModel::onCameraOpened()
@@ -209,6 +219,12 @@ void DeviceModel::restartCloseCamera()
 	closeCamera();
 }
 
+void DeviceModel::onLightControlReleased()
+{
+	if (m_isReleasing)
+		release();
+}
+
 void DeviceModel::onLightControlConnected(const QString& portName)
 {
 	qInfo() << "Light control connected on port:" << portName;
@@ -222,5 +238,5 @@ void DeviceModel::onLightControlConnectionFailed(const QString& portName, const 
 
 void DeviceModel::onLightControlModuleInfoReceived(int id, int version)
 {
-	qInfo() << "Light control id:" << id  << " | Version: " << version;
+	qInfo() << "Light control id:" << id << " | Version: " << version;
 }

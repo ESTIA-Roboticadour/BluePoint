@@ -30,6 +30,7 @@ public:
 	void turnOffLight() const;
 
 private slots:
+	void onCameraReleased();
 	void onCameraConnected();
 	void onCameraDisconnected();
 	void onCameraOpened();
@@ -40,6 +41,7 @@ private slots:
 	void onCameraFailedToClose(const QString& message);
 	void onCameraErrorThrown(const QString& error, const QString& message);
 
+	void onLightControlReleased();
 	void onLightControlConnected(const QString& portName);
 	void onLightControlConnectionFailed(const QString& portName, const QString& error);
 	void onLightControlModuleInfoReceived(int id, int version);

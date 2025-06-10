@@ -9,9 +9,16 @@
 #include <QSizePolicy>
 
 DeviceView::DeviceView(QWidget* parent) :
-    QWidget(parent)
+    QWidget(parent),
+    m_cameraConfig(nullptr)
 {
     buildUi();
+}
+
+DeviceView::~DeviceView()
+{
+    deleteCurrentCameraConfig();
+    emit isDestroying();
 }
 
 void DeviceView::buildUi()
@@ -86,14 +93,21 @@ void DeviceView::buildUi()
 
     // ---- Camera group ----
     auto* camBox = new QGroupBox(tr("Camera"), content);
-    vRight->addWidget(camBox, 1);
     auto* vCam = new QVBoxLayout(camBox);
 
+    auto* scrollAreaCam = new QScrollArea(this);
+    scrollAreaCam->setWidgetResizable(true);
+
     m_parametersView = new ParametersView(camBox);
-    m_parametersView->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
+    m_parametersView->setAlignment(ParametersView::Alignment::All);
+    m_parametersView->setReadOnly(true);
+    m_parametersView->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
-    vCam->addWidget(m_parametersView);
+    scrollAreaCam->setWidget(m_parametersView);
 
+    vCam->addWidget(scrollAreaCam);
+    
+    vRight->addWidget(camBox);
     vRight->addStretch();   // push items to top
     vMain->addStretch();    // allow scrolling if needed
 }
@@ -112,20 +126,14 @@ void DeviceView::setButtonsState(bool enabled)
 
 void DeviceView::setCameraConfig(const CameraConfig* cameraConfig)
 {
+    deleteCurrentCameraConfig();
     if (cameraConfig)
     {
-        QList<ParameterBase*> params = cameraConfig->getParameters();
-		QList<const ParameterBase*> constParams;
-		for (auto* param : params)
-		{
-			constParams.append(param);
-		}
-		m_parametersView->setParameters(constParams);
+        m_cameraConfig = (CameraConfig*)cameraConfig->copy();
+		m_parametersView->setParameters(cameraConfig->getParameters());
     }
     else
-    {
-        m_parametersView->setParameters(QList<const ParameterBase*>());
-    }
+        m_parametersView->clear();
 }
 
 void DeviceView::onImageProvided(const QImage& image)
@@ -136,4 +144,13 @@ void DeviceView::onImageProvided(const QImage& image)
 void DeviceView::clearImage()
 {
     m_frameViewer->clear();
+}
+
+void DeviceView::deleteCurrentCameraConfig()
+{
+    if (m_cameraConfig)
+    {
+        delete m_cameraConfig;
+        m_cameraConfig = nullptr;
+    }
 }

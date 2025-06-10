@@ -14,6 +14,8 @@ public:
     ~LightControl() override = default;
 
     void release();
+    bool isReleased() const;
+
     static QStringList getAvailablePorts();
     void disconnect();
     void connectToPort(const QString& portName);
@@ -39,4 +41,5 @@ private:
     QSerialPort m_serial;
     QTimer m_pollTimer;
     int m_relayStates;
+    bool m_isReleased;
 };
