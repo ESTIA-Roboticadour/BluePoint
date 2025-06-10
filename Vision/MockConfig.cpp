@@ -62,7 +62,7 @@ void MockConfig::reset()
 	setFromConfig(&mockConfig, false);
 }
 
-Config* MockConfig::copy(QObject* parent)
+Config* MockConfig::copy(QObject* parent) const
 {
 	MockConfig* newConfig = new MockConfig(parent);
 	newConfig->setFromConfig(this, true);

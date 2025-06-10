@@ -28,7 +28,7 @@ public:
 	int getGainDB() const;
 
 	void reset() override;
-	Config* copy(QObject* parent = nullptr) override;
+	Config* copy(QObject* parent = nullptr) const override;
 
 protected:
 	bool setFromConfig(const Config* src, bool copyPath) override;

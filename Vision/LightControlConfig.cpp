@@ -89,6 +89,13 @@ void LightControlConfig::reset()
 	setFromConfig(&newConfig, false);
 }
 
+Config* LightControlConfig::copy(QObject* parent) const
+{
+	LightControlConfig* newConfig = new LightControlConfig(parent);
+	newConfig->setFromConfig(this, true);
+	return newConfig;
+}
+
 bool LightControlConfig::setFromConfig(const Config* src, bool copyPath)
 {
 	int numberOfParametersToSet = 2;

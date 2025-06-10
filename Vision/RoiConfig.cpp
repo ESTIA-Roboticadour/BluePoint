@@ -128,7 +128,7 @@ void RoiConfig::reset()
 	setFromConfig(&newConfig, false);
 }
 
-Config* RoiConfig::copy(QObject* parent)
+Config* RoiConfig::copy(QObject* parent) const
 {
 	RoiConfig* newConfig = new RoiConfig(parent);
 	newConfig->setFromConfig(this, true);

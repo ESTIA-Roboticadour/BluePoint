@@ -66,7 +66,7 @@ void CameraConfig::reset()
 	setFromConfig(&newConfig, false);
 }
 
-Config* CameraConfig::copy(QObject* parent)
+Config* CameraConfig::copy(QObject* parent) const
 {
 	CameraConfig* newConfig = new CameraConfig(parent);
 	newConfig->setFromConfig(this, true);

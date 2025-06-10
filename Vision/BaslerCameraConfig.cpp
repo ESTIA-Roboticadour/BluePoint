@@ -93,7 +93,7 @@ void BaslerCameraConfig::reset()
 	setFromConfig(&newConfig, false);
 }
 
-Config* BaslerCameraConfig::copy(QObject* parent)
+Config* BaslerCameraConfig::copy(QObject* parent) const
 {
 	BaslerCameraConfig* newConfig = new BaslerCameraConfig(parent);
 	newConfig->setFromConfig(this, true);

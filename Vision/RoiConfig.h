@@ -35,7 +35,7 @@ public:
 	void setRoi(const int x, const int y, const int width, const int height);
 
 	void reset() override;
-	Config* copy(QObject* parent = nullptr) override;
+	Config* copy(QObject* parent = nullptr) const override;
 
 protected:
 	bool setFromConfig(const Config* src, bool copyPath) override;

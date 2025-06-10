@@ -23,7 +23,7 @@ void RealSenseCameraConfig::reset()
 	setFromConfig(&newConfig, false);
 }
 
-Config* RealSenseCameraConfig::copy(QObject* parent)
+Config* RealSenseCameraConfig::copy(QObject* parent) const
 {
 	RealSenseCameraConfig* newConfig = new RealSenseCameraConfig(parent);
 	newConfig->setFromConfig(this, true);

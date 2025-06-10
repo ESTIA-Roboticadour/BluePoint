@@ -22,6 +22,7 @@ public:
 	void setRelay(const int relay);
 
 	void reset() override;
+	Config* copy(QObject* parent=nullptr) const override;
 
 private:
 	bool setFromConfig(const Config* src, bool copyPath) override;

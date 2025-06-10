@@ -163,7 +163,7 @@ void AppConfig::reset()
 	setFromConfig(&newConfig, false);
 }
 
-Config* AppConfig::copy(QObject* parent)
+Config* AppConfig::copy(QObject* parent) const
 {
 	AppConfig* newConfig = new AppConfig(parent);
 	newConfig->setFromConfig(this, true);

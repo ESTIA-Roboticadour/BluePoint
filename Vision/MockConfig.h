@@ -17,7 +17,7 @@ public:
 	~MockConfig() override = default;
 
 	void reset() override;
-	Config* copy(QObject* parent = nullptr) override;
+	Config* copy(QObject* parent = nullptr) const override;
 
 private:
 	bool setFromConfig(const Config* src, bool copyPath) override;

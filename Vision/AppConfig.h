@@ -47,7 +47,7 @@ public:
 	QString getCameraType() const;
 
 	void reset() override;
-	Config* copy(QObject* parent=nullptr) override;
+	Config* copy(QObject* parent=nullptr) const override;
 
 	bool areCameraTypeAndCameraConfigValid() const;
 	bool isRoiConfigValid() const;
