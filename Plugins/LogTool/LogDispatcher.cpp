@@ -9,6 +9,8 @@
 #include <QLoggingCategory> // éventuel nom de catégorie/type
 #include <QMetaType>
 
+#include <windows.h>
+
 QFile* LogDispatcher::s_file = nullptr;
 QMutex  LogDispatcher::s_fileMutex;
 
@@ -81,7 +83,18 @@ void LogDispatcher::messageHandler(QtMsgType t, const QMessageLogContext& c, con
     // 1) diffusion dans le thread GUI
     QMetaObject::invokeMethod(&instance(), "newEntry", Qt::QueuedConnection, Q_ARG(LogEntry, e));
 
-    // 2) sortie fichier éventuelle
+    // 2) sortie standard (console)
+    if (t == QtDebugMsg || t == QtInfoMsg || t == QtWarningMsg || t == QtCriticalMsg) {
+        QString out = QString("[%1] %2 (%3:%4) %5\n")
+        .arg(levelStr(t))
+            .arg(c.category)
+            .arg(c.file)
+            .arg(c.line)
+            .arg(m);
+        OutputDebugStringW(reinterpret_cast<const wchar_t*>(out.utf16()));
+    }
+
+    // 3) sortie fichier éventuelle
     QMutexLocker lock(&s_fileMutex);
     if (s_file) {
         QTextStream ts(s_file);

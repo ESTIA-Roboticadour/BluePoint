@@ -9,6 +9,7 @@
 #include <QtGlobal>     // QtMsgType, quintptr, qInstallMessageHandler
 #include <QMutex>       // QMutex, QMutexLocker
 #include <QFile>        // QFile* + ouvertures
+#include <QMetaType>
 
 struct LogEntry
 {
