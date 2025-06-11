@@ -27,7 +27,7 @@ public:
 	void setMatrix(const QMatrix4x4& matrix);
 
 	void reset() override;
-	Config* copy(QObject* parent = nullptr) override;
+	Config* copy(QObject* parent = nullptr) const override;
 
 protected:
 	bool setFromConfig(const Config* src, bool copyPath) override;

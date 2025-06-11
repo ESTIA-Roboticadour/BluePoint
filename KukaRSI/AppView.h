@@ -1,16 +1,20 @@
 #pragma once
-#include "MovementDirection.h"
+#include "TransparentScrollArea.h"
 #include "ParametersView.h"
 #include "Config.h"
+#include "RobotKuka.h"
 
 #include <QWidget>
 #include <QPushButton>
 #include <QGroupBox>
 #include <QGridLayout>
+#include <QVBoxLayout>
 #include <QMap>
 #include <QLineEdit>
+#include <QLabel>
+#include <QTimer>
 
-class AppView : public QWidget
+class AppView : public TransparentScrollArea
 {
     Q_OBJECT
 
@@ -23,15 +27,33 @@ public slots:
     void updatePose(double positions[6]);
     void updateDelta(double positions[6]);
 
+    void onRobotStateChanged(RobotKuka::Status status);
+    void onRobotConnected();
+    void onRobotDisconnected();
+    void onRobotStarted();
+    void onRobotStopped();
+    void onConnectionTimeRemainingChanged(int seconds);
+    void onFreshRateChanged(double freshRateHz);
+
 private slots:
+    void onConnectButtonClicked();
+	void onDisconnectButtonClicked();
+	void onStartButtonClicked();
+	void onStopButtonClicked();
+
     void handleMovementPressed();
     void handleMovementReleased();
+
+    void refreshUI();
 
 private:
     void setupUI();
     void createMovementButtons(QGridLayout* layout);
-    void setupMovementSignals(QPushButton* button, MovementDirection direction) const;
+    void setupMovementSignals(QPushButton* button, RobotKuka::MovementDirection direction) const;
     QGroupBox* createPoseGroup(const QString& title, QList<QLineEdit*>& listToFeed);
+    void setConnectionLabelText(const QString& text);
+    void clearConnectionLabelText();
+    void setTimerIntervale(int freshRateHz);
 
 signals:
     void connectButtonClicked();
@@ -39,16 +61,25 @@ signals:
     void startButtonClicked();
     void stopButtonClicked();
 
-    void movementPressed(MovementDirection direction);
-    void movementReleased(MovementDirection direction);
+    void movementPressed(RobotKuka::MovementDirection direction);
+    void movementReleased(RobotKuka::MovementDirection direction);
+
+    void requestNewPose();
+    void requestNewDelta();
 
 private:
-    QPushButton* m_connectButton;
-    QPushButton* m_disconnectButton;
-    QPushButton* m_startButton;
-    QPushButton* m_stopButton;
-    ParametersView* m_parametersView;
+    QPushButton* m_connectButton{ nullptr };
+    QPushButton* m_disconnectButton{ nullptr };
+    QPushButton* m_startButton{ nullptr };
+    QPushButton* m_stopButton{ nullptr };
+    ParametersView* m_parametersView{ nullptr };
+    QVBoxLayout* m_connectionLayout{ nullptr };
     QList<QLineEdit*> m_poseLineEdits;
     QList<QLineEdit*> m_deltaLineEdits;
-    QMap<MovementDirection, QPushButton*> m_movementButtons;
+    QMap<RobotKuka::MovementDirection, QPushButton*> m_movementButtons;
+    QLabel* m_statusLabel{ nullptr };
+    QLabel* m_connectionLabel{ nullptr };
+
+    QTimer m_uiTimer;
+    double m_freshRateHz;
 };

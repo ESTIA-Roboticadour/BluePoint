@@ -6,6 +6,7 @@ AppController::AppController(AppModel* model, AppView* view, QObject* parent):
 	m_model(model)
 {
 	setupConnections();
+	m_view->setConfig(m_model->getConfig());
 }
 
 AppController::~AppController()
@@ -18,6 +19,20 @@ void AppController::onViewDestroyed()
 	m_model->release();
 }
 
+void AppController::onViewRequestNewPose()
+{
+	double currentPose[6];
+	m_model->getCurrentPose(currentPose);
+	m_view->updatePose(currentPose);
+}
+
+void AppController::onViewRequestNewDelta()
+{
+	double currentDelta[6];
+	m_model->getCurrentDelta(currentDelta);
+	m_view->updatePose(currentDelta);
+}
+
 void AppController::onModelReleased()
 {
 	deleteLater();
@@ -27,6 +42,7 @@ void AppController::setupConnections()
 {
 	connect(m_model, &AppModel::released, this, &AppController::onModelReleased);
 
+	// Connexions AppView -> AppModel  ou autres
 	connect(m_view, &AppView::connectButtonClicked, m_model, &AppModel::connectToRobot);
 	connect(m_view, &AppView::disconnectButtonClicked, m_model, &AppModel::disconnectFromRobot);
 	connect(m_view, &AppView::startButtonClicked, m_model, &AppModel::startRobot);
@@ -34,19 +50,19 @@ void AppController::setupConnections()
 
 	connect(m_view, &AppView::movementPressed, m_model, &AppModel::onMovementPressed);
 	connect(m_view, &AppView::movementReleased, m_model, &AppModel::onMovementReleased);
-		
+	
+	connect(m_view, &AppView::requestNewPose, this, &AppController::onViewRequestNewPose);
+	connect(m_view, &AppView::requestNewDelta, this, &AppController::onViewRequestNewDelta);
+
 	// Connexions AppModel -> AppView ou autres
-	connect(m_model, &AppModel::robotStateChanged, this, &AppController::onRobotStateChanged);
-	connect(m_model, &AppModel::robotPoseChanged, this, &AppController::onRobotPoseChanged);
+	connect(m_model, &AppModel::robotStateChanged, m_view, &AppView::onRobotStateChanged);
+	connect(m_model, &AppModel::robotConnected, m_view, &AppView::onRobotConnected);
+	connect(m_model, &AppModel::robotDisconnected, m_view, &AppView::onRobotDisconnected);
+	connect(m_model, &AppModel::robotStarted, m_view, &AppView::onRobotStarted);
+	connect(m_model, &AppModel::robotStopped, m_view, &AppView::onRobotStopped);
 	connect(m_model, &AppModel::errorOccurred, this, &AppController::onErrorOccurred);
-}
-
-void AppController::onRobotStateChanged()
-{
-}
-
-void AppController::onRobotPoseChanged(const QMatrix4x4& pose)
-{
+	connect(m_model, &AppModel::connectionTimeRemainingChanged, m_view, &AppView::onConnectionTimeRemainingChanged);
+	connect(m_model, &AppModel::freshRateChanged, m_view, &AppView::onFreshRateChanged);
 }
 
 void AppController::onErrorOccurred(const QString& msg)

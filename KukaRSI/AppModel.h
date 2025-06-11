@@ -2,10 +2,14 @@
 #include "ModelBase.h"
 #include "RobotKuka.h"
 #include "RobotConfig.h"
-#include "MovementDirection.h"
+#include "Config.h"
+#include "GroupParameter.h"
 #include "NumericalParameter.h"
+#include "StringParameter.h"
+#include "Matrix4x4Parameter.h"
 
 #include <QObject>
+#include <QHostAddress>
 
 class AppModel : public ModelBase
 {
@@ -26,20 +30,45 @@ public:
 
     void release() override;
 
+    void getCurrentPose(double currentPose[6]) const;
+    void getCurrentDelta(double currentDelta[6]) const;
+
 public slots:
-    void onMovementPressed(MovementDirection direction);
-    void onMovementReleased(MovementDirection direction);
+    void onMovementPressed(RobotKuka::MovementDirection direction);
+    void onMovementReleased(RobotKuka::MovementDirection direction);
 
 private slots:
-    void onPoseUpdated(const QMatrix4x4& pose);
     void onErrorOccurred(const QString& message);
+    
+private:
+    void setupConfig(const RobotConfig* config);
+    bool setupAddress(const RobotConfig* config);
 
 signals:
-    void robotStateChanged();
-    void robotPoseChanged(const QMatrix4x4& pose);
+	void connectionTimeRemainingChanged(int seconds);
+    void robotStateChanged(RobotKuka::Status status);
+    void robotConnected();
+    void robotDisconnected();
+    void robotStarted();
+    void robotStopped();
     void errorOccurred(const QString& message);
+
+	void freshRateChanged(double freshRate);
 
 private:
     RobotKuka* m_robot;
     Config m_config;
+    QHostAddress m_hostAddress;
+    int m_port;
+
+    GroupParameter m_robotGroup;
+	StringParameter m_addressParameter;
+	NumericalParameter m_portParameter;
+    NumericalParameter m_speedParameter;
+    NumericalParameter m_accelParameter;
+    Matrix4x4Parameter m_toolParameter;
+    GroupParameter m_connectionGroup;
+    NumericalParameter m_connectionTimeoutParameter;
+    GroupParameter m_uiGroup;
+    NumericalParameter m_freshRateParameter;
 };

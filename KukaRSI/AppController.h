@@ -2,6 +2,7 @@
 #include "WidgetControllerBase.h"
 #include "AppModel.h"
 #include "AppView.h"
+#include "RobotKuka.h"
 
 #include <QObject>
 #include <QString>
@@ -17,11 +18,11 @@ public:
 private slots:
 	// Inherited via WidgetControllerBase
 	void onViewDestroyed() override;
+	void onViewRequestNewPose();
+	void onViewRequestNewDelta();
 
 	void onModelReleased();
 
-	void onRobotStateChanged();
-	void onRobotPoseChanged(const QMatrix4x4& pose);
 	void onErrorOccurred(const QString& msg);
 
 private:

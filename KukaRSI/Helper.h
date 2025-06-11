@@ -16,5 +16,9 @@ public:
 		const QString& filters = QObject::tr("Configuration files (*.json);;All files (*.*)"));
 
 	static QString makePathAbsolute(const QString& path);
+
+	static bool fuzzyCompare(double a, double b, const double epsilon = 1e-6) {
+		return std::abs(a - b) < epsilon;
+	}
 };
 

@@ -96,7 +96,7 @@ void RobotConfig::reset()
 	setFromConfig(&newConfig, false);
 }
 
-Config* RobotConfig::copy(QObject* parent)
+Config* RobotConfig::copy(QObject* parent) const
 {
 	RobotConfig* newConfig = new RobotConfig(parent);
 	newConfig->setFromConfig(this, true);

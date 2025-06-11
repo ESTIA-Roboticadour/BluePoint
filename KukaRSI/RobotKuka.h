@@ -3,44 +3,104 @@
 #include <QObject>
 #include <QVector3D>
 #include <QMatrix4x4>
+#include <QUdpSocket>
+#include <QHostAddress>
 
 class RobotKuka : public QObject
 {
     Q_OBJECT
 
 public:
+    enum Status
+    {
+        Ready,
+        WaitingRobotConnection,
+        Connected,
+        Moving,
+        Error
+    };
+    Q_ENUM(Status)
+
+    enum MovementDirection {
+        Up,
+        Down,
+        Left,
+        Right,
+        Forward,
+        Backward
+    };
+    Q_ENUM(MovementDirection)
+
+    inline static QString toQString(MovementDirection direction) {
+        switch (direction) {
+        case MovementDirection::Up: return "UP";
+        case MovementDirection::Down: return "DOWN";
+        case MovementDirection::Left: return "LEFT";
+        case MovementDirection::Right: return "RIGHT";
+        case MovementDirection::Forward: return "FORWARD";
+        case MovementDirection::Backward: return "BACKWARD";
+        default: return "";
+        }
+    }
+
+    inline static QString toQString(Status status) {
+        switch (status) {
+        case Status::Ready: return "Ready";
+        case Status::WaitingRobotConnection: return "Waiting Robot Connection";
+        case Status::Connected: return "Connected";
+        case Status::Moving: return "Moving";
+        case Status::Error: return "Error";
+        default: return "";
+        }
+    }
+
     explicit RobotKuka(QObject* parent = nullptr);
-    virtual ~RobotKuka();
+    ~RobotKuka();
+
+	Status getStatus() const { return m_status; };
 
     // Connexion / déconnexion
-    virtual void connectToRobot();
-    virtual void disconnectFromRobot();
-    virtual bool isConnected() const;
+    
+    // Open an udp client to the given address and port. When data are received from the robot, connected() signal is emitted. Timeout is in seconds.
+    void connectToRobot(const QHostAddress& hostAddress, int port, int timeout);
+    void disconnectFromRobot();
+    bool isConnected() const;
 
     // Démarrage / arrêt
-    virtual void start();
-    virtual void stop();
-    virtual bool isRunning() const;
+    void start();
+    void stop();
+    bool isRunning() const;
 
     // Déplacement manuel
-    virtual void move(const QString& direction);
-    virtual void stopMovement();
+    void move(const QString& direction);
+    void stopMovement();
 
-    // Pose et position
-    virtual QMatrix4x4 getCurrentPose() const;
-    virtual QVector3D getCurrentPosition() const;
-    virtual QVector3D getCurrentOrientationEuler() const;
+    // Pose & Delta
+    void getCurrentPose(double currentPose[6]) const;
+    void getCurrentDelta(double currentDelta[6]) const;
+
+private:
+	void deleteUdpClient();
+	void setStatus(Status status);
 
 signals:
+	void statusChanged(Status status);
     void connected();
     void disconnected();
     void started();
     void stopped();
-    void poseUpdated(const QMatrix4x4& pose);
     void errorOccurred(const QString& message);
+    void connectionTimeRemainingChanged(int seconds);
 
-protected:
-    bool m_connected = false;
-    bool m_running = false;
+private:
+	Status m_status;
+    bool m_isConnected = false;
+    bool m_isRunning = false;
     QMatrix4x4 m_pose;
+	QHostAddress m_hostAddress;
+    int m_port;
+    QUdpSocket* m_udpClient;
+
+    double m_currentPose[6]; // Positions X, Y, Z, A, B, C
+	double m_currentDelta[6]; // Positions dX, dY, dZ, dA, dB, dC
 };

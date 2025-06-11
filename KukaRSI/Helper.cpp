@@ -18,7 +18,7 @@ QString Helper::getSaveConfigFile(
             QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) : defaultConfigDir) :
         defaultDir;
 
-    // Chemin combiné "dossier/nom"
+    // Chemin combinÃ© "dossier/nom"
     const QString initialPath = defaultFileName.isEmpty() ?
         initialDir :
         QDir(initialDir).filePath(defaultFileName);
@@ -30,7 +30,7 @@ QString Helper::getSaveConfigFile(
             filters);
 
     if (selected.isEmpty())
-        return {};                              // Annulé
+        return {};                              // AnnulÃ©
 
     // Ajoute ".json" si l'utilisateur a omis l'extension
     if (!selected.endsWith(".json", Qt::CaseInsensitive))
@@ -46,7 +46,7 @@ QString Helper::getOpenConfigFile(
     const QString& filters)
 {
     // Emplacement initial : dossier de configuration de l'application,
-    // puis Documents si rien n’est configuré.
+    // puis Documents si rien nâ€™est configurÃ©.
     const QString defaultConfigDir = QDir::current().path();
     const QString initialDir = defaultDir.isEmpty()
         ? (defaultConfigDir.isEmpty()
@@ -61,7 +61,7 @@ QString Helper::getOpenConfigFile(
     if (selected.isEmpty())
         return {};                         // utilisateur : Annuler
 
-    // Normalise le chemin et, par sécurité, force l’extension « .json »
+    // Normalise le chemin et, par sÃ©curitÃ©, force lâ€™extension Â« .json Â»
     if (!selected.endsWith(".json", Qt::CaseInsensitive))
         selected += ".json";
 
@@ -78,7 +78,7 @@ QString Helper::makePathAbsolute(const QString& path)
     if (fi.isAbsolute())
         return QDir::cleanPath(fi.absoluteFilePath());
 
-    // Construit un nouveau QFileInfo relatif au répertoire courant
+    // Construit un nouveau QFileInfo relatif au rÃ©pertoire courant
     fi.setFile(QDir::current(), path);
     return QDir::cleanPath(fi.absoluteFilePath());
 }
