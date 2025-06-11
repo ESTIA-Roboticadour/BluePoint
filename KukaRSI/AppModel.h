@@ -39,6 +39,8 @@ public slots:
 
 private slots:
     void onErrorOccurred(const QString& message);
+    void onRobotConnected();
+    void onRobotDisconnected();
     
 private:
     void setupConfig(const RobotConfig* config);

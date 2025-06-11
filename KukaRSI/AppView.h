@@ -52,7 +52,7 @@ private:
     QGroupBox* createPoseGroup(const QString& title, QList<QLineEdit*>& listToFeed);
     void setConnectionLabelText(const QString& text);
     void clearConnectionLabelText();
-    void setTimerIntervale(int freshRateHz);
+    void setTimerIntervale(double freshRateHz);
 
 signals:
     void connectButtonClicked();

@@ -1,5 +1,6 @@
 #include "AppView.h"
 #include "TransparentScrollArea.h"
+#include "Helper.h"
 
 #include <QHBoxLayout>
 #include <QComboBox>
@@ -405,14 +406,14 @@ void AppView::clearConnectionLabelText()
 	}
 }
 
-void AppView::setTimerIntervale(int freshRateHz)
+void AppView::setTimerIntervale(double freshRateHz)
 {
 	if (freshRateHz < 1.)
 		freshRateHz = 1.;
 	else if (freshRateHz >= 60.)
 		freshRateHz = 60.;
 
-	if (m_freshRateHz != freshRateHz) // qFuzzyCompare ?
+	if (!Helper::fuzzyCompare(m_freshRateHz, freshRateHz))
 	{
 		m_freshRateHz = freshRateHz;
 		m_uiTimer.setInterval(static_cast<int>(1000.0 / m_freshRateHz));
