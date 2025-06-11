@@ -50,6 +50,11 @@ private slots:
 	void onSliderValueChanged(int value);
 	void onSpinBoxValueChanged(double value);
 
+private:
+    static bool fuzzyCompare(double a, double b, const double epsilon = 1e-6) {
+        return std::abs(a - b) < epsilon;
+    }
+
 signals:
 	void nameChanged(const QString& name);
 	void minimumChanged(double minimum);

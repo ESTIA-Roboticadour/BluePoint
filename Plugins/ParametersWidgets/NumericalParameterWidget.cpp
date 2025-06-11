@@ -114,7 +114,7 @@ void NumericalParameterWidget::setValue(double val)
     double k = std::round((val - m_minValue) / m_increment);
     val = m_minValue + k * m_increment; // to be sure val is reachable
 
-    if (!qFuzzyCompare(1.0 + m_value, 1.0 + val))   // évite le cas où m_value == 0
+    if (!fuzzyCompare(m_value, val))
     {
         m_value = val;
 
