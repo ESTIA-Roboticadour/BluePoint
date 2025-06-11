@@ -26,6 +26,7 @@ public:
 public slots:
     void updatePose(double positions[6]);
     void updateDelta(double positions[6]);
+    void synchronizeIO(bool inputs[16], bool outputs[16]);
 
     void onRobotStateChanged(RobotKuka::Status status);
     void onRobotConnected();
@@ -41,15 +42,13 @@ private slots:
 	void onStartButtonClicked();
 	void onStopButtonClicked();
 
-    void handleMovementPressed();
-    void handleMovementReleased();
-
     void refreshUI();
 
 private:
     void setupUI();
     void createMovementButtons(QGridLayout* layout);
-    void setupMovementSignals(QPushButton* button, RobotKuka::MovementDirection direction) const;
+    void createJointControlButtons(QGridLayout* layout);
+    void createIOBtns(QGridLayout* layout);
     QGroupBox* createPoseGroup(const QString& title, QList<QLineEdit*>& listToFeed);
     void setConnectionLabelText(const QString& text);
     void clearConnectionLabelText();
@@ -61,8 +60,12 @@ signals:
     void startButtonClicked();
     void stopButtonClicked();
 
-    void movementPressed(RobotKuka::MovementDirection direction);
-    void movementReleased(RobotKuka::MovementDirection direction);
+    void cartesianMovementPressed(RobotKuka::MovementDirection direction);
+    void cartesianMovementReleased(RobotKuka::MovementDirection direction);
+    void articularMovementPressed(int axe, bool positive);
+    void articularMovementReleased(int axe);
+    void inputToggled(int input, bool enabled);
+    void outputToggled(int output, bool enabled);
 
     void requestNewPose();
     void requestNewDelta();
@@ -74,11 +77,13 @@ private:
     QPushButton* m_stopButton{ nullptr };
     ParametersView* m_parametersView{ nullptr };
     QVBoxLayout* m_connectionLayout{ nullptr };
+    QLabel* m_statusLabel{ nullptr };
+    QLabel* m_connectionLabel{ nullptr };
     QList<QLineEdit*> m_poseLineEdits;
     QList<QLineEdit*> m_deltaLineEdits;
     QMap<RobotKuka::MovementDirection, QPushButton*> m_movementButtons;
-    QLabel* m_statusLabel{ nullptr };
-    QLabel* m_connectionLabel{ nullptr };
+    QList<QPushButton*> m_jointButtons;
+    QList<QPushButton*> m_ioButtons;
 
     QTimer m_uiTimer;
     double m_freshRateHz;

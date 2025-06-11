@@ -2,17 +2,20 @@
 #include "TransparentScrollArea.h"
 
 #include <QHBoxLayout>
+#include <QComboBox>
 #include <QSizePolicy>
 #include <QStringList>
 #include <QList>
 
 AppView::AppView(QWidget* parent) :
 	TransparentScrollArea(parent),
-	m_poseLineEdits(),
-	m_deltaLineEdits(),
+	m_poseLineEdits(6),
+	m_deltaLineEdits(6),
 	m_movementButtons(),
 	m_uiTimer(),
-	m_freshRateHz(20)
+	m_freshRateHz(20),
+	m_jointButtons(),
+	m_ioButtons()
 {
 	setupUI();
 	m_uiTimer.setInterval(static_cast<int>(1000.0 / m_freshRateHz));
@@ -21,7 +24,7 @@ AppView::AppView(QWidget* parent) :
 
 void AppView::setupUI()
 {
-	/* ---- widget qui contiendra tout le contenu d�filable ---- */
+	/* ---- widget qui contiendra tout le contenu défilable ---- */
 	auto* content = new QWidget(scrollArea());
 	scrollArea()->setWidget(content);
 
@@ -31,7 +34,7 @@ void AppView::setupUI()
 
 	auto* leftLayout = new QVBoxLayout();
 
-	// 1�re ligne : ParametersView
+	// 1ère ligne : ParametersView
 	m_parametersView = new ParametersView();
 	//m_parametersView->setReadOnly(true);
 	m_parametersView->setAlignment(ParametersView::Alignment::All);
@@ -39,7 +42,12 @@ void AppView::setupUI()
 
 	leftLayout->addWidget(m_parametersView);
 
-	// 2eme ligne : Groupe "Status"
+	leftLayout->addStretch();
+
+	// Droite : colonne
+	auto* rightLayout = new QVBoxLayout();
+
+	// Group Status
 	auto* statusGroup = new QGroupBox("Status", this);
 	statusGroup->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
 	auto* statusLayout = new QHBoxLayout();
@@ -47,19 +55,13 @@ void AppView::setupUI()
 	statusLayout->addWidget(new QLabel("Status:", statusGroup));
 	statusLayout->addWidget(m_statusLabel);
 	statusGroup->setLayout(statusLayout);
-	leftLayout->addWidget(statusGroup);
+	rightLayout->addWidget(statusGroup);
 
-	leftLayout->addStretch();
-
-	// Droite : colonne
-	auto* rightLayout = new QVBoxLayout();
-
-	// Groupe "Connection"
+	// Groupe Connection
 	auto* connectionGroup = new QGroupBox("Connection", this);
 	connectionGroup->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
 
 	m_connectionLayout = new QVBoxLayout();
-
 	auto* connectionBtnsLayout = new QHBoxLayout();
 	m_connectButton = new QPushButton("Connect", this);
 	m_disconnectButton = new QPushButton("Disconnect", this);
@@ -95,16 +97,69 @@ void AppView::setupUI()
 
 	controlLayout->addWidget(jobGroup);
 
-	// Ligne 2 : Move
+	// Ligne 2 : Move & IO
+	auto* moveIoContent = new QWidget();
+	moveIoContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
+
+	auto* moveIoLayout = new QHBoxLayout(moveIoContent);
+	moveIoLayout->setContentsMargins(0, 0, 0, 0);
+
 	auto* moveGroup = new QGroupBox("Move", this);
-	moveGroup->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
+	moveGroup->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	auto* moveLayout = new QGridLayout();
-	moveGroup->setLayout(moveLayout);
-	moveLayout->setAlignment(Qt::AlignLeft);
+	moveIoLayout->addWidget(moveGroup);
 
-	controlLayout->addWidget(moveGroup);
-	createMovementButtons(moveLayout);
+	auto* moveLayout = new QVBoxLayout(moveGroup);
+
+	// ComboBox base
+	auto* baseLayout = new QHBoxLayout();
+	auto* baseLabel = new QLabel("Base:");
+	baseLayout->addWidget(baseLabel);
+	QComboBox* baseComboBox = new QComboBox();
+	baseComboBox->setFixedWidth(80);
+	baseComboBox->addItems({ "TOOL", "WORLD" });
+	baseComboBox->setCurrentText("TOOL");
+	baseComboBox->setDisabled(true);
+	baseLayout->addWidget(baseComboBox);
+	moveLayout->addLayout(baseLayout);
+	baseLayout->addStretch();
+
+	// Onglets cartésien/articulaire
+	auto* modeTabs = new QTabWidget(this);
+	modeTabs->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+	auto* cartesianWidget = new QWidget();
+	auto* articularWidget = new QWidget();
+	modeTabs->setAttribute(Qt::WA_TranslucentBackground);
+	cartesianWidget->setAttribute(Qt::WA_TranslucentBackground);
+	articularWidget->setAttribute(Qt::WA_TranslucentBackground);
+
+	modeTabs->addTab(cartesianWidget, "Cartesian");
+	modeTabs->addTab(articularWidget, "Articular");
+	moveLayout->addWidget(modeTabs);
+
+	// Layout cartésien : boutons de déplacement
+	auto* cartesianLayout = new QGridLayout(cartesianWidget);
+	cartesianLayout->setSpacing(0);
+	cartesianLayout->setContentsMargins(0, 2, 0, 2);
+
+	createMovementButtons(cartesianLayout);
+
+	// Layout articulaire : boutons J1-J6
+	auto* articularLayout = new QGridLayout(articularWidget);
+	articularLayout->setSpacing(0);
+	articularLayout->setContentsMargins(0, 2, 0, 2);
+	createJointControlButtons(articularLayout);
+
+	// IO Group
+	QGroupBox* ioGroup = new QGroupBox("I/O", this);
+	ioGroup->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	auto* gridLayout = new QGridLayout(ioGroup);
+	gridLayout->setSpacing(0);
+	gridLayout->setContentsMargins(2, 4, 2, 4);
+	createIOBtns(gridLayout);
+
+	moveIoLayout->addWidget(ioGroup);
+	controlLayout->addWidget(moveIoContent);
 
 	// Ligne 3 : Position + Delta
 	auto* posDeltaLayout = new QHBoxLayout();
@@ -122,7 +177,7 @@ void AppView::setupUI()
 	rightLayout->addStretch();
 
 	mainLayout->addLayout(leftLayout);
-	mainLayout->addLayout(rightLayout, 1);
+	mainLayout->addLayout(rightLayout);
 
 	// Connexions
 	connect(m_connectButton, &QPushButton::clicked, this, &AppView::onConnectButtonClicked);
@@ -140,17 +195,13 @@ void AppView::createMovementButtons(QGridLayout* layout)
 		{ RobotKuka::MovementDirection::Down,     {2, 1} },
 		{ RobotKuka::MovementDirection::Left,     {1, 0} },
 		{ RobotKuka::MovementDirection::Right,    {1, 2} },
-		{ RobotKuka::MovementDirection::Forward,  {0, 3} },
-		{ RobotKuka::MovementDirection::Backward, {2, 3} }
 	};
 
 	QStringList content{
 		QStringLiteral(u"\u2191"), // up
 		QStringLiteral(u"\u2193"), // down
 		QStringLiteral(u"\u2190"), // left
-		QStringLiteral(u"\u2192"), // right
-		QStringLiteral(u"\u0046"), // F
-		QStringLiteral(u"\u0042")  // B
+		QStringLiteral(u"\u2192")  // right
 	};
 
 	int i = 0;
@@ -165,34 +216,166 @@ void AppView::createMovementButtons(QGridLayout* layout)
 		m_movementButtons[direction] = button;
 		layout->addWidget(button, pos.x(), pos.y());
 
-		setupMovementSignals(button, direction);
+		connect(button, &QPushButton::pressed, this, [this, direction]() { emit cartesianMovementPressed(direction); });
+		connect(button, &QPushButton::released, this, [this, direction]() { emit cartesianMovementReleased(direction); });
+	}
+
+	// Ligne verticale entre le bloc central et F/B
+	QFrame* separator = new QFrame(this);
+	separator->setFrameShape(QFrame::VLine);
+	separator->setFrameShadow(QFrame::Sunken);
+
+	layout->addWidget(separator, 0, 3, 3, 1); // ligne verticale entre col 2 et 4
+
+	// Ajout des boutons F/B dans un layout horizontal
+	QStringList fbLabels{ "F", "B" };
+	RobotKuka::MovementDirection fbDirections[] = {
+		RobotKuka::MovementDirection::Forward,
+		RobotKuka::MovementDirection::Backward
+	};
+
+	for (int j = 0; j < 2; ++j)
+	{
+		QPushButton* button = new QPushButton(fbLabels[j], this);
+		button->setFixedSize(30, 30);
+		button->setEnabled(false);
+
+		RobotKuka::MovementDirection direction = fbDirections[j];
+
+		m_movementButtons[direction] = button;
+		layout->addWidget(button, j * 2, 4); // col 4 après la ligne verticale
+		
+		connect(button, &QPushButton::pressed, this, [this, direction]() { emit cartesianMovementPressed(direction); });
+		connect(button, &QPushButton::released, this, [this, direction]() { emit cartesianMovementReleased(direction); });
 	}
 }
 
-void AppView::setupMovementSignals(QPushButton* button, RobotKuka::MovementDirection direction) const
+void AppView::createJointControlButtons(QGridLayout* layout)
 {
-	button->setProperty("movementDirection", QVariant::fromValue(direction));
-	connect(button, &QPushButton::pressed, this, &AppView::handleMovementPressed);
-	connect(button, &QPushButton::released, this, &AppView::handleMovementReleased);
+	for (int i = 0; i < 6; ++i)
+	{
+		QString label = QString("J%1").arg(i + 1);
+		QLabel* jointLabel = new QLabel(label, this);
+
+		QPushButton* plusButton = new QPushButton("+", this);
+		QPushButton* minusButton = new QPushButton("-", this);
+		plusButton->setFixedSize(30, 30);
+		minusButton->setFixedSize(30, 30);
+		plusButton->setEnabled(false);
+		minusButton->setEnabled(false);
+
+		QHBoxLayout* btnLayout = new QHBoxLayout();
+		btnLayout->setContentsMargins(3, 0, 3, 0);
+		btnLayout->setSpacing(1);
+		btnLayout->addWidget(jointLabel);
+		btnLayout->addWidget(plusButton);
+		btnLayout->addWidget(minusButton);
+
+		QWidget* group = new QWidget(this);
+		group->setLayout(btnLayout);
+
+		int row = i % 3;
+		int col = (i < 3) ? 0 : 2; // 0 pour J1 à J3, 2 pour J4 à J6
+
+		layout->addWidget(group, row, col);
+
+		connect(plusButton, &QPushButton::pressed, this, [this, i]() { emit articularMovementPressed(i, true); });
+		connect(plusButton, &QPushButton::released, this, [this, i]() { emit articularMovementReleased(i); });
+		connect(minusButton, &QPushButton::pressed, this, [this, i]() { emit articularMovementPressed(i, false); });
+		connect(minusButton, &QPushButton::released, this, [this, i]() { emit articularMovementReleased(i); });
+		m_jointButtons.append(plusButton);
+		m_jointButtons.append(minusButton);
+	}
+
+	// Ligne verticale entre les deux groupes
+	QFrame* line = new QFrame(this);
+	line->setFrameShape(QFrame::VLine);
+	line->setFrameShadow(QFrame::Sunken);
+	layout->addWidget(line, 0, 1, 3, 1); // ligne verticale sur 3 lignes
+}
+
+void AppView::createIOBtns(QGridLayout* layout)
+{
+	for (int col = 0; col < 4; ++col)
+	{
+		for (int row = 0; row < 4; ++row)
+		{
+			int index = col * 4 + row + 1;
+
+			QLabel* label = new QLabel(QString("IO %1:").arg(index), this);
+			QPushButton* inputBtn = new QPushButton("I", this);
+			QPushButton* outputBtn = new QPushButton("O", this);
+			inputBtn->setDisabled(true);
+			outputBtn->setDisabled(true);
+
+			inputBtn->setCheckable(true);
+			outputBtn->setCheckable(true);
+
+			inputBtn->setFixedSize(30, 30);
+			outputBtn->setFixedSize(30, 30);
+
+			QHBoxLayout* ioLayout = new QHBoxLayout();
+			ioLayout->setContentsMargins(3, 0, 3, 0);
+			ioLayout->addWidget(label);
+			ioLayout->addWidget(inputBtn);
+			ioLayout->addWidget(outputBtn);
+
+			QWidget* ioWidget = new QWidget();
+			ioWidget->setLayout(ioLayout);
+
+			layout->addWidget(ioWidget, row, col * 2); // *2 car on insère des QFrame entre
+			connect(inputBtn, &QPushButton::toggled, this, [this, index](bool checked) { emit inputToggled(index - 1, checked); });
+			connect(outputBtn, &QPushButton::toggled, this, [this, index](bool checked) { emit outputToggled(index - 1, checked); });
+			m_ioButtons.append(inputBtn);
+			m_ioButtons.append(outputBtn);
+
+			// Ligne verticale entre colonnes (sauf après la dernière)
+			if (col < 3 && row == 0)
+			{
+				QFrame* line = new QFrame(this);
+				line->setFrameShape(QFrame::VLine);
+				line->setFrameShadow(QFrame::Sunken);
+				layout->addWidget(line, 0, col * 2 + 1, 4, 1); // ligne verticale sur 4 lignes
+			}
+		}
+	}
 }
 
 QGroupBox* AppView::createPoseGroup(const QString& title, QList<QLineEdit*>& listToFeed)
 {
-	listToFeed.clear();
-
 	auto* group = new QGroupBox(title, this);
 	auto* layout = new QGridLayout();
 
 	QStringList labels = { "X", "Y", "Z", "A", "B", "C" };
-	for (int i = 0; i < labels.size(); ++i) {
-		QLabel* label = new QLabel(labels[i], this);
-		QLineEdit* lineEdit = new QLineEdit(this);
-		lineEdit->setPlaceholderText("0.000");
-		lineEdit->setDisabled(true);
-		layout->addWidget(label, i, 0);
-		layout->addWidget(lineEdit, i, 1);
-		listToFeed.append(lineEdit);
+
+	for (int i = 0; i < 3; ++i)
+	{
+		// Partie gauche : X, Y, Z
+		QLabel* labelL = new QLabel(labels[i], this);
+		QLineEdit* editL = new QLineEdit(this);
+		editL->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+		editL->setPlaceholderText("0.000");
+		editL->setDisabled(true);
+		layout->addWidget(labelL, i, 0);
+		layout->addWidget(editL, i, 1);
+		listToFeed[i] = editL;
+
+		// Partie droite : A, B, C
+		QLabel* labelR = new QLabel(labels[i + 3], this);
+		QLineEdit* editR = new QLineEdit(this);
+		editR->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+		editR->setPlaceholderText("0.000");
+		editR->setDisabled(true);
+		layout->addWidget(labelR, i, 3);
+		layout->addWidget(editR, i, 4);
+		listToFeed[3 + i] = editR;
 	}
+
+	// Ligne verticale entre les deux blocs
+	QFrame* line = new QFrame(this);
+	line->setFrameShape(QFrame::VLine);
+	line->setFrameShadow(QFrame::Sunken);
+	layout->addWidget(line, 0, 2, 3, 1); // de ligne 0 à 2, colonne 2
 
 	group->setLayout(layout);
 	return group;
@@ -264,22 +447,13 @@ void AppView::updateDelta(double positions[6])
 	}
 }
 
-void AppView::handleMovementPressed()
+void AppView::synchronizeIO(bool inputs[16], bool outputs[16])
 {
-	auto* button = qobject_cast<QPushButton*>(sender());
-	if (!button) return;
-
-	RobotKuka::MovementDirection direction = button->property("movementDirection").value<RobotKuka::MovementDirection>();
-	emit movementPressed(direction);
-}
-
-void AppView::handleMovementReleased()
-{
-	auto* button = qobject_cast<QPushButton*>(sender());
-	if (!button) return;
-
-	RobotKuka::MovementDirection direction = button->property("movementDirection").value<RobotKuka::MovementDirection>();
-	emit movementReleased(direction);
+	for (int i = 0; i < 16; i++)
+	{
+		m_ioButtons[2 * i]->setChecked(inputs[i]);
+		m_ioButtons[2 * i + 1]->setChecked(outputs[i]);
+	}
 }
 
 void AppView::refreshUI()

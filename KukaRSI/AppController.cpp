@@ -48,8 +48,8 @@ void AppController::setupConnections()
 	connect(m_view, &AppView::startButtonClicked, m_model, &AppModel::startRobot);
 	connect(m_view, &AppView::stopButtonClicked, m_model, &AppModel::stopRobot);
 
-	connect(m_view, &AppView::movementPressed, m_model, &AppModel::onMovementPressed);
-	connect(m_view, &AppView::movementReleased, m_model, &AppModel::onMovementReleased);
+	connect(m_view, &AppView::cartesianMovementPressed, m_model, &AppModel::onMovementPressed);
+	connect(m_view, &AppView::cartesianMovementReleased, m_model, &AppModel::onMovementReleased);
 	
 	connect(m_view, &AppView::requestNewPose, this, &AppController::onViewRequestNewPose);
 	connect(m_view, &AppView::requestNewDelta, this, &AppController::onViewRequestNewDelta);
