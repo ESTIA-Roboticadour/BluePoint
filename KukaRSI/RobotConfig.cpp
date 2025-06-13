@@ -6,7 +6,7 @@ RobotConfig::RobotConfig(QObject* parent) :
 	m_port("Port", 12345, this),
 	m_maxSpeed("Max. Speed (%)", 10, this),
 	m_maxAccel("Max. Accel (%)", 50, this),
-	m_matrix("Tool Matrix", QMatrix4x4(), this)
+	m_toolParameter("Tool", EulerFrameParameter::XYZ, this)
 {
 	defineBounds();
 	addParameters();
@@ -18,7 +18,7 @@ RobotConfig::RobotConfig(const RobotConfig& config, QObject* parent) :
 	m_port("Port", config.m_port, this),
 	m_maxSpeed("Max. Speed (%)", config.m_maxSpeed, this),
 	m_maxAccel("Max. Accel (%)", config.m_maxAccel, this),
-	m_matrix("Tool Matrix", config.m_matrix, this)
+	m_toolParameter("Tool", config.m_toolParameter, this)
 {
 	m_address.setKind(StringParameter::Kind::Plain);
 	
@@ -37,7 +37,7 @@ void RobotConfig::addParameters()
 	addParameter(&m_port);
 	addParameter(&m_maxSpeed);
 	addParameter(&m_maxAccel);
-	addParameter(&m_matrix);
+	addParameter(&m_toolParameter);
 }
 
 QString RobotConfig::getAddress() const
@@ -60,9 +60,9 @@ int RobotConfig::getMaxAccel() const
 	return m_maxAccel.getValue();
 }
 
-QMatrix4x4 RobotConfig::getMatrix() const
+const EulerFrameParameter* RobotConfig::getTool() const
 {
-	return m_matrix.getValue();
+	return &m_toolParameter;
 }
 
 void RobotConfig::setAddress(const QString& address)
@@ -83,11 +83,6 @@ void RobotConfig::setMaxSpeed(const int maxSpeed)
 void RobotConfig::setMaxAccel(const int maxAccel)
 {
 	m_maxAccel.setValue(maxAccel);
-}
-
-void RobotConfig::setMatrix(const QMatrix4x4& matrix) 
-{
-	m_matrix.setValue(matrix);
 }
 
 void RobotConfig::reset()
@@ -131,9 +126,10 @@ bool RobotConfig::setFromConfig(const Config* src, bool copyPath)
 			m_maxAccel.setValue(maxAccel->getValue());
 			numberOfParametersSet++;
 		}
-		if (Matrix4x4Parameter* matrix = qobject_cast<Matrix4x4Parameter*>(src->getParameter("Tool Matrix")))
+		if (EulerFrameParameter* euler = qobject_cast<EulerFrameParameter*>(src->getParameter("Tool")))
 		{
-			m_matrix.setValue(matrix->getValue());
+			m_toolParameter.setPosition(euler->getPosition());
+			m_toolParameter.setAngles(euler->getAngles());
 			numberOfParametersSet++;
 		}
 	}

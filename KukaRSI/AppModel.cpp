@@ -10,14 +10,14 @@ AppModel::AppModel(const RobotConfig* config, QObject* parent) :
 	m_portParameter(NumericalParameter("Port", 0, this)),
 	m_speedParameter(NumericalParameter("Max. Speed. (%)", 10, this)),
 	m_accelParameter(NumericalParameter("Max. Accel. (%)", 50, this)),
-	m_toolParameter(Matrix4x4Parameter("Tool", QMatrix4x4(), this)),
+	m_toolParameter(EulerFrameParameter("Tool", EulerFrameParameter::XYZ, this)),
 	m_connectionGroup(GroupParameter("Connection", this)),
 	m_connectionTimeoutParameter(NumericalParameter("Connection Timeout (s)", 60, this)),
 	m_uiGroup(GroupParameter("UI", this)),
 	m_freshRateParameter(NumericalParameter("Fresh Rate (Hz)", 20, this))
 {
 	setupConfig(config);
-	if (setupAddress(config))
+	if (config && setupAddress(config))
 	{
 		m_robot = new RobotKuka(this);
 
@@ -86,7 +86,9 @@ void AppModel::setupConfig(const RobotConfig* config)
 		m_portParameter.setValue(config->getPort());
 		m_speedParameter.setValue(config->getMaxSpeed());
 		m_accelParameter.setValue(config->getMaxAccel());
-		m_toolParameter.setValue(config->getMatrix());
+		m_toolParameter.setConvention(config->getTool()->getConvention());
+		m_toolParameter.setPosition(config->getTool()->getPosition());
+		m_toolParameter.setAngles(config->getTool()->getAngles());
 	}
 
 	m_addressParameter.lock();

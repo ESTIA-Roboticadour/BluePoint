@@ -6,7 +6,7 @@
 #include "GroupParameter.h"
 #include "NumericalParameter.h"
 #include "StringParameter.h"
-#include "Matrix4x4Parameter.h"
+#include "EulerFrameParameter.h"
 
 #include <QObject>
 #include <QHostAddress>
@@ -68,7 +68,7 @@ private:
 	NumericalParameter m_portParameter;
     NumericalParameter m_speedParameter;
     NumericalParameter m_accelParameter;
-    Matrix4x4Parameter m_toolParameter;
+    EulerFrameParameter m_toolParameter;
     GroupParameter m_connectionGroup;
     NumericalParameter m_connectionTimeoutParameter;
     GroupParameter m_uiGroup;
