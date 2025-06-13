@@ -185,7 +185,7 @@ void NumericalParameterWidget::onSpinBoxValueChanged(double value)
     else
     {
         m_isSliderUpdating = true;
-        m_slider->setValue(value);
+        m_slider->setValue(static_cast<int>(value));
         m_isSliderUpdating = false;
     }
 }

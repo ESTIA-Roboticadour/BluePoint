@@ -11,6 +11,8 @@ QT += widgets designer
 # Files declaration
 HEADERS += \
     Config.h \
+    EulerFrameParameter.h \
+    EulerFrameParameterWidget.h \
     GroupParameter.h \
     IParametrable.h \
     Matrix4x4Parameter.h \
@@ -38,6 +40,8 @@ HEADERS += \
 
 SOURCES += \
     Config.cpp \
+    EulerFrameParameter.cpp \
+    EulerFrameParameterWidget.cpp \
     GroupParameter.cpp \
     ListParameterBase.cpp \
     Matrix4x4Parameter.cpp \

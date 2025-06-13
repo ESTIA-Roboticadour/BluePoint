@@ -10,6 +10,7 @@
 #include "StringParameter.h"
 #include "ListParameterBase.h"
 #include "Matrix4x4Parameter.h"
+#include "EulerFrameParameter.h"
 #include "ParameterWidget.h"
 
 #include <QWidget>
@@ -68,7 +69,8 @@ private:
 	ParameterWidget* createNumericalParameterWidget(const NumericalParameter* parameter);
 	ParameterWidget* createStringParameterWidget(const StringParameter* parameter);
 	ParameterWidget* createListParameterWidget(const ListParameterBase* parameter);
-	ParameterWidget* createMatrix4X4ParameterWidget(const Matrix4x4Parameter* parameter);
+    ParameterWidget* createMatrix4x4ParameterWidget(const Matrix4x4Parameter* parameter);
+    ParameterWidget* createEulerFrameParameter(const EulerFrameParameter* parameter);
 	ParameterWidget* createUnknownParameterWidget(const ParameterBase* parameter);
 
 	void createGroupInfo(const QGroupBox* groupBox);

@@ -5,6 +5,7 @@
 #include "ListParameter.h"
 #include "GroupParameter.h"
 #include "Matrix4x4Parameter.h"
+#include "EulerFrameParameter.h"
 
 #include <QJsonObject>
 #include <QJsonArray>
@@ -56,6 +57,7 @@ std::unique_ptr<ParameterBase> ParameterBase::fromJson(const QJsonObject& o, QOb
     if (type == "list")   return ListParameterBase::fromJson(o, parent);
     if (type == "group")  return GroupParameter::fromJson(o, parent);
     if (type == "matrix4X4") return Matrix4x4Parameter::fromJson(o, parent);
+    if (type == "eulerFrame") return EulerFrameParameter::fromJson(o, parent);
 
     return {};   // type inconnu
 }

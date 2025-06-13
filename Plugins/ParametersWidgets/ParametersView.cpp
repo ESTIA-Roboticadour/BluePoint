@@ -4,6 +4,7 @@
 #include "StringParameterWidget.h"
 #include "ListParameterWidget.h"
 #include "Matrix4x4ParameterWidget.h"
+#include "EulerFrameParameterWidget.h"
 #include "UnknownParameterWidget.h"
 
 #include <QHBoxLayout>
@@ -192,7 +193,12 @@ QWidget* ParametersView::createParameterWidget(const ParameterBase* parameter)
     // Matrix4X4
     if (auto matrixParam = qobject_cast<const Matrix4x4Parameter*>(parameter))
     {
-        return createMatrix4X4ParameterWidget(matrixParam);
+        return createMatrix4x4ParameterWidget(matrixParam);
+    }
+    // EulerFrameParameter
+    if (auto eulerFrameParam = qobject_cast<const EulerFrameParameter*>(parameter))
+    {
+        return createEulerFrameParameter(eulerFrameParam);
     }
 	// Unknown
     return createUnknownParameterWidget(parameter);
@@ -230,13 +236,13 @@ ParameterWidget* ParametersView::createNumericalParameterWidget(const NumericalP
     numericalWidget->setFrom(parameter);
 
     connect(parameter, &NumericalParameter::valueChanged, numericalWidget, &NumericalParameterWidget::setValue);
+    connect(parameter, &NumericalParameter::minimumChanged, numericalWidget, &NumericalParameterWidget::setMinimum);
+    connect(parameter, &NumericalParameter::maximumChanged, numericalWidget, &NumericalParameterWidget::setMaximum);
+    connect(parameter, &NumericalParameter::incrementChanged, numericalWidget, &NumericalParameterWidget::setIncrement);
 
     if (!m_isReadOnly)
 	{
 		connect(numericalWidget, &NumericalParameterWidget::valueChanged, parameter, &NumericalParameter::setValue);
-        connect(parameter, &NumericalParameter::minimumChanged, numericalWidget, &NumericalParameterWidget::setMinimum);
-        connect(parameter, &NumericalParameter::maximumChanged, numericalWidget, &NumericalParameterWidget::setMaximum);
-        connect(parameter, &NumericalParameter::incrementChanged, numericalWidget, &NumericalParameterWidget::setIncrement);
         connect(parameter, &ParameterBase::isEditableChanged, numericalWidget, &NumericalParameterWidget::setEnabled);
 	}
     return numericalWidget;
@@ -248,15 +254,14 @@ ParameterWidget* ParametersView::createStringParameterWidget(const StringParamet
     stringWidget->setFrom(parameter);
 
     connect(parameter, &StringParameter::valueChanged, stringWidget, &StringParameterWidget::setValue);
+    connect(parameter, &StringParameter::kindChanged, stringWidget, &StringParameterWidget::setKind);
+    connect(parameter, &StringParameter::canEditPathChanged, stringWidget, &StringParameterWidget::setCanEditPath);
 
     if (!m_isReadOnly)
 	{
         connect(stringWidget, &StringParameterWidget::valueChanged, parameter, &StringParameter::setValue);
         connect(stringWidget, &StringParameterWidget::kindChanged, parameter, &StringParameter::setKind);
         connect(stringWidget, &StringParameterWidget::canEditPathChanged, parameter, &StringParameter::setCanEditPath);
-
-        connect(parameter, &StringParameter::kindChanged, stringWidget, &StringParameterWidget::setKind);
-        connect(parameter, &StringParameter::canEditPathChanged, stringWidget, &StringParameterWidget::setCanEditPath);
         connect(parameter, &ParameterBase::isEditableChanged, stringWidget, &StringParameterWidget::setEnabled);
 	}
     return stringWidget;
@@ -264,7 +269,7 @@ ParameterWidget* ParametersView::createStringParameterWidget(const StringParamet
 
 ParameterWidget* ParametersView::createListParameterWidget(const ListParameterBase* parameter)
 {
-    ListParameterWidget* listWidget = new ListParameterWidget();
+    ListParameterWidget* listWidget = new ListParameterWidget(m_isReadOnly);
     listWidget->setFrom(parameter);
 
     connect(parameter, &ListParameterBase::selectedIndexChanged, listWidget, &ListParameterWidget::setCurrentIndex);
@@ -277,9 +282,9 @@ ParameterWidget* ParametersView::createListParameterWidget(const ListParameterBa
     return listWidget;
 }
 
-ParameterWidget* ParametersView::createMatrix4X4ParameterWidget(const Matrix4x4Parameter* parameter)
+ParameterWidget* ParametersView::createMatrix4x4ParameterWidget(const Matrix4x4Parameter* parameter)
 {
-    Matrix4x4ParameterWidget* matrixWidget = new Matrix4x4ParameterWidget();
+    Matrix4x4ParameterWidget* matrixWidget = new Matrix4x4ParameterWidget(m_isReadOnly);
     matrixWidget->setFrom(parameter);
 
     connect(parameter, &Matrix4x4Parameter::matrixChanged, matrixWidget, &Matrix4x4ParameterWidget::setValue);
@@ -290,6 +295,35 @@ ParameterWidget* ParametersView::createMatrix4X4ParameterWidget(const Matrix4x4P
         connect(parameter, &ParameterBase::isEditableChanged, matrixWidget, &Matrix4x4ParameterWidget::setEnabled);
     }
     return matrixWidget;
+}
+
+ParameterWidget* ParametersView::createEulerFrameParameter(const EulerFrameParameter* parameter)
+{
+    EulerFrameParameterWidget* eulerWidget = new EulerFrameParameterWidget(m_isReadOnly);
+    eulerWidget->setFrom(parameter);
+
+    connect(parameter, &EulerFrameParameter::conventionChanged, eulerWidget, &EulerFrameParameterWidget::setConvention);
+    connect(parameter, &EulerFrameParameter::xChanged, eulerWidget, &EulerFrameParameterWidget::setX);
+    connect(parameter, &EulerFrameParameter::yChanged, eulerWidget, &EulerFrameParameterWidget::setY);
+    connect(parameter, &EulerFrameParameter::zChanged, eulerWidget, &EulerFrameParameterWidget::setZ);
+    connect(parameter, &EulerFrameParameter::aChanged, eulerWidget, &EulerFrameParameterWidget::setA);
+    connect(parameter, &EulerFrameParameter::bChanged, eulerWidget, &EulerFrameParameterWidget::setB);
+    connect(parameter, &EulerFrameParameter::cChanged, eulerWidget, &EulerFrameParameterWidget::setC);
+
+    if (!m_isReadOnly)
+    {
+        connect(eulerWidget, &EulerFrameParameterWidget::xChanged, parameter, &EulerFrameParameter::setX);
+        connect(eulerWidget, &EulerFrameParameterWidget::yChanged, parameter, &EulerFrameParameter::setY);
+        connect(eulerWidget, &EulerFrameParameterWidget::zChanged, parameter, &EulerFrameParameter::setZ);
+        connect(eulerWidget, &EulerFrameParameterWidget::aChanged, parameter, &EulerFrameParameter::setA);
+        connect(eulerWidget, &EulerFrameParameterWidget::bChanged, parameter, &EulerFrameParameter::setB);
+        connect(eulerWidget, &EulerFrameParameterWidget::cChanged, parameter, &EulerFrameParameter::setC);
+        connect(eulerWidget, &EulerFrameParameterWidget::conventionChanged, parameter, &EulerFrameParameter::setConvention);
+
+        connect(parameter, &ParameterBase::isEditableChanged, eulerWidget, &EulerFrameParameterWidget::setEnabled);
+    }
+
+    return eulerWidget;
 }
 
 ParameterWidget* ParametersView::createUnknownParameterWidget(const ParameterBase* parameter)
