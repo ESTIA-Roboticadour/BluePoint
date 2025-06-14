@@ -39,6 +39,7 @@ public slots:
 
 private slots:
     void onConnectButtonClicked();
+    void onCancelButtonClicked();
 	void onDisconnectButtonClicked();
 	void onStartButtonClicked();
 	void onStopButtonClicked();

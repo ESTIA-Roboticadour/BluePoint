@@ -79,9 +79,10 @@ void RobotKuka::onUdpOpened(const QHostAddress& hostAddress, quint16 port)
 
 void RobotKuka::onUdpFailedToOpen(const QHostAddress& hostAddress, quint16 port)
 {
+	QString errorMessage = QString("Failed to connect UDP to %1:%2").arg(hostAddress.toString()).arg(port);
 	m_udpClient->close();
 	setStatus(Status::Error);
-	emit errorOccurred(QString("Failed to bind to %1:%2").arg(hostAddress.toString()).arg(port));
+	emit errorOccurred(errorMessage);
 }
 
 void RobotKuka::onUdpClosed()
@@ -118,9 +119,10 @@ void RobotKuka::onConnectionTimeoutTick()
 
 		disconnect(m_udpClient, &UdpClient::datagramReceived, this, &RobotKuka::onInitialDatagramReceived);
 		setStatus(m_abortConnectionRequest ? Status::Ready : Status::Error);
+		m_udpClient->close();
 		if (!m_abortConnectionRequest)
 			emit errorOccurred("Connection timeout");
-		m_udpClient->close();
+		failedToConnect();
 	}
 }
 

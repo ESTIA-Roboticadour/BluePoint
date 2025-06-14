@@ -38,7 +38,6 @@ void UdpClient::open(const QHostAddress& address, quint16 port)
         emit opened(address, port);
     }
     else {
-        qWarning() << "[UdpClient] Failed to open " + address.toString() + ':' + port;
         emit failedToOpen(address, port);
     }
 }

@@ -59,8 +59,11 @@ void AppView::setupUI()
 
 	statusLayout->addWidget(new QLabel("Status:", statusGroup));
 	statusLayout->addWidget(m_statusLabel);
+	statusLayout->addStretch();
 	behaviourLayout->addWidget(new QLabel("Robot behaviour:", statusGroup));
 	behaviourLayout->addWidget(m_behaviourLabel);
+	behaviourLayout->addStretch();
+
 	groupLayout->addLayout(statusLayout);
 	groupLayout->addLayout(behaviourLayout);
 
@@ -254,7 +257,7 @@ void AppView::createMovementButtons(QGridLayout* layout)
 
 		m_movementButtons[direction] = button;
 		layout->addWidget(button, j * 2, 4); // col 4 après la ligne verticale
-		
+
 		connect(button, &QPushButton::pressed, this, [this, direction]() { emit cartesianMovementPressed(direction); });
 		connect(button, &QPushButton::released, this, [this, direction]() { emit cartesianMovementReleased(direction); });
 	}
@@ -393,16 +396,22 @@ QGroupBox* AppView::createPoseGroup(const QString& title, QList<QLineEdit*>& lis
 
 void AppView::switchConnectBtnToCancelBtn()
 {
-	disconnect(m_connectButton, &QPushButton::clicked, this, &AppView::onConnectButtonClicked);
-	connect(m_connectButton, &QPushButton::clicked, this, &AppView::cancelConnectButtonClicked);
-	m_connectButton->setText("Cancel");
+	if (m_connectButton->text() != "Cancel")
+	{
+		m_connectButton->setText("Cancel");
+		disconnect(m_connectButton, &QPushButton::clicked, this, &AppView::onConnectButtonClicked);
+		connect(m_connectButton, &QPushButton::clicked, this, &AppView::cancelConnectButtonClicked);
+	}
 }
 
 void AppView::switchCancelBtnToConnectBtn()
 {
-	disconnect(m_connectButton, &QPushButton::clicked, this, &AppView::cancelConnectButtonClicked);
-	connect(m_connectButton, &QPushButton::clicked, this, &AppView::onConnectButtonClicked);
-	m_connectButton->setText("Connect");
+	if (m_connectButton->text() != "Connect")
+	{
+		m_connectButton->setText("Connect");
+		disconnect(m_connectButton, &QPushButton::clicked, this, &AppView::cancelConnectButtonClicked);
+		connect(m_connectButton, &QPushButton::clicked, this, &AppView::onConnectButtonClicked);
+	}
 }
 
 void AppView::setConnectionLabelText(const QString& text)
@@ -488,8 +497,12 @@ void AppView::refreshUI()
 
 void AppView::onConnectButtonClicked()
 {
-	switchConnectBtnToCancelBtn();
 	emit connectButtonClicked();
+}
+
+void AppView::onCancelButtonClicked()
+{
+	emit cancelConnectButtonClicked();
 }
 
 void AppView::onDisconnectButtonClicked()
@@ -527,6 +540,8 @@ void AppView::onRobotStateChanged(RobotKuka::Status status)
 		break;
 	case RobotKuka::Status::WaitingRobotConnection:
 		setConnectionLabelText("Waiting for robot");
+		switchConnectBtnToCancelBtn();
+		m_connectButton->setEnabled(true);
 		break;
 	case RobotKuka::Status::Connected:
 		switchCancelBtnToConnectBtn();
@@ -538,6 +553,7 @@ void AppView::onRobotStateChanged(RobotKuka::Status status)
 		m_stopButton->setEnabled(true);
 		break;
 	case RobotKuka::Status::Error:
+		switchCancelBtnToConnectBtn();
 		m_connectButton->setEnabled(true);
 		break;
 	default:

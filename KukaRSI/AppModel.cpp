@@ -27,8 +27,8 @@ AppModel::AppModel(const RobotConfig* config, QObject* parent) :
 		connect(m_robot, &RobotKuka::disconnected, this, &AppModel::onRobotDisconnected);
 		connect(m_robot, &RobotKuka::started, this, &AppModel::robotStarted);
 		connect(m_robot, &RobotKuka::stopped, this, &AppModel::robotStopped);
+		connect(m_robot, &RobotKuka::failedToConnect, this, &AppModel::onRobotFailedToConnect);
 		connect(m_robot, &RobotKuka::errorOccurred, this, &AppModel::onErrorOccurred);
-
 		connect(m_robot, &RobotKuka::connectionTimeRemainingChanged, this, &AppModel::connectionTimeRemainingChanged);
 	}
 }
@@ -164,6 +164,11 @@ void AppModel::onRobotDisconnected()
 	emit robotDisconnected();
 }
 
+void AppModel::onRobotFailedToConnect()
+{
+	m_connectionTimeoutParameter.unlock();
+}
+
 const Config* AppModel::getConfig() const
 {
 	return &m_config;
@@ -207,6 +212,11 @@ void AppModel::stopRobot()
 
 void AppModel::stopMove()
 {
+}
+
+RobotKuka::Status AppModel::getRobotStatus() const
+{
+	return m_robot ? m_robot->getStatus() : RobotKuka::Status();
 }
 
 void AppModel::onErrorOccurred(const QString& message)

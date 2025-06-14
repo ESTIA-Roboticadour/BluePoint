@@ -11,8 +11,9 @@ class RobotKuka : public QObject
 
 #pragma region enums
 public:
-    enum Status
+    enum class Status
     {
+        None,
         Ready,
         WaitingRobotConnection,
         Connected,
@@ -20,6 +21,16 @@ public:
         Error
     };
     Q_ENUM(Status)
+
+    enum class Behaviour
+    {
+        None,
+        DoNothing,
+        MoveCartesian,
+        MoveJoint,
+        StopMove
+    };
+    Q_ENUM(Behaviour)
 
     enum Joint
     {
@@ -84,30 +95,10 @@ public:
     };
     Q_ENUM(IOOutput)
 
-    enum Behaviour
-    {
-        None,
-        DoNothing,
-        MoveCartesian,
-        MoveJoint,
-        StopMove
-    };
-    Q_ENUM(Behaviour)
-
-    inline static QString toQString(MovementDirection direction) {
-        switch (direction) {
-        case MovementDirection::Up: return "UP";
-        case MovementDirection::Down: return "DOWN";
-        case MovementDirection::Left: return "LEFT";
-        case MovementDirection::Right: return "RIGHT";
-        case MovementDirection::Forward: return "FORWARD";
-        case MovementDirection::Backward: return "BACKWARD";
-        default: return "";
-        }
-    }
 
     inline static QString toQString(Status status) {
         switch (status) {
+        case Status::None: return "None";
         case Status::Ready: return "Ready";
         case Status::WaitingRobotConnection: return "Waiting Robot Connection";
         case Status::Connected: return "Connected";
@@ -128,6 +119,18 @@ public:
         }
     }
 
+    inline static QString toQString(MovementDirection direction) {
+        switch (direction) {
+        case MovementDirection::Up: return "UP";
+        case MovementDirection::Down: return "DOWN";
+        case MovementDirection::Left: return "LEFT";
+        case MovementDirection::Right: return "RIGHT";
+        case MovementDirection::Forward: return "FORWARD";
+        case MovementDirection::Backward: return "BACKWARD";
+        default: return "";
+        }
+    }
+
 #pragma endregion
 
 public:
@@ -135,7 +138,7 @@ public:
     ~RobotKuka();
 
 	Status getStatus() const { return m_status; };
-    Behaviour getRobotBehaviour() const { return m_behaviour; }
+    Behaviour getBehaviour() const { return m_behaviour; }
 
     // Connexion / déconnexion
     
@@ -179,6 +182,7 @@ signals:
     void disconnected();
     void started();
     void stopped();
+    void failedToConnect();
     void errorOccurred(const QString& message);
     void connectionTimeRemainingChanged(quint16 seconds);
 

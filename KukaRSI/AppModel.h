@@ -28,6 +28,7 @@ public:
     void startRobot();
     void stopRobot();
     void stopMove();
+    RobotKuka::Status getRobotStatus() const;
 
     void release() override;
 
@@ -46,6 +47,7 @@ private slots:
     void onErrorOccurred(const QString& message);
     void onRobotConnected();
     void onRobotDisconnected();
+    void onRobotFailedToConnect();
     
 private:
     void setupConfig(const RobotConfig* config);

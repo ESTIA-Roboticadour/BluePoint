@@ -7,6 +7,8 @@ AppController::AppController(AppModel* model, AppView* view, QObject* parent):
 {
 	setupConnections();
 	m_view->setConfig(m_model->getConfig());
+
+	m_view->onRobotStateChanged(m_model->getRobotStatus());
 }
 
 AppController::~AppController()
@@ -73,5 +75,5 @@ void AppController::setupConnections()
 
 void AppController::onErrorOccurred(const QString& msg)
 {
-	qWarning() << ("[AppController] Error from model: " + msg);
+	qWarning() << msg;
 }
