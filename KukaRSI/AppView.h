@@ -29,11 +29,12 @@ public slots:
     void synchronizeIO(bool inputs[16], bool outputs[16]);
 
     void onRobotStateChanged(RobotKuka::Status status);
+    void onRobotBehaviourChanged(RobotKuka::Behaviour behaviour);
     void onRobotConnected();
     void onRobotDisconnected();
     void onRobotStarted();
     void onRobotStopped();
-    void onConnectionTimeRemainingChanged(int seconds);
+    void onConnectionTimeRemainingChanged(quint16 seconds);
     void onFreshRateChanged(double freshRateHz);
 
 private slots:
@@ -50,22 +51,25 @@ private:
     void createJointControlButtons(QGridLayout* layout);
     void createIOBtns(QGridLayout* layout);
     QGroupBox* createPoseGroup(const QString& title, QList<QLineEdit*>& listToFeed);
+    void switchConnectBtnToCancelBtn();
+    void switchCancelBtnToConnectBtn();
     void setConnectionLabelText(const QString& text);
     void clearConnectionLabelText();
     void setTimerIntervale(double freshRateHz);
 
 signals:
     void connectButtonClicked();
+    void cancelConnectButtonClicked();
     void disconnectButtonClicked();
     void startButtonClicked();
     void stopButtonClicked();
 
     void cartesianMovementPressed(RobotKuka::MovementDirection direction);
     void cartesianMovementReleased(RobotKuka::MovementDirection direction);
-    void articularMovementPressed(int axe, bool positive);
-    void articularMovementReleased(int axe);
-    void inputToggled(int input, bool enabled);
-    void outputToggled(int output, bool enabled);
+    void articularMovementPressed(RobotKuka::Joint joint, bool positive);
+    void articularMovementReleased(RobotKuka::Joint joint);
+    void inputToggled(RobotKuka::IOInput input, bool enabled);
+    void outputToggled(RobotKuka::IOOutput output, bool enabled);
 
     void requestNewPose();
     void requestNewDelta();
@@ -78,6 +82,7 @@ private:
     ParametersView* m_parametersView{ nullptr };
     QVBoxLayout* m_connectionLayout{ nullptr };
     QLabel* m_statusLabel{ nullptr };
+    QLabel* m_behaviourLabel{ nullptr };
     QLabel* m_connectionLabel{ nullptr };
     QList<QLineEdit*> m_poseLineEdits;
     QList<QLineEdit*> m_deltaLineEdits;

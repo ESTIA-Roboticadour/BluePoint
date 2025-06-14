@@ -51,11 +51,20 @@ void AppView::setupUI()
 	// Group Status
 	auto* statusGroup = new QGroupBox("Status", this);
 	statusGroup->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
+	auto* groupLayout = new QVBoxLayout();
 	auto* statusLayout = new QHBoxLayout();
+	auto* behaviourLayout = new QHBoxLayout();
 	m_statusLabel = new QLabel("", statusGroup);
+	m_behaviourLabel = new QLabel("", statusGroup);
+
 	statusLayout->addWidget(new QLabel("Status:", statusGroup));
 	statusLayout->addWidget(m_statusLabel);
-	statusGroup->setLayout(statusLayout);
+	behaviourLayout->addWidget(new QLabel("Robot behaviour:", statusGroup));
+	behaviourLayout->addWidget(m_behaviourLabel);
+	groupLayout->addLayout(statusLayout);
+	groupLayout->addLayout(behaviourLayout);
+
+	statusGroup->setLayout(groupLayout);
 	rightLayout->addWidget(statusGroup);
 
 	// Groupe Connection
@@ -280,10 +289,10 @@ void AppView::createJointControlButtons(QGridLayout* layout)
 
 		layout->addWidget(group, row, col);
 
-		connect(plusButton, &QPushButton::pressed, this, [this, i]() { emit articularMovementPressed(i, true); });
-		connect(plusButton, &QPushButton::released, this, [this, i]() { emit articularMovementReleased(i); });
-		connect(minusButton, &QPushButton::pressed, this, [this, i]() { emit articularMovementPressed(i, false); });
-		connect(minusButton, &QPushButton::released, this, [this, i]() { emit articularMovementReleased(i); });
+		connect(plusButton, &QPushButton::pressed, this, [this, i]() { emit articularMovementPressed(static_cast<RobotKuka::Joint>(i), true); });
+		connect(plusButton, &QPushButton::released, this, [this, i]() { emit articularMovementReleased(static_cast<RobotKuka::Joint>(i)); });
+		connect(minusButton, &QPushButton::pressed, this, [this, i]() { emit articularMovementPressed(static_cast<RobotKuka::Joint>(i), false); });
+		connect(minusButton, &QPushButton::released, this, [this, i]() { emit articularMovementReleased(static_cast<RobotKuka::Joint>(i)); });
 		m_jointButtons.append(plusButton);
 		m_jointButtons.append(minusButton);
 	}
@@ -301,9 +310,9 @@ void AppView::createIOBtns(QGridLayout* layout)
 	{
 		for (int row = 0; row < 4; ++row)
 		{
-			int index = col * 4 + row + 1;
+			int index = col * 4 + row;
 
-			QLabel* label = new QLabel(QString("IO %1:").arg(index), this);
+			QLabel* label = new QLabel(QString("IO %1:").arg(index + 1), this);
 			QPushButton* inputBtn = new QPushButton("I", this);
 			QPushButton* outputBtn = new QPushButton("O", this);
 			inputBtn->setDisabled(true);
@@ -325,8 +334,8 @@ void AppView::createIOBtns(QGridLayout* layout)
 			ioWidget->setLayout(ioLayout);
 
 			layout->addWidget(ioWidget, row, col * 2); // *2 car on insère des QFrame entre
-			connect(inputBtn, &QPushButton::toggled, this, [this, index](bool checked) { emit inputToggled(index - 1, checked); });
-			connect(outputBtn, &QPushButton::toggled, this, [this, index](bool checked) { emit outputToggled(index - 1, checked); });
+			connect(inputBtn, &QPushButton::toggled, this, [this, index](bool checked) { emit inputToggled(static_cast<RobotKuka::IOInput>(index), checked); });
+			connect(outputBtn, &QPushButton::toggled, this, [this, index](bool checked) { emit outputToggled(static_cast<RobotKuka::IOOutput>(index), checked); });
 			m_ioButtons.append(inputBtn);
 			m_ioButtons.append(outputBtn);
 
@@ -380,6 +389,20 @@ QGroupBox* AppView::createPoseGroup(const QString& title, QList<QLineEdit*>& lis
 
 	group->setLayout(layout);
 	return group;
+}
+
+void AppView::switchConnectBtnToCancelBtn()
+{
+	disconnect(m_connectButton, &QPushButton::clicked, this, &AppView::onConnectButtonClicked);
+	connect(m_connectButton, &QPushButton::clicked, this, &AppView::cancelConnectButtonClicked);
+	m_connectButton->setText("Cancel");
+}
+
+void AppView::switchCancelBtnToConnectBtn()
+{
+	disconnect(m_connectButton, &QPushButton::clicked, this, &AppView::cancelConnectButtonClicked);
+	connect(m_connectButton, &QPushButton::clicked, this, &AppView::onConnectButtonClicked);
+	m_connectButton->setText("Connect");
 }
 
 void AppView::setConnectionLabelText(const QString& text)
@@ -465,7 +488,7 @@ void AppView::refreshUI()
 
 void AppView::onConnectButtonClicked()
 {
-	m_connectButton->setDisabled(true);
+	switchConnectBtnToCancelBtn();
 	emit connectButtonClicked();
 }
 
@@ -498,26 +521,33 @@ void AppView::onRobotStateChanged(RobotKuka::Status status)
 
 	switch (status)
 	{
-	case RobotKuka::Ready:
+	case RobotKuka::Status::Ready:
+		switchCancelBtnToConnectBtn();
 		m_connectButton->setEnabled(true);
 		break;
-	case RobotKuka::WaitingRobotConnection:
+	case RobotKuka::Status::WaitingRobotConnection:
 		setConnectionLabelText("Waiting for robot");
 		break;
-	case RobotKuka::Connected:
+	case RobotKuka::Status::Connected:
+		switchCancelBtnToConnectBtn();
 		m_disconnectButton->setEnabled(true);
 		m_startButton->setEnabled(true);
 		break;
-	case RobotKuka::Moving:
+	case RobotKuka::Status::ReadyToMove:
 		m_disconnectButton->setEnabled(true);
 		m_stopButton->setEnabled(true);
 		break;
-	case RobotKuka::Error:
+	case RobotKuka::Status::Error:
 		m_connectButton->setEnabled(true);
 		break;
 	default:
 		break;
 	}
+}
+
+void AppView::onRobotBehaviourChanged(RobotKuka::Behaviour behaviour)
+{
+	m_behaviourLabel->setText(RobotKuka::toQString(behaviour));
 }
 
 void AppView::onRobotConnected()
@@ -550,7 +580,7 @@ void AppView::onRobotStopped()
 	m_uiTimer.stop();
 }
 
-void AppView::onConnectionTimeRemainingChanged(int seconds)
+void AppView::onConnectionTimeRemainingChanged(quint16 seconds)
 {
 	setConnectionLabelText(QString("Waiting for robot (%1 s)").arg(seconds));
 }

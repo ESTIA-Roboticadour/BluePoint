@@ -1,48 +1,50 @@
 #include "RobotKuka.h"
 
+#include <cstring> // pour memcpy
+
 RobotKuka::RobotKuka(QObject* parent) :
 	QObject(parent),
-	m_status(RobotKuka::Status::Ready),
+	m_status(Status::Ready),
+	m_behaviour(Behaviour::None),
 	m_isConnected(false),
-	m_isRunning(false),
-	m_pose(),
-	m_hostAddress(),
-	m_port(0),
+	m_disconnectRequest(false),
 	m_udpClient(nullptr),
+	m_connectionTimeout(5),
+	m_connectionTimeRemaining(5),
+	m_connectionTimer(nullptr),
+	m_abortConnectionRequest(false),
+	m_initialDatagramReceived(false),
 	m_currentPose(),
 	m_currentDelta()
 {
-	for (int i = 0; i < 6; ++i) {
-		m_currentPose[i] = 0.0; // Initialisation des positions X, Y, Z, A, B, C
-		m_currentDelta[i] = 0.0;   // Initialisation des deltas dX, dY, dZ, dA, dB, dC
-	}
+	std::memcpy(m_currentPose, m_ZEROS, sizeof(m_ZEROS));
+	std::memcpy(m_currentDelta, m_ZEROS, sizeof(m_ZEROS));
 }
 
 RobotKuka::~RobotKuka()
 {
-	if (m_isConnected)
-		disconnect();
+	if (m_isConnected) 
+	{
+		disconnectFromRobot(); // envoyer une trame de stop directement ? et fermer la thread + le client
+	}
 }
 
-void RobotKuka::connectToRobot(const QHostAddress& hostAddress, int port, int timeout)
+void RobotKuka::connectToRobot(const QHostAddress& hostAddress, quint16 port, quint32 timeout)
 {
-	if (!m_isConnected)
+	if (!m_udpClient)
 	{
-		m_hostAddress = hostAddress;
-		m_port = port;
-
-		m_udpClient = new QUdpSocket(this);
-		if (m_udpClient->bind(m_hostAddress, m_port)) {
-			m_isConnected = true;
-			setStatus(Status::WaitingRobotConnection);
-		}
-		else 
-		{
-			m_status = Status::Error;
-			emit errorOccurred(QString("Failed to bind to %1:%2").arg(m_hostAddress.toString()).arg(m_port));
-		}
+		m_isConnected = false;
+		m_disconnectRequest = false;
+		m_abortConnectionRequest = false;
+		m_initialDatagramReceived = false;
+		setBehaviour(Behaviour::None);
+		m_udpClient = new UdpClient(hostAddress, port, this);
+		connect(m_udpClient, &UdpClient::opened, this, &RobotKuka::onUdpOpened);
+		connect(m_udpClient, &UdpClient::failedToOpen, this, &RobotKuka::onUdpFailedToOpen);
+		connect(m_udpClient, &UdpClient::closed, this, &RobotKuka::onUdpClosed);
+		m_connectionTimeout = timeout;
+		m_udpClient->open();
 	}
-	// TODO : Implémenter la connexion
 }
 
 void RobotKuka::disconnectFromRobot()
@@ -50,17 +52,114 @@ void RobotKuka::disconnectFromRobot()
 	if (!m_isConnected)
 		return;
 
-	for (int i = 0; i < 6; ++i) {
-		m_currentDelta[i] = 0.0;
+	stopMovement();
+	m_disconnectRequest = true;
+	//closeUdpClient();
+}
+
+void RobotKuka::onUdpOpened(const QHostAddress& hostAddress, quint16 port)
+{
+	disconnect(m_udpClient, &UdpClient::opened, this, &RobotKuka::onUdpOpened);
+	setStatus(Status::WaitingRobotConnection);
+
+	// Connexion à la réception du datagramme
+	connect(m_udpClient, &UdpClient::datagramReceived, this, &RobotKuka::onInitialDatagramReceived);
+
+	// Timer de compte à rebours
+	if (!m_connectionTimer)
+	{
+		m_connectionTimer = new QTimer(this);
+		m_connectionTimer->setInterval(1000); // 1 seconde
+		connect(m_connectionTimer, &QTimer::timeout, this, &RobotKuka::onConnectionTimeoutTick);
 	}
-	// send 0
+
+	m_connectionTimeRemaining = m_connectionTimeout;
+	m_connectionTimer->start();
+}
+
+void RobotKuka::onUdpFailedToOpen(const QHostAddress& hostAddress, quint16 port)
+{
 	m_udpClient->close();
-	deleteUdpClient();
+	setStatus(Status::Error);
+	emit errorOccurred(QString("Failed to bind to %1:%2").arg(hostAddress.toString()).arg(port));
+}
+
+void RobotKuka::onUdpClosed()
+{
+	delete m_udpClient;
+	m_udpClient = nullptr;
+}
+
+void RobotKuka::onInitialDatagramReceived(const QByteArray& data, const QHostAddress& sender, quint16 senderPort)
+{
+	if (m_initialDatagramReceived)
+		return;
+
+	m_initialDatagramReceived = true;
+	m_connectionTimer->stop();
+	m_connectionTimer->deleteLater();
+	m_connectionTimer = nullptr;
+
+	disconnect(m_udpClient, &UdpClient::datagramReceived, this, &RobotKuka::onInitialDatagramReceived);
+
+	m_isConnected = true;
+	setStatus(Status::Connected);
+	emit connected();
+}
+
+void RobotKuka::onConnectionTimeoutTick()
+{
+	emit connectionTimeRemainingChanged(--m_connectionTimeRemaining);
+	if (m_abortConnectionRequest || m_connectionTimeRemaining <= 0)
+	{
+		m_connectionTimer->stop();
+		m_connectionTimer->deleteLater();
+		m_connectionTimer = nullptr;
+
+		disconnect(m_udpClient, &UdpClient::datagramReceived, this, &RobotKuka::onInitialDatagramReceived);
+		setStatus(m_abortConnectionRequest ? Status::Ready : Status::Error);
+		if (!m_abortConnectionRequest)
+			emit errorOccurred("Connection timeout");
+		m_udpClient->close();
+	}
+}
+
+void RobotKuka::onDatagramReceived(const QByteArray& data, const QHostAddress& sender, quint16 senderPort)
+{
 }
 
 bool RobotKuka::isConnected() const
 {
 	return m_isConnected;
+}
+
+void RobotKuka::abortConnection()
+{
+	m_abortConnectionRequest = m_status == RobotKuka::Status::WaitingRobotConnection;
+}
+
+void RobotKuka::closeUdpClient()
+{
+	if (m_udpClient && m_udpClient->isOpened()) {
+		m_udpClient->close();
+	}
+}
+
+void RobotKuka::setStatus(Status status)
+{
+	if (m_status != status) {
+		m_status = status;
+		emit statusChanged(m_status);
+	}
+}
+
+void RobotKuka::setBehaviour(Behaviour behaviour)
+{
+	if (m_behaviour != behaviour)
+	{
+		m_behaviour = behaviour;
+		emit behaviourChanged(m_behaviour);
+	}
 }
 
 void RobotKuka::start()
@@ -73,11 +172,6 @@ void RobotKuka::stop()
 	// TODO : Implémenter l'arrêt
 }
 
-bool RobotKuka::isRunning() const
-{
-	return m_isRunning;
-}
-
 void RobotKuka::move(const QString& direction)
 {
 	// TODO : Implémenter le mouvement dans la direction spécifiée
@@ -86,34 +180,16 @@ void RobotKuka::move(const QString& direction)
 
 void RobotKuka::stopMovement()
 {
-	// TODO : Implémenter l'arrêt du mouvement
+	std::memcpy(m_currentDelta, m_ZEROS, sizeof(m_ZEROS));
+	m_behaviour = RobotKuka::Behaviour::StopMove;
 }
 
 void RobotKuka::getCurrentPose(double currentPose[6]) const
 {
-	for (int i = 0; i < 6; i++)
-		currentPose[i] = m_currentPose[i];
+	std::memcpy(currentPose, m_currentPose, sizeof(m_currentPose));
 }
 
 void RobotKuka::getCurrentDelta(double currentDelta[6]) const
 {
-	for (int i = 0; i < 6; i++)
-		currentDelta[i] = m_currentDelta[i];
-}
-
-void RobotKuka::deleteUdpClient()
-{
-	if (m_udpClient) {
-		m_udpClient->close();
-		delete m_udpClient;
-		m_udpClient = nullptr;
-	}
-}
-
-void RobotKuka::setStatus(Status status)
-{
-	if (m_status != status) {
-		m_status = status;
-		emit statusChanged(m_status);
-	}
+	std::memcpy(currentDelta, m_currentDelta, sizeof(m_currentDelta));
 }

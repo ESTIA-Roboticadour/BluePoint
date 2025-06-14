@@ -21,12 +21,13 @@ AppModel::AppModel(const RobotConfig* config, QObject* parent) :
 	{
 		m_robot = new RobotKuka(this);
 
-		connect(m_robot, &RobotKuka::errorOccurred, this, &AppModel::onErrorOccurred);
 		connect(m_robot, &RobotKuka::statusChanged, this, &AppModel::robotStateChanged);
+		connect(m_robot, &RobotKuka::behaviourChanged, this, &AppModel::robotBehaviourChanged);
 		connect(m_robot, &RobotKuka::connected, this, &AppModel::onRobotConnected);
 		connect(m_robot, &RobotKuka::disconnected, this, &AppModel::onRobotDisconnected);
 		connect(m_robot, &RobotKuka::started, this, &AppModel::robotStarted);
 		connect(m_robot, &RobotKuka::stopped, this, &AppModel::robotStopped);
+		connect(m_robot, &RobotKuka::errorOccurred, this, &AppModel::onErrorOccurred);
 
 		connect(m_robot, &RobotKuka::connectionTimeRemainingChanged, this, &AppModel::connectionTimeRemainingChanged);
 	}
@@ -121,11 +122,30 @@ bool AppModel::setupAddress(const RobotConfig* config)
 	return result;
 }
 
-void AppModel::onMovementPressed(RobotKuka::MovementDirection direction)
+void AppModel::onCartesianMovementPressed(RobotKuka::MovementDirection direction)
+{
+
+}
+
+void AppModel::onCartesianMovementReleased(RobotKuka::MovementDirection direction)
+{
+
+}
+
+void AppModel::onArticularMovementPressed(RobotKuka::Joint joint, bool positive)
+{
+
+}
+
+void AppModel::onArticularMovementReleased(RobotKuka::Joint joint)
 {
 }
 
-void AppModel::onMovementReleased(RobotKuka::MovementDirection direction)
+void AppModel::onInputToggled(RobotKuka::IOInput input, bool enabled)
+{
+}
+
+void AppModel::onOutputToggled(RobotKuka::IOOutput output, bool enabled)
 {
 }
 
@@ -156,6 +176,12 @@ void AppModel::connectToRobot()
 		m_connectionTimeoutParameter.lock();
 		m_robot->connectToRobot(m_hostAddress, m_port, (int)m_connectionTimeoutParameter.getValue());
 	}
+}
+
+void AppModel::cancelConnectToRobot()
+{
+	if (m_robot)
+		m_robot->abortConnection();
 }
 
 void AppModel::disconnectFromRobot()

@@ -6,7 +6,7 @@ RobotConfig::RobotConfig(QObject* parent) :
 	m_port("Port", 12345, this),
 	m_maxSpeed("Max. Speed (%)", 10, this),
 	m_maxAccel("Max. Accel (%)", 50, this),
-	m_toolParameter("Tool", EulerFrameParameter::XYZ, this)
+	m_toolParameter("Tool", EulerFrameParameter::ZYX, this)
 {
 	defineBounds();
 	addParameters();

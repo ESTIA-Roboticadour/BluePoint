@@ -23,6 +23,7 @@ public:
 
     // Méthodes utilitaires
     void connectToRobot();
+    void cancelConnectToRobot();
     void disconnectFromRobot();
     void startRobot();
     void stopRobot();
@@ -34,8 +35,12 @@ public:
     void getCurrentDelta(double currentDelta[6]) const;
 
 public slots:
-    void onMovementPressed(RobotKuka::MovementDirection direction);
-    void onMovementReleased(RobotKuka::MovementDirection direction);
+    void onCartesianMovementPressed(RobotKuka::MovementDirection direction);
+    void onCartesianMovementReleased(RobotKuka::MovementDirection direction);
+    void onArticularMovementPressed(RobotKuka::Joint joint, bool positive);
+    void onArticularMovementReleased(RobotKuka::Joint joint);
+    void onInputToggled(RobotKuka::IOInput input, bool enabled);
+    void onOutputToggled(RobotKuka::IOOutput output, bool enabled);
 
 private slots:
     void onErrorOccurred(const QString& message);
@@ -47,13 +52,14 @@ private:
     bool setupAddress(const RobotConfig* config);
 
 signals:
-	void connectionTimeRemainingChanged(int seconds);
     void robotStateChanged(RobotKuka::Status status);
+    void robotBehaviourChanged(RobotKuka::Behaviour behaviour);
     void robotConnected();
     void robotDisconnected();
     void robotStarted();
     void robotStopped();
     void errorOccurred(const QString& message);
+	void connectionTimeRemainingChanged(quint16 seconds);
 
 	void freshRateChanged(double freshRate);
 

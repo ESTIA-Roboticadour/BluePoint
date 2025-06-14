@@ -126,6 +126,7 @@
     <ClCompile Include="ModelBase.cpp" />
     <ClCompile Include="RobotConfig.cpp" />
     <ClCompile Include="RobotKuka.cpp" />
+    <ClCompile Include="UdpClient.cpp" />
     <ClCompile Include="ViewFactory.cpp" />
     <ClCompile Include="WidgetControllerBase.cpp" />
     <ClCompile Include="WindowBase.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="Helper.h" />
     <QtMoc Include="RobotConfig.h" />
     <QtMoc Include="RobotKuka.h" />
+    <QtMoc Include="UdpClient.h" />
     <ClInclude Include="ViewFactory.h" />
     <QtMoc Include="WindowControllerBase.h" />
   </ItemGroup>

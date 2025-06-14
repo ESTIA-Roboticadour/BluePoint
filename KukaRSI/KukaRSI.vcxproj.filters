@@ -87,6 +87,9 @@
     <Filter Include="Services\Robot">
       <UniqueIdentifier>{886c8a34-a4c1-43f5-9242-298ab0b49537}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Services\UDP">
+      <UniqueIdentifier>{a7af09cb-51b8-40b6-bb98-b87da42053b0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="MainWindow.qrc">
@@ -154,6 +157,9 @@
     <ClCompile Include="RobotKuka.cpp">
       <Filter>Services\Robot</Filter>
     </ClCompile>
+    <ClCompile Include="UdpClient.cpp">
+      <Filter>Services\UDP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ModelBase.h">
@@ -200,6 +206,9 @@
     </QtMoc>
     <QtMoc Include="AppController.h">
       <Filter>Features\AppView\Controllers</Filter>
+    </QtMoc>
+    <QtMoc Include="UdpClient.h">
+      <Filter>Services\UDP</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

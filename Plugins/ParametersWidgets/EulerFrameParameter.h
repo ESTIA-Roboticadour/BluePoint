@@ -10,6 +10,7 @@
 #include <QVector3D>
 #include <QList>
 #include <memory>
+#include <QMatrix3x3>
 
 class PARAMETERS_WIDGETS_API EulerFrameParameter : public ParameterBase
 {
@@ -65,6 +66,9 @@ public:
     QString conventionString() const;
     QVector3D getPosition() const;
     QVector3D getAngles() const;
+
+    QMatrix3x3 toMatrix() const;
+    void fromMatrix(const QMatrix3x3& matrix) const;
 
     static QList<EulerFrameParameter::Convention> getConventions();
 
