@@ -15,7 +15,8 @@ RobotKuka::RobotKuka(QObject* parent) :
 	m_abortConnectionRequest(false),
 	m_initialDatagramReceived(false),
 	m_currentPose(),
-	m_currentDelta()
+	m_currentDelta(),
+	m_currentMovement(MovementFlags::fromInt(MovementDirection::None))
 {
 	std::memcpy(m_currentPose, m_ZEROS, sizeof(m_ZEROS));
 	std::memcpy(m_currentDelta, m_ZEROS, sizeof(m_ZEROS));
@@ -167,23 +168,47 @@ void RobotKuka::setBehaviour(Behaviour behaviour)
 void RobotKuka::start()
 {
 	// TODO : Implémenter le démarrage
+	// démarrer une tâche de surveillance de com ?
+	setStatus(RobotKuka::Status::ReadyToMove);
 }
 
 void RobotKuka::stop()
 {
 	// TODO : Implémenter l'arrêt
+	// stoper la tâche de surveillance de com ?
+	setStatus(RobotKuka::Status::Connected);
 }
 
-void RobotKuka::move(const QString& direction)
+void RobotKuka::addMovement(MovementDirection direction)
 {
-	// TODO : Implémenter le mouvement dans la direction spécifiée
-	Q_UNUSED(direction);
+	m_currentMovement |= direction;
+	//qDebug() << "Movement:" << m_currentMovement.toInt() << " " + QString("%1").arg(m_currentMovement.toInt(), 8, 2, QChar('0'));
+}
+
+void RobotKuka::removeMovement(MovementDirection direction)
+{
+	m_currentMovement &= ~direction;
+	//qDebug() << "Movement:" << m_currentMovement.toInt() << " " + QString("%1").arg(m_currentMovement.toInt(), 8, 2, QChar('0'));
+}
+
+void RobotKuka::moveJoint(Joint joint, bool positive)
+{
 }
 
 void RobotKuka::stopMovement()
 {
-	std::memcpy(m_currentDelta, m_ZEROS, sizeof(m_ZEROS));
+	m_currentMovement = MovementDirection::None;
+	//qDebug() << "Movement:" << m_currentMovement.toInt() << " " + QString("%1").arg(m_currentMovement.toInt(), 8, 2, QChar('0'));
+	//std::memcpy(m_currentDelta, m_ZEROS, sizeof(m_ZEROS));
 	m_behaviour = RobotKuka::Behaviour::StopMove;
+}
+
+void RobotKuka::setInput(IOInput input, bool enabled)
+{
+}
+
+void RobotKuka::setOutput(IOOutput output, bool enabled)
+{
 }
 
 void RobotKuka::getCurrentPose(double currentPose[6]) const

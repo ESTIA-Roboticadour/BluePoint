@@ -44,6 +44,7 @@ public:
     Q_ENUM(Joint)
 
     enum MovementDirection {
+        None = 0x00,        // 0000 0000  |   0
         Up = 0x01,          // 0000 0001  |   1
         Down = 0x02,        // 0000 0010  |   2
         Left = 0x04,        // 0000 0100  |   4
@@ -52,6 +53,8 @@ public:
         Backward = 0x20     // 0010 0000  |  32
     };
     Q_ENUM(MovementDirection)
+    Q_DECLARE_FLAGS(MovementFlags, MovementDirection)
+    Q_FLAG(MovementFlags)
 
     enum IOInput
     {
@@ -95,7 +98,6 @@ public:
     };
     Q_ENUM(IOOutput)
 
-
     inline static QString toString(Status status) {
         switch (status) {
         case Status::None: return "None";
@@ -121,6 +123,7 @@ public:
 
     inline static QString toString(MovementDirection direction) {
         switch (direction) {
+        case MovementDirection::None: return "None";
         case MovementDirection::Up: return "UP";
         case MovementDirection::Down: return "DOWN";
         case MovementDirection::Left: return "LEFT";
@@ -154,8 +157,14 @@ public:
     void stop();
 
     // Déplacement manuel
-    void move(const QString& direction);
+    void addMovement(MovementDirection direction);
+    void removeMovement(MovementDirection direction);
+    void moveJoint(Joint joint, bool positive);
     void stopMovement();
+
+    // IO
+    void setInput(IOInput input, bool enabled);
+    void setOutput(IOOutput output, bool enabled);
 
     // Pose & Delta
     void getCurrentPose(double currentPose[6]) const;
@@ -202,4 +211,7 @@ private:
     inline static const double m_ZEROS[6] = { 0., 0., 0., 0., 0., 0. };
     double m_currentPose[6]; // Positions X, Y, Z, A, B, C
 	double m_currentDelta[6]; // Positions dX, dY, dZ, dA, dB, dC
+    MovementFlags m_currentMovement;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(RobotKuka::MovementFlags)
