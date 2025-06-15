@@ -124,12 +124,12 @@ bool AppModel::setupAddress(const RobotConfig* config)
 
 void AppModel::onCartesianMovementPressed(RobotKuka::MovementDirection direction)
 {
-
+	qDebug() << "Received onCartesianMovementPressed:" << RobotKuka::toString(direction);
 }
 
 void AppModel::onCartesianMovementReleased(RobotKuka::MovementDirection direction)
 {
-
+	qDebug() << "Received onCartesianMovementReleased:" << RobotKuka::toString(direction);
 }
 
 void AppModel::onArticularMovementPressed(RobotKuka::Joint joint, bool positive)
@@ -196,18 +196,21 @@ void AppModel::disconnectFromRobot()
 		m_robot->disconnectFromRobot();
 		m_connectionTimeoutParameter.unlock();
 	}
+	onRobotDisconnected(); // TODO : to delete
 }
 
 void AppModel::startRobot()
 {
 	if (m_robot)
 		m_robot->start();
+	emit robotStateChanged(RobotKuka::Status::ReadyToMove); // TODO : to delete
 }
 
 void AppModel::stopRobot()
 {
 	if (m_robot)
 		m_robot->stop();
+	emit robotStateChanged(RobotKuka::Status::Connected); // TODO : to delete
 }
 
 void AppModel::stopMove()

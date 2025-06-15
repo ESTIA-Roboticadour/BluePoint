@@ -96,7 +96,7 @@ public:
     Q_ENUM(IOOutput)
 
 
-    inline static QString toQString(Status status) {
+    inline static QString toString(Status status) {
         switch (status) {
         case Status::None: return "None";
         case Status::Ready: return "Ready";
@@ -108,7 +108,7 @@ public:
         }
     }
 
-    inline static QString toQString(Behaviour behaviour) {
+    inline static QString toString(Behaviour behaviour) {
         switch (behaviour) {
         case Behaviour::None: return "None";
         case Behaviour::DoNothing: return "Do Nothing";
@@ -119,7 +119,7 @@ public:
         }
     }
 
-    inline static QString toQString(MovementDirection direction) {
+    inline static QString toString(MovementDirection direction) {
         switch (direction) {
         case MovementDirection::Up: return "UP";
         case MovementDirection::Down: return "DOWN";

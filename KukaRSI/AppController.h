@@ -27,6 +27,7 @@ private slots:
 
 private:
 	void setupConnections();
+	void removeConnections();
 
 private:
 	AppModel* m_model{ nullptr };

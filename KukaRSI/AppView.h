@@ -1,4 +1,4 @@
-#pragma once
+    #pragma once
 #include "TransparentScrollArea.h"
 #include "ParametersView.h"
 #include "Config.h"
@@ -13,6 +13,8 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QTimer>
+#include <QKeyEvent>
+#include <QSet>
 
 class AppView : public TransparentScrollArea
 {
@@ -37,16 +39,25 @@ public slots:
     void onConnectionTimeRemainingChanged(quint16 seconds);
     void onFreshRateChanged(double freshRateHz);
 
+protected:
+    void keyPressEvent(QKeyEvent* event) override;
+    void keyReleaseEvent(QKeyEvent* event) override;
+
 private slots:
     void onConnectButtonClicked();
     void onCancelButtonClicked();
 	void onDisconnectButtonClicked();
 	void onStartButtonClicked();
 	void onStopButtonClicked();
+    void onMoveTabChanged(int index);
+
+    void onCartesianMovementButtonPressed(RobotKuka::MovementDirection direction);
+    void onCartesianMovementButtonReleased(RobotKuka::MovementDirection direction);
 
     void refreshUI();
 
 private:
+    void feedMonitoredKeys();
     void setupUI();
     void createMovementButtons(QGridLayout* layout);
     void createJointControlButtons(QGridLayout* layout);
@@ -56,7 +67,15 @@ private:
     void switchCancelBtnToConnectBtn();
     void setConnectionLabelText(const QString& text);
     void clearConnectionLabelText();
+    void setMoveAndIOButtonsEnabled(bool enabled) const;
+    void setMoveAndIOButtonsChecked(bool checked) const;
     void setTimerIntervale(double freshRateHz);
+
+    bool isKeyPressed(Qt::Key key) const {
+        return m_pressedKeys.contains(key);
+    }
+    void handleKeyPressed(Qt::Key key);
+    void handleKeyReleased(Qt::Key key);
 
 signals:
     void connectButtonClicked();
@@ -93,4 +112,10 @@ private:
 
     QTimer m_uiTimer;
     double m_freshRateHz;
+    bool m_isReadyToMove;
+    bool m_isMoveCartesianSelected;
+
+    bool m_isAzerty;
+    QSet<Qt::Key> m_pressedKeys;
+    QSet<Qt::Key> m_monitoredKeys;
 };

@@ -4,6 +4,8 @@
 #include <QFileInfo>
 #include <QStandardPaths>
 #include <QDir>
+#include <QLatin1String>
+#include <windows.h>
 
 QString Helper::getSaveConfigFile(
     QWidget* parent,
@@ -81,4 +83,22 @@ QString Helper::makePathAbsolute(const QString& path)
     // Construit un nouveau QFileInfo relatif au répertoire courant
     fi.setFile(QDir::current(), path);
     return QDir::cleanPath(fi.absoluteFilePath());
+}
+
+QString Helper::detectKeyboardLayout()
+{
+    WCHAR localeName[LOCALE_NAME_MAX_LENGTH] = { 0 };
+
+    if (GetUserDefaultLocaleName(localeName, LOCALE_NAME_MAX_LENGTH)) {
+        QString qLocale = QString::fromWCharArray(localeName);
+
+        if (qLocale.startsWith("fr", Qt::CaseInsensitive)) {
+            return "azerty";
+        }
+        else {
+            return "qwerty";
+        }
+    }
+
+    return "qwerty"; // fallback
 }

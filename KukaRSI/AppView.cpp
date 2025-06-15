@@ -7,6 +7,7 @@
 #include <QSizePolicy>
 #include <QStringList>
 #include <QList>
+#include <QLocale>
 
 AppView::AppView(QWidget* parent) :
 	TransparentScrollArea(parent),
@@ -16,11 +17,26 @@ AppView::AppView(QWidget* parent) :
 	m_uiTimer(),
 	m_freshRateHz(20),
 	m_jointButtons(),
-	m_ioButtons()
+	m_ioButtons(),
+	m_isReadyToMove(false),
+	m_isMoveCartesianSelected(true),
+	m_pressedKeys(),
+	m_monitoredKeys(),
+	m_isAzerty(true)
 {
+	feedMonitoredKeys();
+
 	setupUI();
 	m_uiTimer.setInterval(static_cast<int>(1000.0 / m_freshRateHz));
 	connect(&m_uiTimer, &QTimer::timeout, this, &AppView::refreshUI);
+}
+
+void AppView::feedMonitoredKeys()
+{
+	m_isAzerty = Helper::detectKeyboardLayout() == "azerty";
+	m_monitoredKeys = m_isAzerty ?
+		QSet<Qt::Key> { Qt::Key_Z, Qt::Key_Q, Qt::Key_S, Qt::Key_D, Qt::Key_F, Qt::Key_B } :
+		QSet<Qt::Key>{ Qt::Key_W, Qt::Key_A, Qt::Key_S, Qt::Key_D, Qt::Key_F, Qt::Key_B };
 }
 
 void AppView::setupUI()
@@ -150,6 +166,8 @@ void AppView::setupUI()
 	modeTabs->addTab(articularWidget, "Articular");
 	moveLayout->addWidget(modeTabs);
 
+	connect(modeTabs, &QTabWidget::currentChanged, this, &AppView::onMoveTabChanged);
+
 	// Layout cartésien : boutons de déplacement
 	auto* cartesianLayout = new QGridLayout(cartesianWidget);
 	cartesianLayout->setSpacing(0);
@@ -225,12 +243,13 @@ void AppView::createMovementButtons(QGridLayout* layout)
 
 		QPushButton* button = new QPushButton(content[i++], this);
 		button->setFixedSize(30, 30);
+		button->setCheckable(true);
 		button->setEnabled(false);
 		m_movementButtons[direction] = button;
 		layout->addWidget(button, pos.x(), pos.y());
 
-		connect(button, &QPushButton::pressed, this, [this, direction]() { emit cartesianMovementPressed(direction); });
-		connect(button, &QPushButton::released, this, [this, direction]() { emit cartesianMovementReleased(direction); });
+		connect(button, &QPushButton::pressed, this, [this, direction]() { emit onCartesianMovementButtonPressed(direction); });
+		connect(button, &QPushButton::released, this, [this, direction]() { emit onCartesianMovementButtonReleased(direction); });
 	}
 
 	// Ligne verticale entre le bloc central et F/B
@@ -251,15 +270,14 @@ void AppView::createMovementButtons(QGridLayout* layout)
 	{
 		QPushButton* button = new QPushButton(fbLabels[j], this);
 		button->setFixedSize(30, 30);
+		button->setCheckable(true);
 		button->setEnabled(false);
-
 		RobotKuka::MovementDirection direction = fbDirections[j];
-
 		m_movementButtons[direction] = button;
 		layout->addWidget(button, j * 2, 4); // col 4 après la ligne verticale
 
-		connect(button, &QPushButton::pressed, this, [this, direction]() { emit cartesianMovementPressed(direction); });
-		connect(button, &QPushButton::released, this, [this, direction]() { emit cartesianMovementReleased(direction); });
+		connect(button, &QPushButton::pressed, this, [this, direction]() { emit onCartesianMovementButtonPressed(direction); });
+		connect(button, &QPushButton::released, this, [this, direction]() { emit onCartesianMovementButtonReleased(direction); });
 	}
 }
 
@@ -438,6 +456,30 @@ void AppView::clearConnectionLabelText()
 	}
 }
 
+void AppView::setMoveAndIOButtonsEnabled(bool enabled) const
+{
+	for (auto& moveButton : m_movementButtons)
+		moveButton->setEnabled(enabled);
+
+	for (auto& jointButton : m_jointButtons)
+		jointButton->setEnabled(enabled);
+
+	for (auto& ioButton : m_ioButtons)
+		ioButton->setEnabled(enabled);
+}
+
+void AppView::setMoveAndIOButtonsChecked(bool checked) const
+{
+	for (auto& moveButton : m_movementButtons)
+		moveButton->setChecked(checked);
+
+	for (auto& jointButton : m_jointButtons)
+		jointButton->setChecked(checked);
+
+	for (auto& ioButton : m_ioButtons)
+		ioButton->setChecked(checked);
+}
+
 void AppView::setTimerIntervale(double freshRateHz)
 {
 	if (freshRateHz < 1.)
@@ -523,14 +565,104 @@ void AppView::onStopButtonClicked()
 	emit stopButtonClicked();
 }
 
+void AppView::onMoveTabChanged(int index)
+{
+	m_isMoveCartesianSelected = index == 0;
+	for (auto& pressedKey : m_pressedKeys)
+		handleKeyReleased(pressedKey);
+	m_pressedKeys.clear();
+}
+
+void AppView::onCartesianMovementButtonPressed(RobotKuka::MovementDirection direction)
+{
+	bool keyAlreadyPressed = false;
+
+	switch (direction)
+	{
+	case RobotKuka::Up:
+		keyAlreadyPressed = isKeyPressed(m_isAzerty ? Qt::Key_Z : Qt::Key_W);
+		break;
+	case RobotKuka::Down:
+		keyAlreadyPressed = isKeyPressed(Qt::Key_S);
+		break;
+	case RobotKuka::Left:
+		keyAlreadyPressed = isKeyPressed(m_isAzerty ? Qt::Key_Q : Qt::Key_A);
+		break;
+	case RobotKuka::Right:
+		keyAlreadyPressed = isKeyPressed(Qt::Key_D);
+		break;
+	case RobotKuka::Forward:
+		keyAlreadyPressed = isKeyPressed(Qt::Key_F);
+		break;
+	case RobotKuka::Backward:
+		keyAlreadyPressed = isKeyPressed(Qt::Key_B);
+		break;
+	default:
+		qWarning() << RobotKuka::toString(direction) + " not implemented";
+		break;
+	}
+
+	if (!keyAlreadyPressed)
+	{
+		m_movementButtons[direction]->setChecked(true);
+		emit cartesianMovementPressed(direction);
+	}
+}
+
+void AppView::onCartesianMovementButtonReleased(RobotKuka::MovementDirection direction)
+{
+	bool keyStillPressed = false;
+
+	switch (direction)
+	{
+	case RobotKuka::Up:
+		keyStillPressed = isKeyPressed(m_isAzerty ? Qt::Key_Z : Qt::Key_W);
+		break;
+	case RobotKuka::Down:
+		keyStillPressed = isKeyPressed(Qt::Key_S);;
+		break;
+	case RobotKuka::Left:
+		keyStillPressed = isKeyPressed(m_isAzerty ? Qt::Key_Q : Qt::Key_A);
+		break;
+	case RobotKuka::Right:
+		keyStillPressed = isKeyPressed(Qt::Key_D);;
+		break;
+	case RobotKuka::Forward:
+		keyStillPressed = isKeyPressed(Qt::Key_F);
+		break;
+	case RobotKuka::Backward:
+		keyStillPressed = isKeyPressed(Qt::Key_B);
+		break;
+	default:
+		qWarning() << RobotKuka::toString(direction) + " not implemented";
+		break;
+	}
+
+	if (!keyStillPressed)
+	{
+		m_movementButtons[direction]->setChecked(false);
+		emit cartesianMovementReleased(direction);
+	}
+	else
+	{
+		m_movementButtons[direction]->setChecked(true);
+	}
+}
+
 void AppView::onRobotStateChanged(RobotKuka::Status status)
 {
+	// remise a zero
 	m_connectButton->setEnabled(false);
 	m_disconnectButton->setEnabled(false);
 	m_startButton->setEnabled(false);
 	m_stopButton->setEnabled(false);
-	m_statusLabel->setText(RobotKuka::toQString(status));
+	setMoveAndIOButtonsEnabled(false);
+	setMoveAndIOButtonsChecked(false);
+	m_statusLabel->setText(RobotKuka::toString(status));
 	clearConnectionLabelText();
+	m_pressedKeys.clear();
+	m_isReadyToMove = false;
+	// -----------------------------------
 
 	switch (status)
 	{
@@ -549,8 +681,10 @@ void AppView::onRobotStateChanged(RobotKuka::Status status)
 		m_startButton->setEnabled(true);
 		break;
 	case RobotKuka::Status::ReadyToMove:
+		m_isReadyToMove = true;
 		m_disconnectButton->setEnabled(true);
 		m_stopButton->setEnabled(true);
+		setMoveAndIOButtonsEnabled(true);
 		break;
 	case RobotKuka::Status::Error:
 		switchCancelBtnToConnectBtn();
@@ -563,7 +697,7 @@ void AppView::onRobotStateChanged(RobotKuka::Status status)
 
 void AppView::onRobotBehaviourChanged(RobotKuka::Behaviour behaviour)
 {
-	m_behaviourLabel->setText(RobotKuka::toQString(behaviour));
+	m_behaviourLabel->setText(RobotKuka::toString(behaviour));
 }
 
 void AppView::onRobotConnected()
@@ -604,4 +738,102 @@ void AppView::onConnectionTimeRemainingChanged(quint16 seconds)
 void AppView::onFreshRateChanged(double freshRateHz)
 {
 	setTimerIntervale(freshRateHz);
+}
+
+void AppView::keyPressEvent(QKeyEvent* event)
+{
+	if (m_isReadyToMove && m_isMoveCartesianSelected)
+	{
+		Qt::Key key = static_cast<Qt::Key>(event->key());
+
+		if (!event->isAutoRepeat() && m_monitoredKeys.contains(key)) {
+			m_pressedKeys.insert(key);
+			handleKeyPressed(key);
+		}
+	}
+}
+
+void AppView::keyReleaseEvent(QKeyEvent* event)
+{
+	if (m_isReadyToMove && m_isMoveCartesianSelected)
+	{
+		Qt::Key key = static_cast<Qt::Key>(event->key());
+
+		if (!event->isAutoRepeat() && m_monitoredKeys.contains(key)) {
+			m_pressedKeys.remove(key);
+			handleKeyReleased(key);
+		}
+	}
+}
+
+void AppView::handleKeyPressed(Qt::Key key)
+{
+	RobotKuka::MovementDirection movementDirection;
+	switch (key)
+	{
+	case Qt::Key_Z: // azerty case
+	case Qt::Key_W: // qwerty case
+		movementDirection = RobotKuka::MovementDirection::Up;
+		break;
+	case Qt::Key_Q: // azerty case
+	case Qt::Key_A: // qwerty case
+		movementDirection = RobotKuka::MovementDirection::Left;
+		break;
+	case Qt::Key_S:
+		movementDirection = RobotKuka::MovementDirection::Down;
+		break;
+	case Qt::Key_D:
+		movementDirection = RobotKuka::MovementDirection::Right;
+		break;
+	case Qt::Key_F:
+		movementDirection = RobotKuka::MovementDirection::Forward;
+		break;
+	case Qt::Key_B:
+		movementDirection = RobotKuka::MovementDirection::Backward;
+		break;
+	default:
+		return; // block next if case if not supported
+	}
+
+	if (!m_movementButtons[movementDirection]->isDown()) // button is not pressed
+	{
+		m_movementButtons[movementDirection]->setChecked(true); // set ui as button was pressed
+		emit cartesianMovementPressed(movementDirection);
+	}
+}
+
+void AppView::handleKeyReleased(Qt::Key key)
+{
+	RobotKuka::MovementDirection movementDirection;
+	switch (key)
+	{
+	case Qt::Key_Z: // azerty case
+	case Qt::Key_W: // qwerty case
+		movementDirection = RobotKuka::MovementDirection::Up;
+		break;
+	case Qt::Key_Q: // azerty case
+	case Qt::Key_A: // qwerty case
+		movementDirection = RobotKuka::MovementDirection::Left;
+		break;
+	case Qt::Key_S:
+		movementDirection = RobotKuka::MovementDirection::Down;
+		break;
+	case Qt::Key_D:
+		movementDirection = RobotKuka::MovementDirection::Right;
+		break;
+	case Qt::Key_F:
+		movementDirection = RobotKuka::MovementDirection::Forward;
+		break;
+	case Qt::Key_B:
+		movementDirection = RobotKuka::MovementDirection::Backward;
+		break;
+	default:
+		return; // block next if case if not supported
+	}
+
+	if (!m_movementButtons[movementDirection]->isDown()) // button is not pressed
+	{
+		m_movementButtons[movementDirection]->setChecked(false); // set ui as button was released
+		emit cartesianMovementReleased(movementDirection);
+	}
 }
