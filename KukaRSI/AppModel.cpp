@@ -21,8 +21,8 @@ AppModel::AppModel(const RobotConfig* config, QObject* parent) :
 	{
 		m_robot = new RobotKuka(this);
 
-		connect(m_robot, &RobotKuka::statusChanged, this, &AppModel::robotStateChanged);
-		connect(m_robot, &RobotKuka::behaviourChanged, this, &AppModel::robotBehaviourChanged);
+		connect(m_robot, &RobotKuka::statusChanged, this, &AppModel::robotStatusChanged);
+		connect(m_robot, &RobotKuka::robotStateChanged, this, &AppModel::robotStateChanged);
 		connect(m_robot, &RobotKuka::connected, this, &AppModel::onRobotConnected);
 		connect(m_robot, &RobotKuka::disconnected, this, &AppModel::onRobotDisconnected);
 		connect(m_robot, &RobotKuka::started, this, &AppModel::robotStarted);
@@ -224,7 +224,12 @@ void AppModel::stopMove()
 
 RobotKuka::Status AppModel::getRobotStatus() const
 {
-	return m_robot ? m_robot->getStatus() : RobotKuka::Status();
+	return m_robot ? m_robot->getStatus() : RobotKuka::Status::None;
+}
+
+RobotKuka::RobotState AppModel::getRobotState() const
+{
+	return m_robot ? m_robot->getRobotState() : RobotKuka::RobotState::None;
 }
 
 void AppModel::onErrorOccurred(const QString& message)

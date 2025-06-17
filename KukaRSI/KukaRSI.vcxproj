@@ -117,6 +117,7 @@
     <ClCompile Include="AppModel.cpp" />
     <ClCompile Include="AppStore.cpp" />
     <ClCompile Include="AppView.cpp" />
+    <ClCompile Include="CartesianMoveTrame.cpp" />
     <ClCompile Include="ConfigurationController.cpp" />
     <ClCompile Include="ConfigurationModel.cpp" />
     <ClCompile Include="ConfigurationView.cpp" />
@@ -126,6 +127,9 @@
     <ClCompile Include="ModelBase.cpp" />
     <ClCompile Include="RobotConfig.cpp" />
     <ClCompile Include="RobotKuka.cpp" />
+    <ClCompile Include="SetAccelTrame.cpp" />
+    <ClCompile Include="SetVelocityTrame.cpp" />
+    <ClCompile Include="TrameStack.cpp" />
     <ClCompile Include="UdpClient.cpp" />
     <ClCompile Include="ViewFactory.cpp" />
     <ClCompile Include="WidgetControllerBase.cpp" />
@@ -157,10 +161,15 @@
     <QtMoc Include="ConfigurationView.h" />
     <QtMoc Include="AppView.h" />
     <ClInclude Include="CallbackTypes.h" />
+    <ClInclude Include="CartesianMoveTrame.h" />
     <ClInclude Include="Helper.h" />
     <QtMoc Include="RobotConfig.h" />
     <QtMoc Include="RobotKuka.h" />
     <QtMoc Include="UdpClient.h" />
+    <ClInclude Include="SetAccelTrame.h" />
+    <ClInclude Include="SetVelocityTrame.h" />
+    <ClInclude Include="Trame.h" />
+    <ClInclude Include="TrameStack.h" />
     <ClInclude Include="ViewFactory.h" />
     <QtMoc Include="WindowControllerBase.h" />
   </ItemGroup>

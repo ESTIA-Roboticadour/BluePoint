@@ -90,6 +90,9 @@
     <Filter Include="Services\UDP">
       <UniqueIdentifier>{a7af09cb-51b8-40b6-bb98-b87da42053b0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Services\Trame">
+      <UniqueIdentifier>{3fea317d-c97f-4674-aa8f-800473fb0115}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="MainWindow.qrc">
@@ -160,6 +163,18 @@
     <ClCompile Include="UdpClient.cpp">
       <Filter>Services\UDP</Filter>
     </ClCompile>
+    <ClCompile Include="CartesianMoveTrame.cpp">
+      <Filter>Services\Trame</Filter>
+    </ClCompile>
+    <ClCompile Include="SetAccelTrame.cpp">
+      <Filter>Services\Trame</Filter>
+    </ClCompile>
+    <ClCompile Include="SetVelocityTrame.cpp">
+      <Filter>Services\Trame</Filter>
+    </ClCompile>
+    <ClCompile Include="TrameStack.cpp">
+      <Filter>Services\Trame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ModelBase.h">
@@ -223,6 +238,21 @@
     </ClInclude>
     <ClInclude Include="CallbackTypes.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CartesianMoveTrame.h">
+      <Filter>Services\Trame</Filter>
+    </ClInclude>
+    <ClInclude Include="SetAccelTrame.h">
+      <Filter>Services\Trame</Filter>
+    </ClInclude>
+    <ClInclude Include="SetVelocityTrame.h">
+      <Filter>Services\Trame</Filter>
+    </ClInclude>
+    <ClInclude Include="Trame.h">
+      <Filter>Services\Trame</Filter>
+    </ClInclude>
+    <ClInclude Include="TrameStack.h">
+      <Filter>Services\Trame</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

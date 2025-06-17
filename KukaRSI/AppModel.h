@@ -29,6 +29,7 @@ public:
     void stopRobot();
     void stopMove();
     RobotKuka::Status getRobotStatus() const;
+    RobotKuka::RobotState getRobotState() const;
 
     void release() override;
 
@@ -54,8 +55,8 @@ private:
     bool setupAddress(const RobotConfig* config);
 
 signals:
-    void robotStateChanged(RobotKuka::Status status);
-    void robotBehaviourChanged(RobotKuka::Behaviour behaviour);
+    void robotStatusChanged(RobotKuka::Status status);
+    void robotStateChanged(RobotKuka::RobotState state);
     void robotConnected();
     void robotDisconnected();
     void robotStarted();

@@ -71,13 +71,13 @@ void AppView::setupUI()
 	auto* statusLayout = new QHBoxLayout();
 	auto* behaviourLayout = new QHBoxLayout();
 	m_statusLabel = new QLabel("", statusGroup);
-	m_behaviourLabel = new QLabel("", statusGroup);
+	m_robotStateLabel = new QLabel("", statusGroup);
 
 	statusLayout->addWidget(new QLabel("Status:", statusGroup));
 	statusLayout->addWidget(m_statusLabel);
 	statusLayout->addStretch();
 	behaviourLayout->addWidget(new QLabel("Robot behaviour:", statusGroup));
-	behaviourLayout->addWidget(m_behaviourLabel);
+	behaviourLayout->addWidget(m_robotStateLabel);
 	behaviourLayout->addStretch();
 
 	groupLayout->addLayout(statusLayout);
@@ -649,7 +649,7 @@ void AppView::onCartesianMovementButtonReleased(RobotKuka::MovementDirection dir
 	}
 }
 
-void AppView::onRobotStateChanged(RobotKuka::Status status)
+void AppView::onRobotStatusChanged(RobotKuka::Status status)
 {
 	// remise a zero
 	m_connectButton->setEnabled(false);
@@ -695,9 +695,9 @@ void AppView::onRobotStateChanged(RobotKuka::Status status)
 	}
 }
 
-void AppView::onRobotBehaviourChanged(RobotKuka::Behaviour behaviour)
+void AppView::onRobotStateChanged(RobotKuka::RobotState state)
 {
-	m_behaviourLabel->setText(RobotKuka::toString(behaviour));
+	m_robotStateLabel->setText(RobotKuka::toString(state));
 }
 
 void AppView::onRobotConnected()

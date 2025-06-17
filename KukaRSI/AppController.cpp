@@ -9,9 +9,10 @@ AppController::AppController(AppModel* model, AppView* view, QObject* parent):
 	setupConnections();
 	m_view->setConfig(m_model->getConfig());
 
-	m_view->onRobotStateChanged(m_model->getRobotStatus());
+	m_view->onRobotStatusChanged(m_model->getRobotStatus());
+	m_view->onRobotStateChanged(m_model->getRobotState());
 
-	QTimer::singleShot(3000, [=]() { m_view->onRobotStateChanged(RobotKuka::Status::Connected); });  // TODO : to delete
+	QTimer::singleShot(3000, [=]() { m_view->onRobotStatusChanged(RobotKuka::Status::Connected); });  // TODO : to delete
 }
 
 AppController::~AppController()
@@ -66,8 +67,8 @@ void AppController::setupConnections()
 	connect(m_view, &AppView::requestNewDelta, this, &AppController::onViewRequestNewDelta);
 
 	// Connexions AppModel -> AppView ou autres
+	connect(m_model, &AppModel::robotStatusChanged, m_view, &AppView::onRobotStatusChanged);
 	connect(m_model, &AppModel::robotStateChanged, m_view, &AppView::onRobotStateChanged);
-	connect(m_model, &AppModel::robotBehaviourChanged, m_view, &AppView::onRobotBehaviourChanged);
 	connect(m_model, &AppModel::robotConnected, m_view, &AppView::onRobotConnected);
 	connect(m_model, &AppModel::robotDisconnected, m_view, &AppView::onRobotDisconnected);
 	connect(m_model, &AppModel::robotStarted, m_view, &AppView::onRobotStarted);
@@ -97,8 +98,8 @@ void AppController::removeConnections()
 	disconnect(m_view, &AppView::requestNewDelta, this, &AppController::onViewRequestNewDelta);
 
 	// Connexions AppModel -> AppView ou autres
+	disconnect(m_model, &AppModel::robotStatusChanged, m_view, &AppView::onRobotStatusChanged);
 	disconnect(m_model, &AppModel::robotStateChanged, m_view, &AppView::onRobotStateChanged);
-	disconnect(m_model, &AppModel::robotBehaviourChanged, m_view, &AppView::onRobotBehaviourChanged);
 	disconnect(m_model, &AppModel::robotConnected, m_view, &AppView::onRobotConnected);
 	disconnect(m_model, &AppModel::robotDisconnected, m_view, &AppView::onRobotDisconnected);
 	disconnect(m_model, &AppModel::robotStarted, m_view, &AppView::onRobotStarted);

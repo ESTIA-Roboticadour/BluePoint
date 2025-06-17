@@ -1,6 +1,8 @@
 #pragma once
 #include "RobotConfig.h"
 #include "UdpClient.h"
+#include "TrameStack.h"
+
 #include <QObject>
 #include <QHostAddress>
 #include <QTimer>
@@ -22,7 +24,7 @@ public:
     };
     Q_ENUM(Status)
 
-    enum class Behaviour
+    enum class RobotState
     {
         None,
         DoNothing,
@@ -30,7 +32,7 @@ public:
         MoveJoint,
         StopMove
     };
-    Q_ENUM(Behaviour)
+    Q_ENUM(RobotState)
 
     enum Joint
     {
@@ -110,13 +112,13 @@ public:
         }
     }
 
-    inline static QString toString(Behaviour behaviour) {
+    inline static QString toString(RobotState behaviour) {
         switch (behaviour) {
-        case Behaviour::None: return "None";
-        case Behaviour::DoNothing: return "Do Nothing";
-        case Behaviour::MoveCartesian: return "Move Cartesian";
-        case Behaviour::MoveJoint: return "Move Joint";
-        case Behaviour::StopMove: return "Stop Move";
+        case RobotState::None: return "None";
+        case RobotState::DoNothing: return "Do Nothing";
+        case RobotState::MoveCartesian: return "Move Cartesian";
+        case RobotState::MoveJoint: return "Move Joint";
+        case RobotState::StopMove: return "Stop Move";
         default: return "";
         }
     }
@@ -141,7 +143,7 @@ public:
     ~RobotKuka();
 
 	Status getStatus() const { return m_status; };
-    Behaviour getBehaviour() const { return m_behaviour; }
+    RobotState getRobotState() const { return m_robotState; }
 
     // Connexion / déconnexion
     
@@ -178,15 +180,21 @@ private slots:
     void onInitialDatagramReceived(const QByteArray& data, const QHostAddress& sender, quint16 senderPort);
     void onConnectionTimeoutTick();
     void onDatagramReceived(const QByteArray& data, const QHostAddress& sender, quint16 senderPort);
+    void onWatchdogTimeout();
 
 private:
 	void closeUdpClient();
     void setStatus(Status status);
-    void setBehaviour(Behaviour behaviour);
+    void setRequestState(RobotState newState) { m_robotRequestState = newState; }
+    void setRobotState(RobotState state);
+    void parseReceivedData(const QString& data);
+    void requestAutomate();
+    void stateAutomate();
+    void sendTrame();
 
 signals:
     void statusChanged(Status status);
-    void behaviourChanged(Behaviour status);
+    void robotStateChanged(RobotState status);
     void connected();
     void disconnected();
     void started();
@@ -196,8 +204,9 @@ signals:
     void connectionTimeRemainingChanged(quint16 seconds);
 
 private:
-	Status m_status;
-    Behaviour m_behaviour;
+    Status m_status;
+    RobotState m_robotRequestState;
+    RobotState m_robotState;
     bool m_isConnected;
     bool m_disconnectRequest;
 
@@ -208,10 +217,17 @@ private:
     bool m_abortConnectionRequest;
     bool m_initialDatagramReceived;
 
+    const QHostAddress m_robotAddress;
+    quint16 m_robotPort;
+    QTimer* m_watchdogTimer;
+    const int WATCHDOG_TIMEOUT_MS = 20; // 20 ms
+
     inline static const double m_ZEROS[6] = { 0., 0., 0., 0., 0., 0. };
     double m_currentPose[6]; // Positions X, Y, Z, A, B, C
 	double m_currentDelta[6]; // Positions dX, dY, dZ, dA, dB, dC
     MovementFlags m_currentMovement;
+
+    TrameStack m_trameStack;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(RobotKuka::MovementFlags)

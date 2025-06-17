@@ -1,11 +1,13 @@
 #include "RobotKuka.h"
+#include <memory>
 
 #include <cstring> // pour memcpy
 
 RobotKuka::RobotKuka(QObject* parent) :
 	QObject(parent),
-	m_status(Status::Ready),
-	m_behaviour(Behaviour::None),
+	m_status(Status::None),
+	m_robotRequestState(RobotState::None),
+	m_robotState(RobotState::None),
 	m_isConnected(false),
 	m_disconnectRequest(false),
 	m_udpClient(nullptr),
@@ -14,9 +16,13 @@ RobotKuka::RobotKuka(QObject* parent) :
 	m_connectionTimer(nullptr),
 	m_abortConnectionRequest(false),
 	m_initialDatagramReceived(false),
+	m_robotAddress(),
+	m_robotPort(0),
+	m_watchdogTimer(nullptr),
 	m_currentPose(),
 	m_currentDelta(),
-	m_currentMovement(MovementFlags::fromInt(MovementDirection::None))
+	m_currentMovement(MovementFlags::fromInt(MovementDirection::None)),
+	m_trameStack()
 {
 	std::memcpy(m_currentPose, m_ZEROS, sizeof(m_ZEROS));
 	std::memcpy(m_currentDelta, m_ZEROS, sizeof(m_ZEROS));
@@ -38,7 +44,7 @@ void RobotKuka::connectToRobot(const QHostAddress& hostAddress, quint16 port, qu
 		m_disconnectRequest = false;
 		m_abortConnectionRequest = false;
 		m_initialDatagramReceived = false;
-		setBehaviour(Behaviour::None);
+		setRobotState(RobotState::None);
 		m_udpClient = new UdpClient(hostAddress, port, this);
 		connect(m_udpClient, &UdpClient::opened, this, &RobotKuka::onUdpOpened);
 		connect(m_udpClient, &UdpClient::failedToOpen, this, &RobotKuka::onUdpFailedToOpen);
@@ -103,10 +109,22 @@ void RobotKuka::onInitialDatagramReceived(const QByteArray& data, const QHostAdd
 	m_connectionTimer = nullptr;
 
 	disconnect(m_udpClient, &UdpClient::datagramReceived, this, &RobotKuka::onInitialDatagramReceived);
+	
+	// Démarre le watchdog
+	if (!m_watchdogTimer)
+	{
+		m_watchdogTimer = new QTimer(this);
+		m_watchdogTimer->setInterval(WATCHDOG_TIMEOUT_MS);
+		m_watchdogTimer->setSingleShot(true);
+		connect(m_watchdogTimer, &QTimer::timeout, this, &RobotKuka::onWatchdogTimeout);
+	}
 
 	m_isConnected = true;
 	setStatus(Status::Connected);
+	connect(m_udpClient, &UdpClient::datagramReceived, this, &RobotKuka::onDatagramReceived);
 	emit connected();
+
+	m_watchdogTimer->start();
 }
 
 void RobotKuka::onConnectionTimeoutTick()
@@ -129,6 +147,30 @@ void RobotKuka::onConnectionTimeoutTick()
 
 void RobotKuka::onDatagramReceived(const QByteArray& data, const QHostAddress& sender, quint16 senderPort)
 {
+	if (!m_isConnected) 
+		return;
+
+	m_watchdogTimer->start(); // Reset watchdog
+
+	// 1. Parse la trame reçue
+	parseReceivedData(data);
+
+	// 2. Met à jour les requêtes (RequestAutomate)
+	requestAutomate();
+
+	// 3. Applique la logique d’état (StateAutomate)
+	stateAutomate();
+
+	// 4. Envoie de la trame
+	sendTrame();
+}
+
+void RobotKuka::onWatchdogTimeout()
+{
+	setStatus(Status::Error);
+	emit errorOccurred(QString("Communication lost with robot (%1:%2").arg(m_robotAddress.toString()).arg(m_robotPort));
+	setRequestState(RobotState::None);
+	m_udpClient->close();
 }
 
 bool RobotKuka::isConnected() const
@@ -156,20 +198,81 @@ void RobotKuka::setStatus(Status status)
 	}
 }
 
-void RobotKuka::setBehaviour(Behaviour behaviour)
+void RobotKuka::setRobotState(RobotState state)
 {
-	if (m_behaviour != behaviour)
+	if (m_robotState != state)
 	{
-		m_behaviour = behaviour;
-		emit behaviourChanged(m_behaviour);
+		m_robotState = state;
+		emit robotStateChanged(m_robotState);
 	}
+}
+
+void RobotKuka::parseReceivedData(const QString& data)
+{
+	// to implement
+}
+
+void RobotKuka::requestAutomate()
+{
+	if (m_robotRequestState != m_robotState)
+	{
+		switch (m_robotRequestState)
+		{
+		case RobotKuka::RobotState::None:
+			m_robotState = m_robotRequestState;
+			break;
+		case RobotKuka::RobotState::MoveCartesian:
+			m_robotState = m_robotRequestState;
+			break;
+		case RobotKuka::RobotState::MoveJoint:
+			m_robotState = m_robotRequestState;
+			break;
+		case RobotKuka::RobotState::StopMove:
+			m_robotState = m_robotRequestState;
+			break;
+		case RobotKuka::RobotState::DoNothing:
+		default:
+			m_robotState = RobotState::DoNothing;
+			break;
+		}
+
+		m_currentMovement = MovementFlags::fromInt(MovementDirection::None);
+	}
+}
+
+void RobotKuka::stateAutomate()
+{
+	switch (m_robotState)
+	{
+	case RobotKuka::RobotState::None:
+		m_robotRequestState = RobotState::DoNothing;
+		m_currentMovement = MovementFlags::fromInt(MovementDirection::None);
+		break;
+	case RobotKuka::RobotState::DoNothing:
+		m_currentMovement = MovementFlags::fromInt(MovementDirection::None);
+		break;
+	case RobotKuka::RobotState::MoveCartesian:
+		break;
+	case RobotKuka::RobotState::MoveJoint:
+		break;
+	case RobotKuka::RobotState::StopMove:
+		m_currentMovement = MovementFlags::fromInt(MovementDirection::None);
+		break;
+	default:
+		break;
+	}
+}
+
+void RobotKuka::sendTrame()
+{
+	if (m_udpClient)
+		m_udpClient->sendData(m_trameStack.buildTrame(), m_robotAddress, m_robotPort);
 }
 
 void RobotKuka::start()
 {
-	// TODO : Implémenter le démarrage
-	// démarrer une tâche de surveillance de com ?
-	setStatus(RobotKuka::Status::ReadyToMove);
+	if (true || m_isConnected)
+		setStatus(RobotKuka::Status::ReadyToMove);
 }
 
 void RobotKuka::stop()
@@ -200,7 +303,7 @@ void RobotKuka::stopMovement()
 	m_currentMovement = MovementDirection::None;
 	//qDebug() << "Movement:" << m_currentMovement.toInt() << " " + QString("%1").arg(m_currentMovement.toInt(), 8, 2, QChar('0'));
 	//std::memcpy(m_currentDelta, m_ZEROS, sizeof(m_ZEROS));
-	m_behaviour = RobotKuka::Behaviour::StopMove;
+	m_robotState = RobotKuka::RobotState::StopMove;
 }
 
 void RobotKuka::setInput(IOInput input, bool enabled)

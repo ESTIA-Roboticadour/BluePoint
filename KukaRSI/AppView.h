@@ -30,8 +30,8 @@ public slots:
     void updateDelta(double positions[6]);
     void synchronizeIO(bool inputs[16], bool outputs[16]);
 
-    void onRobotStateChanged(RobotKuka::Status status);
-    void onRobotBehaviourChanged(RobotKuka::Behaviour behaviour);
+    void onRobotStatusChanged(RobotKuka::Status status);
+    void onRobotStateChanged(RobotKuka::RobotState state);
     void onRobotConnected();
     void onRobotDisconnected();
     void onRobotStarted();
@@ -102,7 +102,7 @@ private:
     ParametersView* m_parametersView{ nullptr };
     QVBoxLayout* m_connectionLayout{ nullptr };
     QLabel* m_statusLabel{ nullptr };
-    QLabel* m_behaviourLabel{ nullptr };
+    QLabel* m_robotStateLabel{ nullptr };
     QLabel* m_connectionLabel{ nullptr };
     QList<QLineEdit*> m_poseLineEdits;
     QList<QLineEdit*> m_deltaLineEdits;
