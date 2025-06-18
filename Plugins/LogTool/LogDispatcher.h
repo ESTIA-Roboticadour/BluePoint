@@ -33,6 +33,7 @@ public:
     /**  Active / change le fichier cible (vide => plus de fichier). */
     static void setLogFile(const QString& absolutePath);
     static void removeLogFile();
+    static void setUILogEnabled(bool uiLogEnabled);
 
 signals:
     void newEntry(const LogEntry& e);
@@ -43,6 +44,8 @@ private:
 
     static QFile* s_file;         // nullptr si aucun
     static QMutex s_fileMutex;    // protège s_file
+
+    static bool s_uiLogEnabled;
 };
 
 #endif // LOGDISPATCHER_H
