@@ -63,7 +63,7 @@ void AppController::setupConnections()
 
 	connect(m_view, &AppView::requestNewPose, this, &AppController::onViewRequestNewPose);
 	connect(m_view, &AppView::requestNewDelta, this, &AppController::onViewRequestNewDelta);
-	connect(m_view, &AppView::joggingModeChanged, m_model, &AppModel::onJoggingModeChanged);
+	connect(m_view, &AppView::isMovingInRobotBaseChanged, m_model, &AppModel::onIsInRobotBaseChanged);
 
 	// Connexions AppModel -> AppView ou autres
 	connect(m_model, &AppModel::robotStatusChanged, m_view, &AppView::onRobotStatusChanged);

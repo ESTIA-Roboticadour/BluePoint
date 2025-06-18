@@ -13,30 +13,20 @@ AppView::AppView(QWidget* parent) :
 	TransparentScrollArea(parent),
 	m_poseLineEdits(6),
 	m_deltaLineEdits(6),
-	m_movementButtons(),
+	m_axisButtons(12),
+	m_jointButtons(12),
+	m_poseLabels(6),
+	m_deltaLabels(6),
+	m_ioButtons(32),
 	m_uiTimer(),
 	m_freshRateHz(20),
-	m_jointButtons(),
-	m_ioButtons(),
 	m_isReadyToMove(false),
 	m_isJoggingCartesian(true),
-	m_pressedKeys(),
-	m_monitoredKeys(),
 	m_isAzerty(true)
 {
-	feedMonitoredKeys();
-
 	setupUI();
 	m_uiTimer.setInterval(static_cast<int>(1000.0 / m_freshRateHz));
 	connect(&m_uiTimer, &QTimer::timeout, this, &AppView::refreshUI);
-}
-
-void AppView::feedMonitoredKeys()
-{
-	m_isAzerty = Helper::detectKeyboardLayout() == "azerty";
-	m_monitoredKeys = m_isAzerty ?
-		QSet<Qt::Key> { Qt::Key_Z, Qt::Key_Q, Qt::Key_S, Qt::Key_D, Qt::Key_F, Qt::Key_B } :
-		QSet<Qt::Key>{ Qt::Key_W, Qt::Key_A, Qt::Key_S, Qt::Key_D, Qt::Key_F, Qt::Key_B };
 }
 
 void AppView::setupUI()
@@ -146,9 +136,11 @@ void AppView::setupUI()
 	baseLayout->addWidget(baseLabel);
 	QComboBox* baseComboBox = new QComboBox();
 	baseComboBox->setFixedWidth(80);
-	baseComboBox->addItems({ "TOOL", "WORLD" });
-	baseComboBox->setCurrentText("TOOL");
+	baseComboBox->addItems({ "BASE", "TOOL" });
+	baseComboBox->setCurrentIndex(0);
 	baseComboBox->setDisabled(true);
+	connect(baseComboBox, &QComboBox::currentIndexChanged, this, &AppView::onBaseComboBoxChanged);
+
 	baseLayout->addWidget(baseComboBox);
 	moveLayout->addLayout(baseLayout);
 	baseLayout->addStretch();
@@ -195,8 +187,8 @@ void AppView::setupUI()
 	// Ligne 3 : Position + Delta
 	auto* posDeltaLayout = new QHBoxLayout();
 
-	auto* positionGroup = createPoseGroup("Position", m_poseLineEdits);
-	auto* deltaGroup = createPoseGroup("Delta", m_deltaLineEdits);
+	auto* positionGroup = createPoseGroup("Position", m_poseLabels, m_poseLineEdits);
+	auto* deltaGroup = createPoseGroup("Delta", m_deltaLabels, m_deltaLineEdits);
 
 	posDeltaLayout->addWidget(positionGroup);
 	posDeltaLayout->addWidget(deltaGroup);
@@ -221,64 +213,50 @@ void AppView::setupUI()
 
 void AppView::createMovementButtons(QGridLayout* layout)
 {
-	QMap<RobotKuka::MovementDirection, QPoint> positions = {
-		{ RobotKuka::MovementDirection::Up,       {0, 1} },
-		{ RobotKuka::MovementDirection::Down,     {2, 1} },
-		{ RobotKuka::MovementDirection::Left,     {1, 0} },
-		{ RobotKuka::MovementDirection::Right,    {1, 2} },
-	};
-
-	QStringList content{
-		QStringLiteral(u"\u2191"), // up
-		QStringLiteral(u"\u2193"), // down
-		QStringLiteral(u"\u2190"), // left
-		QStringLiteral(u"\u2192")  // right
-	};
-
-	int i = 0;
-	for (auto it = positions.begin(); it != positions.end(); ++it)
+	static const char axisLabels[6] = { 'X', 'Y', 'Z', 'A', 'B', 'C' };
+	for (int i = 0; i < 6; ++i)
 	{
-		RobotKuka::MovementDirection direction = it.key();
-		const QPoint& pos = it.value();
+		QString label = QString("%1").arg(axisLabels[i]);
+		QLabel* axisLabel = new QLabel(label, this);
+		axisLabel->setMinimumWidth(15);
+		axisLabel->setAlignment(Qt::AlignCenter);
+		axisLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-		QPushButton* button = new QPushButton(content[i++], this);
-		button->setFixedSize(30, 30);
-		button->setCheckable(true);
-		button->setEnabled(false);
-		m_movementButtons[direction] = button;
-		layout->addWidget(button, pos.x(), pos.y());
+		QPushButton* plusButton = new QPushButton("+", this);
+		QPushButton* minusButton = new QPushButton("-", this);
+		plusButton->setFixedSize(30, 30);
+		minusButton->setFixedSize(30, 30);
+		plusButton->setEnabled(false);
+		minusButton->setEnabled(false);
 
-		connect(button, &QPushButton::pressed, this, [this, direction]() { emit onCartesianMovementButtonPressed(direction); });
-		connect(button, &QPushButton::released, this, [this, direction]() { emit onCartesianMovementButtonReleased(direction); });
+		QHBoxLayout* btnLayout = new QHBoxLayout();
+		btnLayout->setContentsMargins(3, 0, 3, 0);
+		btnLayout->setSpacing(1);
+		btnLayout->addWidget(axisLabel);
+		btnLayout->addWidget(plusButton);
+		btnLayout->addWidget(minusButton);
+
+		QWidget* group = new QWidget(this);
+		group->setLayout(btnLayout);
+
+		int row = i % 3;
+		int col = (i < 3) ? 0 : 2; // 0 pour X à Z, 2 pour A à C
+
+		layout->addWidget(group, row, col);
+
+		connect(plusButton, &QPushButton::pressed, this, [this, i]() { emit cartesianMovementPressed(static_cast<RobotKuka::Axis>(i), true); });
+		connect(plusButton, &QPushButton::released, this, [this, i]() { emit cartesianMovementReleased(static_cast<RobotKuka::Axis>(i)); });
+		connect(minusButton, &QPushButton::pressed, this, [this, i]() { emit cartesianMovementPressed(static_cast<RobotKuka::Axis>(i), false); });
+		connect(minusButton, &QPushButton::released, this, [this, i]() { emit cartesianMovementReleased(static_cast<RobotKuka::Axis>(i)); });
+		m_axisButtons[2 * i] = plusButton;
+		m_axisButtons[2 * i + 1] = minusButton;
 	}
 
-	// Ligne verticale entre le bloc central et F/B
-	QFrame* separator = new QFrame(this);
-	separator->setFrameShape(QFrame::VLine);
-	separator->setFrameShadow(QFrame::Sunken);
-
-	layout->addWidget(separator, 0, 3, 3, 1); // ligne verticale entre col 2 et 4
-
-	// Ajout des boutons F/B dans un layout horizontal
-	QStringList fbLabels{ "F", "B" };
-	RobotKuka::MovementDirection fbDirections[] = {
-		RobotKuka::MovementDirection::Forward,
-		RobotKuka::MovementDirection::Backward
-	};
-
-	for (int j = 0; j < 2; ++j)
-	{
-		QPushButton* button = new QPushButton(fbLabels[j], this);
-		button->setFixedSize(30, 30);
-		button->setCheckable(true);
-		button->setEnabled(false);
-		RobotKuka::MovementDirection direction = fbDirections[j];
-		m_movementButtons[direction] = button;
-		layout->addWidget(button, j * 2, 4); // col 4 après la ligne verticale
-
-		connect(button, &QPushButton::pressed, this, [this, direction]() { emit onCartesianMovementButtonPressed(direction); });
-		connect(button, &QPushButton::released, this, [this, direction]() { emit onCartesianMovementButtonReleased(direction); });
-	}
+	// Ligne verticale entre les deux groupes
+	QFrame* line = new QFrame(this);
+	line->setFrameShape(QFrame::VLine);
+	line->setFrameShadow(QFrame::Sunken);
+	layout->addWidget(line, 0, 1, 3, 1); // ligne verticale sur 3 lignes
 }
 
 void AppView::createJointControlButtons(QGridLayout* layout)
@@ -287,6 +265,9 @@ void AppView::createJointControlButtons(QGridLayout* layout)
 	{
 		QString label = QString("J%1").arg(i + 1);
 		QLabel* jointLabel = new QLabel(label, this);
+		jointLabel->setMinimumWidth(15);
+		jointLabel->setAlignment(Qt::AlignCenter);
+		jointLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
 		QPushButton* plusButton = new QPushButton("+", this);
 		QPushButton* minusButton = new QPushButton("-", this);
@@ -314,8 +295,8 @@ void AppView::createJointControlButtons(QGridLayout* layout)
 		connect(plusButton, &QPushButton::released, this, [this, i]() { emit articularMovementReleased(static_cast<RobotKuka::Joint>(i)); });
 		connect(minusButton, &QPushButton::pressed, this, [this, i]() { emit articularMovementPressed(static_cast<RobotKuka::Joint>(i), false); });
 		connect(minusButton, &QPushButton::released, this, [this, i]() { emit articularMovementReleased(static_cast<RobotKuka::Joint>(i)); });
-		m_jointButtons.append(plusButton);
-		m_jointButtons.append(minusButton);
+		m_jointButtons[2 * i] = plusButton;
+		m_jointButtons[2 * i + 1] = minusButton;
 	}
 
 	// Ligne verticale entre les deux groupes
@@ -334,6 +315,7 @@ void AppView::createIOBtns(QGridLayout* layout)
 			int index = col * 4 + row;
 
 			QLabel* label = new QLabel(QString("IO %1:").arg(index + 1), this);
+			label->setFixedWidth(30);
 			QPushButton* inputBtn = new QPushButton("I", this);
 			QPushButton* outputBtn = new QPushButton("O", this);
 			inputBtn->setDisabled(true);
@@ -357,8 +339,9 @@ void AppView::createIOBtns(QGridLayout* layout)
 			layout->addWidget(ioWidget, row, col * 2); // *2 car on insère des QFrame entre
 			connect(inputBtn, &QPushButton::toggled, this, [this, index](bool checked) { emit inputToggled(static_cast<RobotKuka::IOInput>(index), checked); });
 			connect(outputBtn, &QPushButton::toggled, this, [this, index](bool checked) { emit outputToggled(static_cast<RobotKuka::IOOutput>(index), checked); });
-			m_ioButtons.append(inputBtn);
-			m_ioButtons.append(outputBtn);
+			
+			m_ioButtons[2 * index] = inputBtn;
+			m_ioButtons[2 * index + 1] = outputBtn;
 
 			// Ligne verticale entre colonnes (sauf après la dernière)
 			if (col < 3 && row == 0)
@@ -372,7 +355,7 @@ void AppView::createIOBtns(QGridLayout* layout)
 	}
 }
 
-QGroupBox* AppView::createPoseGroup(const QString& title, QList<QLineEdit*>& listToFeed)
+QGroupBox* AppView::createPoseGroup(const QString& title, QList<QLabel*>& labelsToFeed, QList<QLineEdit*>& lineEditsToFeed)
 {
 	auto* group = new QGroupBox(title, this);
 	auto* layout = new QGridLayout();
@@ -383,23 +366,29 @@ QGroupBox* AppView::createPoseGroup(const QString& title, QList<QLineEdit*>& lis
 	{
 		// Partie gauche : X, Y, Z
 		QLabel* labelL = new QLabel(labels[i], this);
+		labelL->setMinimumWidth(20);
+		labelL->setAlignment(Qt::AlignCenter);
 		QLineEdit* editL = new QLineEdit(this);
 		editL->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 		editL->setPlaceholderText("0.000");
 		editL->setDisabled(true);
 		layout->addWidget(labelL, i, 0);
 		layout->addWidget(editL, i, 1);
-		listToFeed[i] = editL;
+		labelsToFeed[i] = labelL;
+		lineEditsToFeed[i] = editL;
 
 		// Partie droite : A, B, C
 		QLabel* labelR = new QLabel(labels[i + 3], this);
+		labelR->setAlignment(Qt::AlignCenter);
+		labelR->setMinimumWidth(20);
 		QLineEdit* editR = new QLineEdit(this);
 		editR->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 		editR->setPlaceholderText("0.000");
 		editR->setDisabled(true);
 		layout->addWidget(labelR, i, 3);
 		layout->addWidget(editR, i, 4);
-		listToFeed[3 + i] = editR;
+		labelsToFeed[3 + i] = labelR;
+		lineEditsToFeed[3 + i] = editR;
 	}
 
 	// Ligne verticale entre les deux blocs
@@ -458,7 +447,7 @@ void AppView::clearConnectionLabelText()
 
 void AppView::setMoveAndIOButtonsEnabled(bool enabled) const
 {
-	for (auto& moveButton : m_movementButtons)
+	for (auto& moveButton : m_axisButtons)
 		moveButton->setEnabled(enabled);
 
 	for (auto& jointButton : m_jointButtons)
@@ -470,7 +459,7 @@ void AppView::setMoveAndIOButtonsEnabled(bool enabled) const
 
 void AppView::setMoveAndIOButtonsChecked(bool checked) const
 {
-	for (auto& moveButton : m_movementButtons)
+	for (auto& moveButton : m_axisButtons)
 		moveButton->setChecked(checked);
 
 	for (auto& jointButton : m_jointButtons)
@@ -494,12 +483,54 @@ void AppView::setTimerIntervale(double freshRateHz)
 	}
 }
 
-void AppView::setJoggingMode(bool isCartesian)
+void AppView::setIsJoggingInCartesian(bool isCartesian)
 {
 	if (m_isJoggingCartesian != isCartesian)
 	{
 		m_isJoggingCartesian = isCartesian;
-		emit joggingModeChanged(m_isJoggingCartesian);
+		if (m_isJoggingCartesian)
+		{
+			m_poseLabels[0]->setText("X");
+			m_poseLabels[1]->setText("Y");
+			m_poseLabels[2]->setText("Z");
+			m_poseLabels[3]->setText("A");
+			m_poseLabels[4]->setText("B");
+			m_poseLabels[5]->setText("C");
+
+			m_deltaLabels[0]->setText("dX");
+			m_deltaLabels[1]->setText("dY");
+			m_deltaLabels[2]->setText("dZ");
+			m_deltaLabels[3]->setText("dA");
+			m_deltaLabels[4]->setText("dB");
+			m_deltaLabels[5]->setText("dC");
+		}
+		else
+		{
+			m_poseLabels[0]->setText("J1");
+			m_poseLabels[1]->setText("J2");
+			m_poseLabels[2]->setText("J3");
+			m_poseLabels[3]->setText("J4");
+			m_poseLabels[4]->setText("J5");
+			m_poseLabels[5]->setText("J6");
+
+			m_deltaLabels[0]->setText("dJ1");
+			m_deltaLabels[1]->setText("dJ2");
+			m_deltaLabels[2]->setText("dJ3");
+			m_deltaLabels[3]->setText("dJ4");
+			m_deltaLabels[4]->setText("dJ5");
+			m_deltaLabels[5]->setText("dJ6");
+		}
+
+		emit isJoggingInCartesianChanged(m_isJoggingCartesian);
+	}
+}
+
+void AppView::setIsMovingInRobotBase(bool isMovingInRobotBase)
+{
+	if (m_isMovingInRobotBase != isMovingInRobotBase)
+	{
+		m_isMovingInRobotBase = isMovingInRobotBase;
+		emit isMovingInRobotBaseChanged(m_isMovingInRobotBase);
 	}
 }
 
@@ -570,92 +601,20 @@ void AppView::onStartButtonClicked()
 
 void AppView::onStopButtonClicked()
 {
+	m_startButton->setDisabled(true);
 	m_stopButton->setDisabled(true);
 	emit stopButtonClicked();
 }
 
+void AppView::onBaseComboBoxChanged(int index)
+{
+	setIsMovingInRobotBase(index == 0); // 0 = BASE, 1 = TOOL
+	emit isMovingInRobotBaseChanged(m_isMovingInRobotBase);
+}
+
 void AppView::onMoveTabChanged(int index)
 {
-	setJoggingMode(index == 0);
-	for (auto& pressedKey : m_pressedKeys)
-		handleKeyReleased(pressedKey);
-	m_pressedKeys.clear();
-}
-
-void AppView::onCartesianMovementButtonPressed(RobotKuka::MovementDirection direction)
-{
-	bool keyAlreadyPressed = false;
-
-	switch (direction)
-	{
-	case RobotKuka::Up:
-		keyAlreadyPressed = isKeyPressed(m_isAzerty ? Qt::Key_Z : Qt::Key_W);
-		break;
-	case RobotKuka::Down:
-		keyAlreadyPressed = isKeyPressed(Qt::Key_S);
-		break;
-	case RobotKuka::Left:
-		keyAlreadyPressed = isKeyPressed(m_isAzerty ? Qt::Key_Q : Qt::Key_A);
-		break;
-	case RobotKuka::Right:
-		keyAlreadyPressed = isKeyPressed(Qt::Key_D);
-		break;
-	case RobotKuka::Forward:
-		keyAlreadyPressed = isKeyPressed(Qt::Key_F);
-		break;
-	case RobotKuka::Backward:
-		keyAlreadyPressed = isKeyPressed(Qt::Key_B);
-		break;
-	default:
-		qWarning() << RobotKuka::toString(direction) + " not implemented";
-		break;
-	}
-
-	if (!keyAlreadyPressed)
-	{
-		m_movementButtons[direction]->setChecked(true);
-		emit cartesianMovementPressed(direction);
-	}
-}
-
-void AppView::onCartesianMovementButtonReleased(RobotKuka::MovementDirection direction)
-{
-	bool keyStillPressed = false;
-
-	switch (direction)
-	{
-	case RobotKuka::Up:
-		keyStillPressed = isKeyPressed(m_isAzerty ? Qt::Key_Z : Qt::Key_W);
-		break;
-	case RobotKuka::Down:
-		keyStillPressed = isKeyPressed(Qt::Key_S);;
-		break;
-	case RobotKuka::Left:
-		keyStillPressed = isKeyPressed(m_isAzerty ? Qt::Key_Q : Qt::Key_A);
-		break;
-	case RobotKuka::Right:
-		keyStillPressed = isKeyPressed(Qt::Key_D);;
-		break;
-	case RobotKuka::Forward:
-		keyStillPressed = isKeyPressed(Qt::Key_F);
-		break;
-	case RobotKuka::Backward:
-		keyStillPressed = isKeyPressed(Qt::Key_B);
-		break;
-	default:
-		qWarning() << RobotKuka::toString(direction) + " not implemented";
-		break;
-	}
-
-	if (!keyStillPressed)
-	{
-		m_movementButtons[direction]->setChecked(false);
-		emit cartesianMovementReleased(direction);
-	}
-	else
-	{
-		m_movementButtons[direction]->setChecked(true);
-	}
+	setIsJoggingInCartesian(index == 0);
 }
 
 void AppView::onRobotStatusChanged(RobotKuka::Status status)
@@ -669,7 +628,6 @@ void AppView::onRobotStatusChanged(RobotKuka::Status status)
 	setMoveAndIOButtonsChecked(false);
 	m_statusLabel->setText(RobotKuka::toString(status));
 	clearConnectionLabelText();
-	m_pressedKeys.clear();
 	m_isReadyToMove = false;
 	// -----------------------------------
 
@@ -747,102 +705,4 @@ void AppView::onConnectionTimeRemainingChanged(quint16 seconds)
 void AppView::onFreshRateChanged(double freshRateHz)
 {
 	setTimerIntervale(freshRateHz);
-}
-
-void AppView::keyPressEvent(QKeyEvent* event)
-{
-	if (m_isReadyToMove && m_isJoggingCartesian)
-	{
-		Qt::Key key = static_cast<Qt::Key>(event->key());
-
-		if (!event->isAutoRepeat() && m_monitoredKeys.contains(key)) {
-			m_pressedKeys.insert(key);
-			handleKeyPressed(key);
-		}
-	}
-}
-
-void AppView::keyReleaseEvent(QKeyEvent* event)
-{
-	if (m_isReadyToMove && m_isJoggingCartesian)
-	{
-		Qt::Key key = static_cast<Qt::Key>(event->key());
-
-		if (!event->isAutoRepeat() && m_monitoredKeys.contains(key)) {
-			m_pressedKeys.remove(key);
-			handleKeyReleased(key);
-		}
-	}
-}
-
-void AppView::handleKeyPressed(Qt::Key key)
-{
-	RobotKuka::MovementDirection movementDirection;
-	switch (key)
-	{
-	case Qt::Key_Z: // azerty case
-	case Qt::Key_W: // qwerty case
-		movementDirection = RobotKuka::MovementDirection::Up;
-		break;
-	case Qt::Key_Q: // azerty case
-	case Qt::Key_A: // qwerty case
-		movementDirection = RobotKuka::MovementDirection::Left;
-		break;
-	case Qt::Key_S:
-		movementDirection = RobotKuka::MovementDirection::Down;
-		break;
-	case Qt::Key_D:
-		movementDirection = RobotKuka::MovementDirection::Right;
-		break;
-	case Qt::Key_F:
-		movementDirection = RobotKuka::MovementDirection::Forward;
-		break;
-	case Qt::Key_B:
-		movementDirection = RobotKuka::MovementDirection::Backward;
-		break;
-	default:
-		return; // block next if case if not supported
-	}
-
-	if (!m_movementButtons[movementDirection]->isDown()) // button is not pressed
-	{
-		m_movementButtons[movementDirection]->setChecked(true); // set ui as button was pressed
-		emit cartesianMovementPressed(movementDirection);
-	}
-}
-
-void AppView::handleKeyReleased(Qt::Key key)
-{
-	RobotKuka::MovementDirection movementDirection;
-	switch (key)
-	{
-	case Qt::Key_Z: // azerty case
-	case Qt::Key_W: // qwerty case
-		movementDirection = RobotKuka::MovementDirection::Up;
-		break;
-	case Qt::Key_Q: // azerty case
-	case Qt::Key_A: // qwerty case
-		movementDirection = RobotKuka::MovementDirection::Left;
-		break;
-	case Qt::Key_S:
-		movementDirection = RobotKuka::MovementDirection::Down;
-		break;
-	case Qt::Key_D:
-		movementDirection = RobotKuka::MovementDirection::Right;
-		break;
-	case Qt::Key_F:
-		movementDirection = RobotKuka::MovementDirection::Forward;
-		break;
-	case Qt::Key_B:
-		movementDirection = RobotKuka::MovementDirection::Backward;
-		break;
-	default:
-		return; // block next if case if not supported
-	}
-
-	if (!m_movementButtons[movementDirection]->isDown()) // button is not pressed
-	{
-		m_movementButtons[movementDirection]->setChecked(false); // set ui as button was released
-		emit cartesianMovementReleased(movementDirection);
-	}
 }

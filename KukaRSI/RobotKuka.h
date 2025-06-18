@@ -35,6 +35,17 @@ public:
     };
     Q_ENUM(RobotState)
 
+    enum Axis
+    {
+		X,
+		Y,
+		Z,
+		A,
+		B,
+		C
+    };
+    Q_ENUM(Axis)
+
     enum Joint
     {
         J1,
@@ -46,18 +57,18 @@ public:
     };
     Q_ENUM(Joint)
 
-    enum MovementDirection {
-        None = 0x00,        // 0000 0000  |   0
-        Up = 0x01,          // 0000 0001  |   1
-        Down = 0x02,        // 0000 0010  |   2
-        Left = 0x04,        // 0000 0100  |   4
-        Right = 0x08,       // 0000 1000  |   8
-        Forward = 0x10,     // 0001 0000  |  16
-        Backward = 0x20     // 0010 0000  |  32
-    };
-    Q_ENUM(MovementDirection)
-    Q_DECLARE_FLAGS(MovementFlags, MovementDirection)
-    Q_FLAG(MovementFlags)
+    //enum MovementDirection {
+    //    None = 0x00,        // 0000 0000  |   0
+    //    Up = 0x01,          // 0000 0001  |   1
+    //    Down = 0x02,        // 0000 0010  |   2
+    //    Left = 0x04,        // 0000 0100  |   4
+    //    Right = 0x08,       // 0000 1000  |   8
+    //    Forward = 0x10,     // 0001 0000  |  16
+    //    Backward = 0x20     // 0010 0000  |  32
+    //};
+    //Q_ENUM(MovementDirection)
+    //Q_DECLARE_FLAGS(MovementFlags, MovementDirection)
+    //Q_FLAG(MovementFlags)
 
     enum IOInput
     {
@@ -124,15 +135,14 @@ public:
         }
     }
 
-    inline static QString toString(MovementDirection direction) {
-        switch (direction) {
-        case MovementDirection::None: return "None";
-        case MovementDirection::Up: return "UP";
-        case MovementDirection::Down: return "DOWN";
-        case MovementDirection::Left: return "LEFT";
-        case MovementDirection::Right: return "RIGHT";
-        case MovementDirection::Forward: return "FORWARD";
-        case MovementDirection::Backward: return "BACKWARD";
+    inline static QString toString(Axis axis) {
+        switch (axis) {
+        case Axis::X: return "X";
+        case Axis::Y: return "Y";
+        case Axis::Z: return "Z";
+        case Axis::A: return "A";
+        case Axis::B: return "B";
+        case Axis::C: return "C";
         default: return "";
         }
     }
@@ -145,13 +155,15 @@ public:
 
 	Status getStatus() const { return m_status; };
     RobotState getRobotState() const { return m_robotState; }
+    void setRobotBase(bool isInRobotBase);
 
     // Connexion / déconnexion
     
     // Open an udp client to the given address and port. When data are received from the robot, connected() signal is emitted. Timeout is in seconds.
     void connectToRobot(const QHostAddress& hostAddress, quint16 port, quint32 timeout);
     void disconnectFromRobot();
-    bool isConnected() const;
+	bool isConnected() const { return m_isConnected; }
+	bool isReadyToMove() const { return m_status == Status::ReadyToMove; }
 
     void abortConnection();
 
@@ -160,12 +172,9 @@ public:
     void stop();
 
     // Déplacement manuel
-    void addMovement(MovementDirection direction);
-    void removeMovement(MovementDirection direction);
+    void moveAxis(Axis axis, bool positive);
     void moveJoint(Joint joint, bool positive);
-    void stopMovement();
-
-    void setJoggingMode(bool isCartesian);
+    void stopMove();
 
     // IO
     void setInput(IOInput input, bool enabled);
@@ -232,12 +241,12 @@ private:
     inline static const double m_ZEROS[6] = { 0., 0., 0., 0., 0., 0. };
     double m_currentPose[6]; // Positions X, Y, Z, A, B, C
 	double m_currentDelta[6]; // Positions dX, dY, dZ, dA, dB, dC
-    MovementFlags m_currentMovement;
     double m_deltaStep;
-	bool m_startInCartesian;
+    Axis m_currentAxis;
+	Joint m_currentJoint;
+    bool m_isMovePositive;
+	bool m_isMovingInRobotBase; // true = BASE, false = TOOL
 
     RsiTrame m_rsiTrame;
     QString m_lastIPOC;
 };
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(RobotKuka::MovementFlags)

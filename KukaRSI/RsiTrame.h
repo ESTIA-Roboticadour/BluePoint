@@ -8,7 +8,7 @@ public:
 
 	void reset();
 
-	void setPose(bool isCartesian, double pos[6]);
+	void setPose(bool isCartesian, double pos[6], bool isInRobotBase);
 	void setIPOC(const QString& ipoc);
 
 	// Inherited via Trame
@@ -21,6 +21,7 @@ public:
 
 private:
 	bool m_isCartesian;
+	bool m_isInRobotBase;
 	double m_pos[6];
 	QString m_ipoc;
 };

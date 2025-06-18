@@ -122,18 +122,17 @@ bool AppModel::setupAddress(const RobotConfig* config)
 	return result;
 }
 
-void AppModel::onCartesianMovementPressed(RobotKuka::MovementDirection direction)
+void AppModel::onCartesianMovementPressed(RobotKuka::Axis axis, bool positive)
 {
-	//qDebug() << "Received onCartesianMovementPressed:" << RobotKuka::toString(direction);
 	if (m_robot)
-		m_robot->addMovement(direction);
+		m_robot->moveAxis(axis, positive);
 }
 
-void AppModel::onCartesianMovementReleased(RobotKuka::MovementDirection direction)
+void AppModel::onCartesianMovementReleased(RobotKuka::Axis axis)
 {
-	//qDebug() << "Received onCartesianMovementReleased:" << RobotKuka::toString(direction);
+	Q_UNUSED(axis);
 	if (m_robot)
-		m_robot->removeMovement(direction);
+		m_robot->stopMove();
 }
 
 void AppModel::onArticularMovementPressed(RobotKuka::Joint joint, bool positive)
@@ -144,8 +143,9 @@ void AppModel::onArticularMovementPressed(RobotKuka::Joint joint, bool positive)
 
 void AppModel::onArticularMovementReleased(RobotKuka::Joint joint)
 {
+	Q_UNUSED(joint);
 	if (m_robot)
-		m_robot->stopMovement();
+		m_robot->stopMove();
 }
 
 void AppModel::onInputToggled(RobotKuka::IOInput input, bool enabled)
@@ -154,6 +154,12 @@ void AppModel::onInputToggled(RobotKuka::IOInput input, bool enabled)
 
 void AppModel::onOutputToggled(RobotKuka::IOOutput output, bool enabled)
 {
+}
+
+void AppModel::onIsInRobotBaseChanged(bool isInRobotBase)
+{
+	if (m_robot)
+		m_robot->setRobotBase(isInRobotBase);
 }
 
 void AppModel::onRobotConnected()
@@ -174,12 +180,6 @@ void AppModel::onRobotDisconnected()
 void AppModel::onRobotFailedToConnect()
 {
 	m_connectionTimeoutParameter.unlock();
-}
-
-void AppModel::onJoggingModeChanged(bool isCartesian)
-{
-	if (m_robot)
-		m_robot->setJoggingMode(isCartesian);
 }
 
 const Config* AppModel::getConfig() const

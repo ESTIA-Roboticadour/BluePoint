@@ -37,13 +37,13 @@ public:
     void getCurrentDelta(double currentDelta[6]) const;
 
 public slots:
-    void onCartesianMovementPressed(RobotKuka::MovementDirection direction);
-    void onCartesianMovementReleased(RobotKuka::MovementDirection direction);
+    void onCartesianMovementPressed(RobotKuka::Axis axis, bool positive);
+    void onCartesianMovementReleased(RobotKuka::Axis axis);
     void onArticularMovementPressed(RobotKuka::Joint joint, bool positive);
     void onArticularMovementReleased(RobotKuka::Joint joint);
     void onInputToggled(RobotKuka::IOInput input, bool enabled);
     void onOutputToggled(RobotKuka::IOOutput output, bool enabled);
-    void onJoggingModeChanged(bool isCartesian);
+    void onIsInRobotBaseChanged(bool isInRobotBase);
 
 private slots:
     void onErrorOccurred(const QString& message);

@@ -21,11 +21,13 @@ RobotKuka::RobotKuka(QObject* parent) :
 	m_watchdogTimer(nullptr),
 	m_currentPose(),
 	m_currentDelta(),
-	m_currentMovement(MovementFlags::fromInt(MovementDirection::None)),
 	m_deltaStep(0.5), // Default delta step
+	m_currentAxis(Axis::X), // Default axis
+	m_currentJoint(Joint::J1), // Default joint
+	m_isMovePositive(true), // Default to positive movement
+	m_isMovingInRobotBase(true), // Default to BASE mode
 	m_rsiTrame(),
-	m_lastIPOC(),
-	m_startInCartesian(true) // Default to Cartesian mode
+	m_lastIPOC()
 {
 	std::memcpy(m_currentPose, m_ZEROS, 6 * sizeof(double));
 	std::memcpy(m_currentDelta, m_ZEROS, 6 * sizeof(double));
@@ -33,10 +35,15 @@ RobotKuka::RobotKuka(QObject* parent) :
 
 RobotKuka::~RobotKuka()
 {
-	if (m_isConnected) 
+	if (m_isConnected)
 	{
 		disconnectFromRobot(); // envoyer une trame de stop directement ? et fermer la thread + le client
 	}
+}
+
+void RobotKuka::setRobotBase(bool isInRobotBase)
+{
+	m_isMovingInRobotBase = isInRobotBase;
 }
 
 void RobotKuka::connectToRobot(const QHostAddress& hostAddress, quint16 port, quint32 timeout)
@@ -62,9 +69,7 @@ void RobotKuka::disconnectFromRobot()
 	if (!m_isConnected)
 		return;
 
-	stopMovement();
-	m_disconnectRequest = true;
-	//closeUdpClient();
+	closeUdpClient();
 }
 
 void RobotKuka::onUdpOpened(const QHostAddress& hostAddress, quint16 port)
@@ -101,6 +106,9 @@ void RobotKuka::onUdpClosed()
 {
 	delete m_udpClient;
 	m_udpClient = nullptr;
+	m_isConnected = false;
+	setStatus(Status::Ready);
+	emit disconnected();
 }
 
 void RobotKuka::onInitialDatagramReceived(const QByteArray& data, const QHostAddress& sender, quint16 senderPort)
@@ -114,7 +122,7 @@ void RobotKuka::onInitialDatagramReceived(const QByteArray& data, const QHostAdd
 	m_connectionTimer = nullptr;
 
 	disconnect(m_udpClient, &UdpClient::datagramReceived, this, &RobotKuka::onInitialDatagramReceived);
-	
+
 	// Démarre le watchdog
 	if (!m_watchdogTimer)
 	{
@@ -157,7 +165,7 @@ void RobotKuka::onConnectionTimeoutTick()
 
 void RobotKuka::onDatagramReceived(const QByteArray& data, const QHostAddress& sender, quint16 senderPort)
 {
-	if (!m_isConnected) 
+	if (!m_isConnected)
 		return;
 
 	m_rsiTrame.reset();
@@ -183,11 +191,6 @@ void RobotKuka::onWatchdogTimeout()
 	emit errorOccurred(QString("Communication lost with robot (%1:%2)").arg(m_robotAddress.toString()).arg(m_robotPort));
 	setRequestState(RobotState::None);
 	m_udpClient->close();
-}
-
-bool RobotKuka::isConnected() const
-{
-	return m_isConnected;
 }
 
 void RobotKuka::abortConnection()
@@ -299,8 +302,6 @@ void RobotKuka::requestAutomate()
 			setRobotState(RobotState::DoNothing);
 			break;
 		}
-
-		m_currentMovement = MovementFlags::fromInt(MovementDirection::None);
 	}
 }
 
@@ -310,52 +311,29 @@ void RobotKuka::stateAutomate()
 	{
 	case RobotState::None:
 		m_robotRequestState = RobotState::DoNothing;
-		m_currentMovement = MovementFlags::fromInt(MovementDirection::None);
 		break;
+
 	case RobotState::DoNothing:
-		m_currentMovement = MovementFlags::fromInt(MovementDirection::None);
 		break;
+
 	case RobotState::MoveCartesianLIN:
-		// Base
-		if (m_currentMovement & MovementDirection::Forward) // X+
-			m_currentDelta[0] += m_deltaStep;
-		if (m_currentMovement & MovementDirection::Backward) // X-
-			m_currentDelta[0] -= m_deltaStep;
 
-		if (m_currentMovement & MovementDirection::Left) // Y+
-			m_currentDelta[1] += m_deltaStep;
-		if (m_currentMovement & MovementDirection::Right) // Y-
-			m_currentDelta[1] -= m_deltaStep;
-		
-		if (m_currentMovement & MovementDirection::Up) // Z+
-			m_currentDelta[2] += m_deltaStep;
-		if (m_currentMovement & MovementDirection::Down) // Z-
-			m_currentDelta[2] -= m_deltaStep;
-
-		// Tool
-		//if (m_currentMovement & MovementDirection::Left) // X+
-		//	m_currentDelta[0] += m_deltaStep;
-		//if (m_currentMovement & MovementDirection::Right) // X-
-		//	m_currentDelta[0] -= m_deltaStep;
-		//if (m_currentMovement & MovementDirection::Up) // Y+
-		//	m_currentDelta[1] += m_deltaStep;
-		//if (m_currentMovement & MovementDirection::Down) // Y-
-		//	m_currentDelta[1] -= m_deltaStep;
-		//if (m_currentMovement & MovementDirection::Forward) // Z+
-		//	m_currentDelta[2] += m_deltaStep;
-		//if (m_currentMovement & MovementDirection::Backward) // Z-
-		//	m_currentDelta[2] -= m_deltaStep;
 		break;
 	case RobotState::MoveJoint:
 		break;
+
 	case RobotState::StopMove:
-		m_currentMovement = MovementFlags::fromInt(MovementDirection::None);
+		m_robotRequestState = RobotState::DoNothing;
 		break;
+
 	default:
 		break;
 	}
 
-	m_rsiTrame.setPose(m_robotState == RobotState::MoveCartesianLIN, m_currentDelta);
+	m_rsiTrame.setPose(
+		m_robotState == RobotState::MoveCartesianLIN,
+		m_currentDelta,
+		m_isMovingInRobotBase);
 	m_rsiTrame.setIPOC(m_lastIPOC);
 }
 
@@ -374,7 +352,7 @@ void RobotKuka::start()
 	if (m_status == Status::Connected)
 	{
 		setStatus(Status::ReadyToMove);
-		m_robotRequestState = m_startInCartesian ? RobotState::MoveCartesianLIN : RobotState::MoveJoint;
+		m_robotRequestState = RobotState::DoNothing; // Reset request state
 		emit started();
 	}
 }
@@ -389,40 +367,29 @@ void RobotKuka::stop()
 	}
 }
 
-void RobotKuka::addMovement(MovementDirection direction)
+void RobotKuka::moveAxis(Axis axis, bool positive)
 {
-	m_currentMovement |= direction;
-	//qDebug() << "Movement:" << m_currentMovement.toInt() << " " + QString("%1").arg(m_currentMovement.toInt(), 8, 2, QChar('0'));
-}
-
-void RobotKuka::removeMovement(MovementDirection direction)
-{
-	m_currentMovement &= ~direction;
-	//qDebug() << "Movement:" << m_currentMovement.toInt() << " " + QString("%1").arg(m_currentMovement.toInt(), 8, 2, QChar('0'));
+	if (isReadyToMove())
+	{
+		m_currentAxis = axis;
+		m_isMovePositive = positive;
+		m_robotRequestState = RobotState::MoveCartesianLIN; // at the end
+	}
 }
 
 void RobotKuka::moveJoint(Joint joint, bool positive)
 {
+	if (isReadyToMove())
+	{
+		m_currentJoint = joint;
+		m_isMovePositive = positive;
+		m_robotRequestState = RobotState::MoveJoint; // at the end
+	}
 }
 
-void RobotKuka::stopMovement()
+void RobotKuka::stopMove()
 {
 	m_robotRequestState = RobotState::StopMove;
-	m_currentMovement = MovementDirection::None;
-	//qDebug() << "Movement:" << m_currentMovement.toInt() << " " + QString("%1").arg(m_currentMovement.toInt(), 8, 2, QChar('0'));
-	//std::memcpy(m_currentDelta, m_ZEROS, 6 * sizeof(double));
-}
-
-void RobotKuka::setJoggingMode(bool isCartesian)
-{
-	if (m_status == Status::ReadyToMove)
-	{
-		m_robotRequestState = isCartesian ? RobotState::MoveCartesianLIN : RobotState::MoveJoint;
-	}
-	else
-	{
-		m_startInCartesian = isCartesian;
-	}
 }
 
 void RobotKuka::setInput(IOInput input, bool enabled)

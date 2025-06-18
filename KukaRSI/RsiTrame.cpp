@@ -21,9 +21,10 @@ void RsiTrame::reset()
     m_pos[5] = 0.;
 }
 
-void RsiTrame::setPose(bool isCartesian, double pos[6])
+void RsiTrame::setPose(bool isCartesian, double pos[6], bool isInRobotBase)
 {
     m_isCartesian = isCartesian;
+	m_isInRobotBase = isInRobotBase;
     std::memcpy(m_pos, pos, 6 * sizeof(double));
 }
 
@@ -43,6 +44,7 @@ QString RsiTrame::build() const
         "<Sen Type=\"ImFree\">\r\n"
         "<EStr></EStr>\r\n"
         "<MoveType>" + QString::number(m_isCartesian ? 1 : 0) + "</MoveType>\r\n"
+        "<Base>" + QString::number(m_isInRobotBase ? 1 : 0) + "</Base>\r\n"
         "<RKorr"
         " X=\"" + QString::number(m_pos[0], 'g', 6) + "\""
         " Y=\"" + QString::number(m_pos[1], 'g', 6) + "\""

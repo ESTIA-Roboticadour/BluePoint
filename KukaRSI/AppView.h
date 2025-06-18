@@ -25,6 +25,7 @@ public:
 
     void setConfig(const Config* config);
 	bool getJoggingMode() const { return m_isJoggingCartesian; }
+	bool getIsMovingInRobotBase() const { return m_isMovingInRobotBase; }
 
 public slots:
     void updatePose(double positions[6]);
@@ -40,30 +41,23 @@ public slots:
     void onConnectionTimeRemainingChanged(quint16 seconds);
     void onFreshRateChanged(double freshRateHz);
 
-protected:
-    void keyPressEvent(QKeyEvent* event) override;
-    void keyReleaseEvent(QKeyEvent* event) override;
-
 private slots:
     void onConnectButtonClicked();
     void onCancelButtonClicked();
 	void onDisconnectButtonClicked();
 	void onStartButtonClicked();
 	void onStopButtonClicked();
+    void onBaseComboBoxChanged(int index);
     void onMoveTabChanged(int index);
-
-    void onCartesianMovementButtonPressed(RobotKuka::MovementDirection direction);
-    void onCartesianMovementButtonReleased(RobotKuka::MovementDirection direction);
 
     void refreshUI();
 
 private:
-    void feedMonitoredKeys();
     void setupUI();
     void createMovementButtons(QGridLayout* layout);
     void createJointControlButtons(QGridLayout* layout);
     void createIOBtns(QGridLayout* layout);
-    QGroupBox* createPoseGroup(const QString& title, QList<QLineEdit*>& listToFeed);
+    QGroupBox* createPoseGroup(const QString& title, QList<QLabel*>& labelsToFeed, QList<QLineEdit*>& lineEditsToFeed);
     void switchConnectBtnToCancelBtn();
     void switchCancelBtnToConnectBtn();
     void setConnectionLabelText(const QString& text);
@@ -71,13 +65,8 @@ private:
     void setMoveAndIOButtonsEnabled(bool enabled) const;
     void setMoveAndIOButtonsChecked(bool checked) const;
     void setTimerIntervale(double freshRateHz);
-	void setJoggingMode(bool isCartesian);
-
-    bool isKeyPressed(Qt::Key key) const {
-        return m_pressedKeys.contains(key);
-    }
-    void handleKeyPressed(Qt::Key key);
-    void handleKeyReleased(Qt::Key key);
+	void setIsJoggingInCartesian(bool isJoggingInCartesian);
+	void setIsMovingInRobotBase(bool isMovingInRobotBase);
 
 signals:
     void connectButtonClicked();
@@ -86,8 +75,8 @@ signals:
     void startButtonClicked();
     void stopButtonClicked();
 
-    void cartesianMovementPressed(RobotKuka::MovementDirection direction);
-    void cartesianMovementReleased(RobotKuka::MovementDirection direction);
+    void cartesianMovementPressed(RobotKuka::Axis axis, bool positive);
+    void cartesianMovementReleased(RobotKuka::Axis axis);
     void articularMovementPressed(RobotKuka::Joint joint, bool positive);
     void articularMovementReleased(RobotKuka::Joint joint);
     void inputToggled(RobotKuka::IOInput input, bool enabled);
@@ -96,7 +85,8 @@ signals:
     void requestNewPose();
     void requestNewDelta();
 
-    void joggingModeChanged(bool isCartesian);
+    void isJoggingInCartesianChanged(bool isCartesian);
+	void isMovingInRobotBaseChanged(bool isMovingInRobotBase);
 
 private:
     QPushButton* m_connectButton{ nullptr };
@@ -108,9 +98,11 @@ private:
     QLabel* m_statusLabel{ nullptr };
     QLabel* m_robotStateLabel{ nullptr };
     QLabel* m_connectionLabel{ nullptr };
+    QList<QLabel*> m_poseLabels;
+    QList<QLabel*> m_deltaLabels;
     QList<QLineEdit*> m_poseLineEdits;
     QList<QLineEdit*> m_deltaLineEdits;
-    QMap<RobotKuka::MovementDirection, QPushButton*> m_movementButtons;
+    QList<QPushButton*> m_axisButtons;
     QList<QPushButton*> m_jointButtons;
     QList<QPushButton*> m_ioButtons;
 
@@ -118,8 +110,7 @@ private:
     double m_freshRateHz;
     bool m_isReadyToMove;
     bool m_isJoggingCartesian;
+    bool m_isMovingInRobotBase;
 
     bool m_isAzerty;
-    QSet<Qt::Key> m_pressedKeys;
-    QSet<Qt::Key> m_monitoredKeys;
 };
