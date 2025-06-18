@@ -124,14 +124,14 @@ bool AppModel::setupAddress(const RobotConfig* config)
 
 void AppModel::onCartesianMovementPressed(RobotKuka::MovementDirection direction)
 {
-	qDebug() << "Received onCartesianMovementPressed:" << RobotKuka::toString(direction);
+	//qDebug() << "Received onCartesianMovementPressed:" << RobotKuka::toString(direction);
 	if (m_robot)
 		m_robot->addMovement(direction);
 }
 
 void AppModel::onCartesianMovementReleased(RobotKuka::MovementDirection direction)
 {
-	qDebug() << "Received onCartesianMovementReleased:" << RobotKuka::toString(direction);
+	//qDebug() << "Received onCartesianMovementReleased:" << RobotKuka::toString(direction);
 	if (m_robot)
 		m_robot->removeMovement(direction);
 }

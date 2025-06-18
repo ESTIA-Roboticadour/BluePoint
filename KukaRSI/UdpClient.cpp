@@ -33,7 +33,7 @@ void UdpClient::open(const QHostAddress& address, quint16 port)
 
     if (bind(address, port)) 
     {
-        connect(m_udpSocket, &QUdpSocket::readyRead, this, &UdpClient::onReadyRead);
+        connect(m_udpSocket, &QUdpSocket::readyRead, this, &UdpClient::onReadyRead, Qt::DirectConnection);
         m_opened = true;
         emit opened(address, port);
     }

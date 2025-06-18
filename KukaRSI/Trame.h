@@ -5,6 +5,7 @@ class Trame
 {
 public:
     enum class Type {
+        RSI,
         CartesianMovement,
         ArticularMovement,
         SetVelocity,

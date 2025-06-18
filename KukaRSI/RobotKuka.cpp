@@ -1,11 +1,11 @@
 #include "RobotKuka.h"
 #include <memory>
 
-#include <cstring> // pour memcpy
+#include <cstring> // memcpy
 
 RobotKuka::RobotKuka(QObject* parent) :
 	QObject(parent),
-	m_status(Status::None),
+	m_status(Status::Ready),
 	m_robotRequestState(RobotState::None),
 	m_robotState(RobotState::None),
 	m_isConnected(false),
@@ -22,10 +22,12 @@ RobotKuka::RobotKuka(QObject* parent) :
 	m_currentPose(),
 	m_currentDelta(),
 	m_currentMovement(MovementFlags::fromInt(MovementDirection::None)),
-	m_trameStack()
+	m_deltaStep(0.5), // Default delta step
+	m_rsiTrame(),
+	m_lastIPOC()
 {
-	std::memcpy(m_currentPose, m_ZEROS, sizeof(m_ZEROS));
-	std::memcpy(m_currentDelta, m_ZEROS, sizeof(m_ZEROS));
+	std::memcpy(m_currentPose, m_ZEROS, 6 * sizeof(double));
+	std::memcpy(m_currentDelta, m_ZEROS, 6 * sizeof(double));
 }
 
 RobotKuka::~RobotKuka()
@@ -66,6 +68,7 @@ void RobotKuka::disconnectFromRobot()
 
 void RobotKuka::onUdpOpened(const QHostAddress& hostAddress, quint16 port)
 {
+	qInfo() << "UDP client opened at" << hostAddress.toString() << ":" << port;
 	disconnect(m_udpClient, &UdpClient::opened, this, &RobotKuka::onUdpOpened);
 	setStatus(Status::WaitingRobotConnection);
 
@@ -77,6 +80,7 @@ void RobotKuka::onUdpOpened(const QHostAddress& hostAddress, quint16 port)
 	{
 		m_connectionTimer = new QTimer(this);
 		m_connectionTimer->setInterval(1000); // 1 seconde
+		m_connectionTimer->setTimerType(Qt::PreciseTimer);
 		connect(m_connectionTimer, &QTimer::timeout, this, &RobotKuka::onConnectionTimeoutTick);
 	}
 
@@ -115,13 +119,18 @@ void RobotKuka::onInitialDatagramReceived(const QByteArray& data, const QHostAdd
 	{
 		m_watchdogTimer = new QTimer(this);
 		m_watchdogTimer->setInterval(WATCHDOG_TIMEOUT_MS);
+		m_watchdogTimer->setTimerType(Qt::PreciseTimer);
 		m_watchdogTimer->setSingleShot(true);
-		connect(m_watchdogTimer, &QTimer::timeout, this, &RobotKuka::onWatchdogTimeout);
+		connect(m_watchdogTimer, &QTimer::timeout, this, &RobotKuka::onWatchdogTimeout, Qt::DirectConnection);
 	}
 
+	m_robotAddress = QHostAddress(sender); // make sure it's a copy
+	m_robotPort = senderPort;
+	parseReceivedData(data);
 	m_isConnected = true;
+	qInfo() << QString("Connection established from %1:%2").arg(m_robotAddress.toString()).arg(m_robotPort);
 	setStatus(Status::Connected);
-	connect(m_udpClient, &UdpClient::datagramReceived, this, &RobotKuka::onDatagramReceived);
+	connect(m_udpClient, &UdpClient::datagramReceived, this, &RobotKuka::onDatagramReceived, Qt::DirectConnection);
 	emit connected();
 
 	m_watchdogTimer->start();
@@ -150,6 +159,8 @@ void RobotKuka::onDatagramReceived(const QByteArray& data, const QHostAddress& s
 	if (!m_isConnected) 
 		return;
 
+	m_rsiTrame.reset();
+	resetCurrentDelta();
 	m_watchdogTimer->start(); // Reset watchdog
 
 	// 1. Parse la trame reçue
@@ -168,7 +179,7 @@ void RobotKuka::onDatagramReceived(const QByteArray& data, const QHostAddress& s
 void RobotKuka::onWatchdogTimeout()
 {
 	setStatus(Status::Error);
-	emit errorOccurred(QString("Communication lost with robot (%1:%2").arg(m_robotAddress.toString()).arg(m_robotPort));
+	emit errorOccurred(QString("Communication lost with robot (%1:%2)").arg(m_robotAddress.toString()).arg(m_robotPort));
 	setRequestState(RobotState::None);
 	m_udpClient->close();
 }
@@ -180,7 +191,7 @@ bool RobotKuka::isConnected() const
 
 void RobotKuka::abortConnection()
 {
-	m_abortConnectionRequest = m_status == RobotKuka::Status::WaitingRobotConnection;
+	m_abortConnectionRequest = m_status == Status::WaitingRobotConnection;
 }
 
 void RobotKuka::closeUdpClient()
@@ -202,6 +213,7 @@ void RobotKuka::setRobotState(RobotState state)
 {
 	if (m_robotState != state)
 	{
+		//qDebug() << "Robot state: " + toString(state);
 		m_robotState = state;
 		emit robotStateChanged(m_robotState);
 	}
@@ -209,7 +221,58 @@ void RobotKuka::setRobotState(RobotState state)
 
 void RobotKuka::parseReceivedData(const QString& data)
 {
+	//qDebug() << "RECV: " + data;
+
+	m_lastIPOC = ipocFromTrame(data);
+	positionFromTrame(data, m_currentPose);
+
 	// to implement
+	//m_currentPose[0] += 0.1;
+	//m_currentPose[1] += 0.1;
+	//m_currentPose[2] += 0.1;
+	//m_currentPose[3] += 0.1;
+	//m_currentPose[4] += 0.1;
+	//m_currentPose[5] += 0.1;
+}
+
+QString RobotKuka::ipocFromTrame(const QString& trame)
+{
+	static const QString etiquette = "<IPOC>";
+	static int startIPOC;
+	static int endIPOC;
+	startIPOC = trame.lastIndexOf(etiquette) + etiquette.length();
+	endIPOC = trame.lastIndexOf("</IPOC");
+	return trame.mid(startIPOC, endIPOC - startIPOC);
+}
+
+void RobotKuka::positionFromTrame(const QString& trame, double pos[6])
+{
+	static const QString tag = "<RIst";
+	int start = trame.indexOf(tag);
+
+	if (start == -1)
+		return;
+
+	int end = trame.indexOf("/>", start);
+	if (end == -1)
+		return;
+
+	QString rist = trame.mid(start, end - start); // extrait la sous-chaîne "<RIst ..."
+
+	QMap<QString, int> indexMap = { {"X", 0}, {"Y", 1}, {"Z", 2}, {"A", 3}, {"B", 4}, {"C", 5} };
+
+	for (auto it = indexMap.constBegin(); it != indexMap.constEnd(); ++it) {
+		QString key = it.key() + "=\"";
+		int idx = rist.indexOf(key);
+		if (idx != -1) {
+			idx += key.length();
+			int endIdx = rist.indexOf("\"", idx);
+			if (endIdx != -1) {
+				QString valueStr = rist.mid(idx, endIdx - idx);
+				pos[it.value()] = valueStr.toDouble();
+			}
+		}
+	}
 }
 
 void RobotKuka::requestAutomate()
@@ -218,21 +281,21 @@ void RobotKuka::requestAutomate()
 	{
 		switch (m_robotRequestState)
 		{
-		case RobotKuka::RobotState::None:
-			m_robotState = m_robotRequestState;
+		case RobotState::None:
+			setRobotState(m_robotRequestState);
 			break;
-		case RobotKuka::RobotState::MoveCartesian:
-			m_robotState = m_robotRequestState;
+		case RobotState::MoveCartesianLIN:
+			setRobotState(m_robotRequestState);
 			break;
-		case RobotKuka::RobotState::MoveJoint:
-			m_robotState = m_robotRequestState;
+		case RobotState::MoveJoint:
+			setRobotState(m_robotRequestState);
 			break;
-		case RobotKuka::RobotState::StopMove:
-			m_robotState = m_robotRequestState;
+		case RobotState::StopMove:
+			setRobotState(m_robotRequestState);
 			break;
-		case RobotKuka::RobotState::DoNothing:
+		case RobotState::DoNothing:
 		default:
-			m_robotState = RobotState::DoNothing;
+			setRobotState(RobotState::DoNothing);
 			break;
 		}
 
@@ -244,42 +307,87 @@ void RobotKuka::stateAutomate()
 {
 	switch (m_robotState)
 	{
-	case RobotKuka::RobotState::None:
+	case RobotState::None:
 		m_robotRequestState = RobotState::DoNothing;
 		m_currentMovement = MovementFlags::fromInt(MovementDirection::None);
 		break;
-	case RobotKuka::RobotState::DoNothing:
+	case RobotState::DoNothing:
 		m_currentMovement = MovementFlags::fromInt(MovementDirection::None);
 		break;
-	case RobotKuka::RobotState::MoveCartesian:
+	case RobotState::MoveCartesianLIN:
+		// Base
+		if (m_currentMovement & MovementDirection::Forward) // X+
+			m_currentDelta[0] += m_deltaStep;
+		if (m_currentMovement & MovementDirection::Backward) // X-
+			m_currentDelta[0] -= m_deltaStep;
+
+		if (m_currentMovement & MovementDirection::Left) // Y+
+			m_currentDelta[1] += m_deltaStep;
+		if (m_currentMovement & MovementDirection::Right) // Y-
+			m_currentDelta[1] -= m_deltaStep;
+		
+		if (m_currentMovement & MovementDirection::Up) // Z+
+			m_currentDelta[2] += m_deltaStep;
+		if (m_currentMovement & MovementDirection::Down) // Z-
+			m_currentDelta[2] -= m_deltaStep;
+
+		// Tool
+		//if (m_currentMovement & MovementDirection::Left) // X+
+		//	m_currentDelta[0] += m_deltaStep;
+		//if (m_currentMovement & MovementDirection::Right) // X-
+		//	m_currentDelta[0] -= m_deltaStep;
+		//if (m_currentMovement & MovementDirection::Up) // Y+
+		//	m_currentDelta[1] += m_deltaStep;
+		//if (m_currentMovement & MovementDirection::Down) // Y-
+		//	m_currentDelta[1] -= m_deltaStep;
+		//if (m_currentMovement & MovementDirection::Forward) // Z+
+		//	m_currentDelta[2] += m_deltaStep;
+		//if (m_currentMovement & MovementDirection::Backward) // Z-
+		//	m_currentDelta[2] -= m_deltaStep;
 		break;
-	case RobotKuka::RobotState::MoveJoint:
+	case RobotState::MoveJoint:
 		break;
-	case RobotKuka::RobotState::StopMove:
+	case RobotState::StopMove:
 		m_currentMovement = MovementFlags::fromInt(MovementDirection::None);
 		break;
 	default:
 		break;
 	}
+
+	//qDebug() << "Current Delta:" << m_currentDelta[0] << m_currentDelta[1] << m_currentDelta[2];
+
+	m_rsiTrame.setPose(m_currentDelta);
+	m_rsiTrame.setIPOC(m_lastIPOC);
 }
 
 void RobotKuka::sendTrame()
 {
 	if (m_udpClient)
-		m_udpClient->sendData(m_trameStack.buildTrame(), m_robotAddress, m_robotPort);
+	{
+		QString trame = m_rsiTrame.build();
+		m_udpClient->sendData(trame, m_robotAddress, m_robotPort);
+		//qDebug() << "SEND: " + trame;
+	}
 }
 
 void RobotKuka::start()
 {
-	if (true || m_isConnected)
-		setStatus(RobotKuka::Status::ReadyToMove);
+	if (m_status == Status::Connected)
+	{
+		setStatus(Status::ReadyToMove);
+		m_robotRequestState = RobotState::MoveCartesianLIN;
+		emit started();
+	}
 }
 
 void RobotKuka::stop()
 {
-	// TODO : Implémenter l'arrêt
-	// stoper la tâche de surveillance de com ?
-	setStatus(RobotKuka::Status::Connected);
+	if (m_status == Status::ReadyToMove)
+	{
+		setStatus(Status::Connected);
+		m_robotRequestState = RobotState::DoNothing;
+		stopped();
+	}
 }
 
 void RobotKuka::addMovement(MovementDirection direction)
@@ -300,10 +408,10 @@ void RobotKuka::moveJoint(Joint joint, bool positive)
 
 void RobotKuka::stopMovement()
 {
+	m_robotRequestState = RobotState::StopMove;
 	m_currentMovement = MovementDirection::None;
 	//qDebug() << "Movement:" << m_currentMovement.toInt() << " " + QString("%1").arg(m_currentMovement.toInt(), 8, 2, QChar('0'));
-	//std::memcpy(m_currentDelta, m_ZEROS, sizeof(m_ZEROS));
-	m_robotState = RobotKuka::RobotState::StopMove;
+	//std::memcpy(m_currentDelta, m_ZEROS, 6 * sizeof(double));
 }
 
 void RobotKuka::setInput(IOInput input, bool enabled)
@@ -316,10 +424,15 @@ void RobotKuka::setOutput(IOOutput output, bool enabled)
 
 void RobotKuka::getCurrentPose(double currentPose[6]) const
 {
-	std::memcpy(currentPose, m_currentPose, sizeof(m_currentPose));
+	std::memcpy(currentPose, m_currentPose, 6 * sizeof(double));
 }
 
 void RobotKuka::getCurrentDelta(double currentDelta[6]) const
 {
-	std::memcpy(currentDelta, m_currentDelta, sizeof(m_currentDelta));
+	std::memcpy(currentDelta, m_currentDelta, 6 * sizeof(double));
+}
+
+void RobotKuka::resetCurrentDelta()
+{
+	std::memcpy(m_currentDelta, m_ZEROS, 6 * sizeof(double));
 }

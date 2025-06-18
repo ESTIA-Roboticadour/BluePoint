@@ -1,11 +1,12 @@
 #pragma once
 #include "RobotConfig.h"
 #include "UdpClient.h"
-#include "TrameStack.h"
+#include "RsiTrame.h"
 
 #include <QObject>
 #include <QHostAddress>
 #include <QTimer>
+#include <memory>
 
 class RobotKuka : public QObject
 {
@@ -28,7 +29,7 @@ public:
     {
         None,
         DoNothing,
-        MoveCartesian,
+        MoveCartesianLIN,
         MoveJoint,
         StopMove
     };
@@ -116,7 +117,7 @@ public:
         switch (behaviour) {
         case RobotState::None: return "None";
         case RobotState::DoNothing: return "Do Nothing";
-        case RobotState::MoveCartesian: return "Move Cartesian";
+        case RobotState::MoveCartesianLIN: return "Move Cartesian LIN";
         case RobotState::MoveJoint: return "Move Joint";
         case RobotState::StopMove: return "Stop Move";
         default: return "";
@@ -171,6 +172,7 @@ public:
     // Pose & Delta
     void getCurrentPose(double currentPose[6]) const;
     void getCurrentDelta(double currentDelta[6]) const;
+    void resetCurrentDelta();
 
 private slots:
     void onUdpOpened(const QHostAddress& hostAddress, quint16 port);
@@ -188,6 +190,9 @@ private:
     void setRequestState(RobotState newState) { m_robotRequestState = newState; }
     void setRobotState(RobotState state);
     void parseReceivedData(const QString& data);
+    QString ipocFromTrame(const QString& trame);
+    void positionFromTrame(const QString& trame, double pos[6]);
+
     void requestAutomate();
     void stateAutomate();
     void sendTrame();
@@ -217,17 +222,19 @@ private:
     bool m_abortConnectionRequest;
     bool m_initialDatagramReceived;
 
-    const QHostAddress m_robotAddress;
+    QHostAddress m_robotAddress;
     quint16 m_robotPort;
     QTimer* m_watchdogTimer;
-    const int WATCHDOG_TIMEOUT_MS = 20; // 20 ms
+    const int WATCHDOG_TIMEOUT_MS = 100; // 20 ms
 
     inline static const double m_ZEROS[6] = { 0., 0., 0., 0., 0., 0. };
     double m_currentPose[6]; // Positions X, Y, Z, A, B, C
 	double m_currentDelta[6]; // Positions dX, dY, dZ, dA, dB, dC
     MovementFlags m_currentMovement;
+    double m_deltaStep;
 
-    TrameStack m_trameStack;
+    RsiTrame m_rsiTrame;
+    QString m_lastIPOC;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(RobotKuka::MovementFlags)

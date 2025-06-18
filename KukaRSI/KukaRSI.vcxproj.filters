@@ -175,6 +175,9 @@
     <ClCompile Include="TrameStack.cpp">
       <Filter>Services\Trame</Filter>
     </ClCompile>
+    <ClCompile Include="RsiTrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ModelBase.h">
@@ -253,6 +256,9 @@
     </ClInclude>
     <ClInclude Include="TrameStack.h">
       <Filter>Services\Trame</Filter>
+    </ClInclude>
+    <ClInclude Include="RsiTrame.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

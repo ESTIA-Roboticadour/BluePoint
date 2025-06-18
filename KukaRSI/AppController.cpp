@@ -12,7 +12,7 @@ AppController::AppController(AppModel* model, AppView* view, QObject* parent):
 	m_view->onRobotStatusChanged(m_model->getRobotStatus());
 	m_view->onRobotStateChanged(m_model->getRobotState());
 
-	QTimer::singleShot(3000, [=]() { m_view->onRobotStatusChanged(RobotKuka::Status::Connected); });  // TODO : to delete
+	//QTimer::singleShot(3000, [=]() { m_view->onRobotStatusChanged(RobotKuka::Status::Connected); });  // TODO : to delete
 }
 
 AppController::~AppController()
@@ -37,7 +37,7 @@ void AppController::onViewRequestNewDelta()
 {
 	double currentDelta[6];
 	m_model->getCurrentDelta(currentDelta);
-	m_view->updatePose(currentDelta);
+	m_view->updateDelta(currentDelta);
 }
 
 void AppController::onModelReleased()

@@ -9,10 +9,10 @@ class TrameStack
 public:
     explicit TrameStack();
 
-    void addTrame(std::unique_ptr<Trame> trame);
+    void addTrame(std::shared_ptr<Trame> trame);
 
     QString buildTrame();
 
 private:
-    std::map<Trame::Type, std::unique_ptr<Trame>> m_trames;
+    std::map<Trame::Type, std::shared_ptr<Trame>> m_trames;
 };

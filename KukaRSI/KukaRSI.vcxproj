@@ -127,6 +127,7 @@
     <ClCompile Include="ModelBase.cpp" />
     <ClCompile Include="RobotConfig.cpp" />
     <ClCompile Include="RobotKuka.cpp" />
+    <ClCompile Include="RsiTrame.cpp" />
     <ClCompile Include="SetAccelTrame.cpp" />
     <ClCompile Include="SetVelocityTrame.cpp" />
     <ClCompile Include="TrameStack.cpp" />
@@ -166,6 +167,7 @@
     <QtMoc Include="RobotConfig.h" />
     <QtMoc Include="RobotKuka.h" />
     <QtMoc Include="UdpClient.h" />
+    <ClInclude Include="RsiTrame.h" />
     <ClInclude Include="SetAccelTrame.h" />
     <ClInclude Include="SetVelocityTrame.h" />
     <ClInclude Include="Trame.h" />

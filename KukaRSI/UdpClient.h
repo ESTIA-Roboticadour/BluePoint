@@ -12,6 +12,9 @@ public:
     explicit UdpClient(const QHostAddress& address, quint16 port, QObject* parent = nullptr);
     ~UdpClient();
 
+	QHostAddress address() const { return m_address; }
+	quint16 port() const { return m_port; }
+
     void close();
 
     void open();

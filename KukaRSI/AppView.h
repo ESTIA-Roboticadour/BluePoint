@@ -94,6 +94,8 @@ signals:
     void requestNewPose();
     void requestNewDelta();
 
+    // ajouté 
+
 private:
     QPushButton* m_connectButton{ nullptr };
     QPushButton* m_disconnectButton{ nullptr };

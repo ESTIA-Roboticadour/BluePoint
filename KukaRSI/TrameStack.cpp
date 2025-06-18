@@ -6,7 +6,7 @@ TrameStack::TrameStack() :
 {
 }
 
-void TrameStack::addTrame(std::unique_ptr<Trame> trame)
+void TrameStack::addTrame(std::shared_ptr<Trame> trame)
 {
 	// Remplace toute trame existante du même type
     m_trames[trame->type()] = std::move(trame);  // Transfert de propriété
@@ -20,6 +20,6 @@ QString TrameStack::buildTrame()
         frame << trame->build();
     }
 
-    m_trames.clear(); // Toutes les unique_ptr seront automatiquement détruites
+    m_trames.clear(); // Toutes les shared_ptr seront automatiquement détruites
     return frame.join(";");
 }
