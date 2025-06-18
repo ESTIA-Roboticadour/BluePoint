@@ -176,7 +176,7 @@
       <Filter>Services\Trame</Filter>
     </ClCompile>
     <ClCompile Include="RsiTrame.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Services\Trame</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -258,7 +258,7 @@
       <Filter>Services\Trame</Filter>
     </ClInclude>
     <ClInclude Include="RsiTrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Services\Trame</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

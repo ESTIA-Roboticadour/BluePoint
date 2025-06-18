@@ -176,6 +176,12 @@ void AppModel::onRobotFailedToConnect()
 	m_connectionTimeoutParameter.unlock();
 }
 
+void AppModel::onJoggingModeChanged(bool isCartesian)
+{
+	if (m_robot)
+		m_robot->setJoggingMode(isCartesian);
+}
+
 const Config* AppModel::getConfig() const
 {
 	return &m_config;

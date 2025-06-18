@@ -165,6 +165,8 @@ public:
     void moveJoint(Joint joint, bool positive);
     void stopMovement();
 
+    void setJoggingMode(bool isCartesian);
+
     // IO
     void setInput(IOInput input, bool enabled);
     void setOutput(IOOutput output, bool enabled);
@@ -232,6 +234,7 @@ private:
 	double m_currentDelta[6]; // Positions dX, dY, dZ, dA, dB, dC
     MovementFlags m_currentMovement;
     double m_deltaStep;
+	bool m_startInCartesian;
 
     RsiTrame m_rsiTrame;
     QString m_lastIPOC;

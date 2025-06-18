@@ -11,8 +11,6 @@ AppController::AppController(AppModel* model, AppView* view, QObject* parent):
 
 	m_view->onRobotStatusChanged(m_model->getRobotStatus());
 	m_view->onRobotStateChanged(m_model->getRobotState());
-
-	//QTimer::singleShot(3000, [=]() { m_view->onRobotStatusChanged(RobotKuka::Status::Connected); });  // TODO : to delete
 }
 
 AppController::~AppController()
@@ -65,6 +63,7 @@ void AppController::setupConnections()
 
 	connect(m_view, &AppView::requestNewPose, this, &AppController::onViewRequestNewPose);
 	connect(m_view, &AppView::requestNewDelta, this, &AppController::onViewRequestNewDelta);
+	connect(m_view, &AppView::joggingModeChanged, m_model, &AppModel::onJoggingModeChanged);
 
 	// Connexions AppModel -> AppView ou autres
 	connect(m_model, &AppModel::robotStatusChanged, m_view, &AppView::onRobotStatusChanged);

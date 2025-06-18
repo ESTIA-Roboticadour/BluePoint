@@ -19,7 +19,7 @@ AppView::AppView(QWidget* parent) :
 	m_jointButtons(),
 	m_ioButtons(),
 	m_isReadyToMove(false),
-	m_isMoveCartesianSelected(true),
+	m_isJoggingCartesian(true),
 	m_pressedKeys(),
 	m_monitoredKeys(),
 	m_isAzerty(true)
@@ -494,6 +494,15 @@ void AppView::setTimerIntervale(double freshRateHz)
 	}
 }
 
+void AppView::setJoggingMode(bool isCartesian)
+{
+	if (m_isJoggingCartesian != isCartesian)
+	{
+		m_isJoggingCartesian = isCartesian;
+		emit joggingModeChanged(m_isJoggingCartesian);
+	}
+}
+
 void AppView::setConfig(const Config* config)
 {
 	if (config)
@@ -567,7 +576,7 @@ void AppView::onStopButtonClicked()
 
 void AppView::onMoveTabChanged(int index)
 {
-	m_isMoveCartesianSelected = index == 0;
+	setJoggingMode(index == 0);
 	for (auto& pressedKey : m_pressedKeys)
 		handleKeyReleased(pressedKey);
 	m_pressedKeys.clear();
@@ -742,7 +751,7 @@ void AppView::onFreshRateChanged(double freshRateHz)
 
 void AppView::keyPressEvent(QKeyEvent* event)
 {
-	if (m_isReadyToMove && m_isMoveCartesianSelected)
+	if (m_isReadyToMove && m_isJoggingCartesian)
 	{
 		Qt::Key key = static_cast<Qt::Key>(event->key());
 
@@ -755,7 +764,7 @@ void AppView::keyPressEvent(QKeyEvent* event)
 
 void AppView::keyReleaseEvent(QKeyEvent* event)
 {
-	if (m_isReadyToMove && m_isMoveCartesianSelected)
+	if (m_isReadyToMove && m_isJoggingCartesian)
 	{
 		Qt::Key key = static_cast<Qt::Key>(event->key());
 

@@ -24,6 +24,7 @@ public:
     explicit AppView(QWidget* parent = nullptr);
 
     void setConfig(const Config* config);
+	bool getJoggingMode() const { return m_isJoggingCartesian; }
 
 public slots:
     void updatePose(double positions[6]);
@@ -70,6 +71,7 @@ private:
     void setMoveAndIOButtonsEnabled(bool enabled) const;
     void setMoveAndIOButtonsChecked(bool checked) const;
     void setTimerIntervale(double freshRateHz);
+	void setJoggingMode(bool isCartesian);
 
     bool isKeyPressed(Qt::Key key) const {
         return m_pressedKeys.contains(key);
@@ -94,7 +96,7 @@ signals:
     void requestNewPose();
     void requestNewDelta();
 
-    // ajouté 
+    void joggingModeChanged(bool isCartesian);
 
 private:
     QPushButton* m_connectButton{ nullptr };
@@ -115,7 +117,7 @@ private:
     QTimer m_uiTimer;
     double m_freshRateHz;
     bool m_isReadyToMove;
-    bool m_isMoveCartesianSelected;
+    bool m_isJoggingCartesian;
 
     bool m_isAzerty;
     QSet<Qt::Key> m_pressedKeys;

@@ -24,7 +24,8 @@ RobotKuka::RobotKuka(QObject* parent) :
 	m_currentMovement(MovementFlags::fromInt(MovementDirection::None)),
 	m_deltaStep(0.5), // Default delta step
 	m_rsiTrame(),
-	m_lastIPOC()
+	m_lastIPOC(),
+	m_startInCartesian(true) // Default to Cartesian mode
 {
 	std::memcpy(m_currentPose, m_ZEROS, 6 * sizeof(double));
 	std::memcpy(m_currentDelta, m_ZEROS, 6 * sizeof(double));
@@ -354,9 +355,7 @@ void RobotKuka::stateAutomate()
 		break;
 	}
 
-	//qDebug() << "Current Delta:" << m_currentDelta[0] << m_currentDelta[1] << m_currentDelta[2];
-
-	m_rsiTrame.setPose(m_currentDelta);
+	m_rsiTrame.setPose(m_robotState == RobotState::MoveCartesianLIN, m_currentDelta);
 	m_rsiTrame.setIPOC(m_lastIPOC);
 }
 
@@ -375,7 +374,7 @@ void RobotKuka::start()
 	if (m_status == Status::Connected)
 	{
 		setStatus(Status::ReadyToMove);
-		m_robotRequestState = RobotState::MoveCartesianLIN;
+		m_robotRequestState = m_startInCartesian ? RobotState::MoveCartesianLIN : RobotState::MoveJoint;
 		emit started();
 	}
 }
@@ -412,6 +411,18 @@ void RobotKuka::stopMovement()
 	m_currentMovement = MovementDirection::None;
 	//qDebug() << "Movement:" << m_currentMovement.toInt() << " " + QString("%1").arg(m_currentMovement.toInt(), 8, 2, QChar('0'));
 	//std::memcpy(m_currentDelta, m_ZEROS, 6 * sizeof(double));
+}
+
+void RobotKuka::setJoggingMode(bool isCartesian)
+{
+	if (m_status == Status::ReadyToMove)
+	{
+		m_robotRequestState = isCartesian ? RobotState::MoveCartesianLIN : RobotState::MoveJoint;
+	}
+	else
+	{
+		m_startInCartesian = isCartesian;
+	}
 }
 
 void RobotKuka::setInput(IOInput input, bool enabled)

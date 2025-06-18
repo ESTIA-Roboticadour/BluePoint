@@ -43,6 +43,7 @@ public slots:
     void onArticularMovementReleased(RobotKuka::Joint joint);
     void onInputToggled(RobotKuka::IOInput input, bool enabled);
     void onOutputToggled(RobotKuka::IOOutput output, bool enabled);
+    void onJoggingModeChanged(bool isCartesian);
 
 private slots:
     void onErrorOccurred(const QString& message);
