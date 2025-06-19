@@ -24,14 +24,6 @@
       <Parameter Name="DataSize" ParamID="2" ParamValue="0" />
     </Parameters>
   </RSIObject>
-  <RSIObject ObjType="SOURCE" ObjTypeID="45" ObjID="SOURCE1">
-    <Parameters>
-      <Parameter Name="Type" ParamID="1" ParamValue="1" />
-      <Parameter Name="Offset" ParamID="2" ParamValue="0" />
-      <Parameter Name="Amplitude" ParamID="3" ParamValue="50" />
-      <Parameter Name="Period" ParamID="4" ParamValue="5" />
-    </Parameters>
-  </RSIObject>
   <RSIObject ObjType="POSCORR" ObjTypeID="27" ObjID="POSCORR1">
     <Inputs>
       <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="1" />
@@ -58,7 +50,6 @@
       <Input InIdx="2" OutObjID="DIGOUT1" OutIdx="1" />
       <Input InIdx="3" OutObjID="DIGOUT2" OutIdx="1" />
       <Input InIdx="4" OutObjID="DIGOUT3" OutIdx="1" />
-      <Input InIdx="5" OutObjID="SOURCE1" OutIdx="1" />
     </Inputs>
     <Parameters>
       <Parameter Name="ConfigFile" ParamID="1" ParamValue="RSI_EthernetConfig.xml" IsRuntime="false" />

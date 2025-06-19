@@ -50,18 +50,6 @@
         <elementListCompartment Id="06e01483-b386-4bc9-8525-4ac3d760c8af" absoluteBounds="0.515, 4.885, 1.4700000000000002, 0.63399251302083326" name="RSIParameters" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </rSIElementShape>
-    <rSIElementShape Id="2dedaa42-fffe-41f9-acc8-0454d9015363" absoluteBounds="0.5, 5.75, 1.5, 1.6285953776041655" fillColor="BlanchedAlmond">
-      <rSIElementMoniker name="//SOURCE1" />
-      <relativeChildShapes>
-        <rSIOutPortShape Id="a6685103-4bbb-466a-9ec5-c74f0b2c1e2a" absoluteBounds="2, 6, 0.40000000596046448, 0.075000002980232239" fillColor="White">
-          <rSIOutPortMoniker name="//SOURCE1/Out1" />
-          <relativeChildShapes />
-        </rSIOutPortShape>
-      </relativeChildShapes>
-      <nestedChildShapes>
-        <elementListCompartment Id="fc3bcf8b-3410-4487-879e-98d182f98ada" absoluteBounds="0.515, 6.26, 1.4700000000000002, 1.0185953776041665" name="RSIParameters" titleTextColor="Black" itemTextColor="Black" />
-      </nestedChildShapes>
-    </rSIElementShape>
     <rSIElementShape Id="a895327e-9d92-4056-828e-5409d00df2f9" absoluteBounds="7.625, 0.5, 1.5, 2.8750000029802325" fillColor="BlanchedAlmond">
       <rSIElementMoniker name="//POSCORR1" />
       <relativeChildShapes>
@@ -236,12 +224,6 @@
       <nodes>
         <rSIInPortShapeMoniker Id="f4ee1154-9f4a-4d80-ae5a-3ba17aeb8d4c" />
         <rSIOutPortShapeMoniker Id="f1e5908a-b1f7-41e7-80fd-cc2e6aaa9f22" />
-      </nodes>
-    </rSISignalConnector>
-    <rSISignalConnector edgePoints="[(3.47499999403954 : 2.38750000149012); (3.01145832737287 : 2.38750000149012); (3.01145832737287 : 6.03750000149012); (2.40000000596046 : 6.03750000149012)]" manuallyRouted="true" fixedFrom="Caller" fixedTo="Caller" TargetRelationshipDomainClassId="e3f2b7da-330d-4daf-bd29-4d4ed734c0af">
-      <nodes>
-        <rSIInPortShapeMoniker Id="56f5f47d-66ba-46d3-8fe0-21fbe373e7a5" />
-        <rSIOutPortShapeMoniker Id="a6685103-4bbb-466a-9ec5-c74f0b2c1e2a" />
       </nodes>
     </rSISignalConnector>
     <rSISignalConnector edgePoints="[(7.22499999403954 : 0.787500001490116); (5.77500000596046 : 0.787500001490116)]" fixedFrom="Caller" fixedTo="Caller" TargetRelationshipDomainClassId="e3f2b7da-330d-4daf-bd29-4d4ed734c0af">

@@ -23,7 +23,6 @@
          <ELEMENT TAG="Digout.o1" TYPE="BOOL" INDX="2" />
          <ELEMENT TAG="Digout.o2" TYPE="BOOL" INDX="3" />
          <ELEMENT TAG="Digout.o3" TYPE="BOOL" INDX="4" />
-         <ELEMENT TAG="Source1" TYPE="DOUBLE" INDX="5" />
       </ELEMENTS>
    </SEND>
    <RECEIVE>

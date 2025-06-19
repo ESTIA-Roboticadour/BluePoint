@@ -37,17 +37,6 @@
         <rSIParameter name="DataSize" value="Bit" paramType="KUKA.RSIVisual.RSI_DataSize" minVal="-2147483648" maxVal="2147483647" isEnum="true" index="2" />
       </rSIParameters>
     </rSIElement>
-    <rSIElement name="SOURCE1" objType="SOURCE" objTypeID="45" maxInputs="0" maxOutputs="0">
-      <rSIOutPorts>
-        <rSIOutPort name="Out1" />
-      </rSIOutPorts>
-      <rSIParameters>
-        <rSIParameter name="Type" value="Sin" paramType="KUKA.RSIVisual.RSI_SourceType" minVal="-2147483648" maxVal="2147483647" isEnum="true" index="1" />
-        <rSIParameter name="Offset" value="0" paramType="System.Double" minVal="-2147483648" maxVal="2147483647" isEnum="false" index="2" />
-        <rSIParameter name="Amplitude" value="50" paramType="System.Double" minVal="-2147483648" maxVal="2147483647" isEnum="false" index="3" />
-        <rSIParameter name="Period" value="5" paramType="System.Double" minVal="-2147483648" maxVal="2147483647" isEnum="false" index="4" />
-      </rSIParameters>
-    </rSIElement>
     <rSIElement name="POSCORR1" objType="POSCORR" objTypeID="27" maxInputs="0" maxOutputs="0">
       <rSIInPorts>
         <rSIInPort name="CorrX" mandatory="false">
@@ -123,11 +112,7 @@
             <rSIOutPortMoniker name="//DIGOUT3/Out1" />
           </source>
         </rSIInPort>
-        <rSIInPort name="In5" mandatory="false">
-          <source>
-            <rSIOutPortMoniker name="//SOURCE1/Out1" />
-          </source>
-        </rSIInPort>
+        <rSIInPort name="In5" mandatory="false" />
         <rSIInPort name="In6" mandatory="false" />
       </rSIInPorts>
       <rSIOutPorts>
