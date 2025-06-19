@@ -25,8 +25,8 @@ RobotKuka::RobotKuka(QObject* parent) :
 	m_currentJoint(),
 	m_currentDelta(),
 	m_deltaStepCartesianTranslation(0.5), // Default delta step cartesian (mm)
-	m_deltaStepCartesianRotation(0.25), // Default delta step cartesian (°)
-	m_deltaStepJoint(0.05), // Default delta step joint (degrees)
+	m_deltaStepCartesianRotation(0.2), // Default delta step cartesian (°)
+	m_deltaStepJoint(0.025), // Default delta step joint (degrees)
 	m_joggingAxis(Axis::X), // Default axis
 	m_joggingJoint(Joint::J1), // Default joint
 	m_isMovePositive(true), // Default to positive movement

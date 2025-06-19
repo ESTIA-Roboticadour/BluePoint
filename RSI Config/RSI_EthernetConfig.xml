@@ -42,8 +42,6 @@
          <ELEMENT TAG="RKorr.J4" TYPE="DOUBLE" INDX="10" HOLDON="1" />
          <ELEMENT TAG="RKorr.J5" TYPE="DOUBLE" INDX="11" HOLDON="1" />
          <ELEMENT TAG="RKorr.J6" TYPE="DOUBLE" INDX="12" HOLDON="1" />
-         <ELEMENT TAG="FREE" TYPE="LONG" INDX="13" HOLDON="1" />
-         <ELEMENT TAG="DiO" TYPE="LONG" INDX="14" HOLDON="1" />
-      </ELEMENTS>
+       </ELEMENTS>
    </RECEIVE>
 </ROOT>

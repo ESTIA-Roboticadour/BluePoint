@@ -52,39 +52,6 @@
       <Parameter Name="RefCorrSys" ParamID="1" ParamValue="1" IsRuntime="false" />
     </Parameters>
   </RSIObject>
-  <RSIObject ObjType="MAP2DIGOUT" ObjTypeID="14" ObjID="MAP2DIGOUT1">
-    <Inputs>
-      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="14" />
-    </Inputs>
-    <Parameters>
-      <Parameter Name="Index" ParamID="1" ParamValue="2" />
-      <Parameter Name="DataSize" ParamID="2" ParamValue="2" />
-    </Parameters>
-  </RSIObject>
-  <RSIObject ObjType="MAP2SEN_PREA" ObjTypeID="17" ObjID="MAP2SEN_PREA1">
-    <Inputs>
-      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="1" />
-    </Inputs>
-    <Parameters>
-      <Parameter Name="Index" ParamID="1" ParamValue="1" />
-    </Parameters>
-  </RSIObject>
-  <RSIObject ObjType="MAP2SEN_PREA" ObjTypeID="17" ObjID="MAP2SEN_PREA2">
-    <Inputs>
-      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="2" />
-    </Inputs>
-    <Parameters>
-      <Parameter Name="Index" ParamID="1" ParamValue="2" />
-    </Parameters>
-  </RSIObject>
-  <RSIObject ObjType="MAP2SEN_PREA" ObjTypeID="17" ObjID="MAP2SEN_PREA3">
-    <Inputs>
-      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="3" />
-    </Inputs>
-    <Parameters>
-      <Parameter Name="Index" ParamID="1" ParamValue="3" />
-    </Parameters>
-  </RSIObject>
   <RSIObject ObjType="ETHERNET" ObjTypeID="64" ObjID="ETHERNET1">
     <Inputs>
       <Input InIdx="1" OutObjID="DIGIN1" OutIdx="1" />

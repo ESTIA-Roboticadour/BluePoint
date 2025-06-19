@@ -101,55 +101,6 @@
         <rSIParameter name="RefCorrSys" value="Base" paramType="KUKA.RSIVisual.RSI_TrafoCosys" minVal="-2147483648" maxVal="2147483647" isEnum="true" isRuntime="false" index="1" />
       </rSIParameters>
     </rSIElement>
-    <rSIElement name="MAP2DIGOUT1" objType="MAP2DIGOUT" objTypeID="14" maxInputs="0" maxOutputs="0">
-      <rSIInPorts>
-        <rSIInPort name="In1" signalType="Int">
-          <source>
-            <rSIOutPortMoniker name="//ETHERNET1/Out14" />
-          </source>
-        </rSIInPort>
-      </rSIInPorts>
-      <rSIParameters>
-        <rSIParameter name="Index" value="2" paramType="System.Int32" minVal="1" maxVal="4096" isEnum="false" index="1" />
-        <rSIParameter name="DataSize" value="Word" paramType="KUKA.RSIVisual.RSI_DataSizeX" minVal="-2147483648" maxVal="2147483647" isEnum="true" index="2" />
-      </rSIParameters>
-    </rSIElement>
-    <rSIElement name="MAP2SEN_PREA1" objType="MAP2SEN_PREA" objTypeID="17" maxInputs="0" maxOutputs="0">
-      <rSIInPorts>
-        <rSIInPort name="In1">
-          <source>
-            <rSIOutPortMoniker name="//ETHERNET1/Out1" />
-          </source>
-        </rSIInPort>
-      </rSIInPorts>
-      <rSIParameters>
-        <rSIParameter name="Index" value="1" paramType="System.Int32" minVal="1" maxVal="20" isEnum="false" index="1" />
-      </rSIParameters>
-    </rSIElement>
-    <rSIElement name="MAP2SEN_PREA2" objType="MAP2SEN_PREA" objTypeID="17" maxInputs="0" maxOutputs="0">
-      <rSIInPorts>
-        <rSIInPort name="In1">
-          <source>
-            <rSIOutPortMoniker name="//ETHERNET1/Out2" />
-          </source>
-        </rSIInPort>
-      </rSIInPorts>
-      <rSIParameters>
-        <rSIParameter name="Index" value="2" paramType="System.Int32" minVal="1" maxVal="20" isEnum="false" index="1" />
-      </rSIParameters>
-    </rSIElement>
-    <rSIElement name="MAP2SEN_PREA3" objType="MAP2SEN_PREA" objTypeID="17" maxInputs="0" maxOutputs="0">
-      <rSIInPorts>
-        <rSIInPort name="In1">
-          <source>
-            <rSIOutPortMoniker name="//ETHERNET1/Out3" />
-          </source>
-        </rSIInPort>
-      </rSIInPorts>
-      <rSIParameters>
-        <rSIParameter name="Index" value="3" paramType="System.Int32" minVal="1" maxVal="20" isEnum="false" index="1" />
-      </rSIParameters>
-    </rSIElement>
     <rSIElement name="ETHERNET1" objType="ETHERNET" objTypeID="64" maxInputs="64" maxOutputs="64">
       <rSIInPorts>
         <rSIInPort name="In1" mandatory="false">
