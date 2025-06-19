@@ -43,8 +43,7 @@ QString RsiTrame::build() const
     return (
         "<Sen Type=\"ImFree\">\r\n"
         "<EStr></EStr>\r\n"
-        "<MoveType>" + QString::number(m_isCartesian ? 1 : 0) + "</MoveType>\r\n"
-        "<Base>" + QString::number(m_isInRobotBase ? 1 : 0) + "</Base>\r\n"
+        //"<Base>" + QString::number(m_isInRobotBase ? 1 : 0) + "</Base>\r\n"
         "<RKorr"
         " X=\"" + QString::number(m_pos[0], 'g', 6) + "\""
         " Y=\"" + QString::number(m_pos[1], 'g', 6) + "\""

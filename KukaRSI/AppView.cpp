@@ -216,8 +216,7 @@ void AppView::createMovementButtons(QGridLayout* layout)
 	static const char axisLabels[6] = { 'X', 'Y', 'Z', 'A', 'B', 'C' };
 	for (int i = 0; i < 6; ++i)
 	{
-		QString label = QString("%1").arg(axisLabels[i]);
-		QLabel* axisLabel = new QLabel(label, this);
+		QLabel* axisLabel = new QLabel(QString("%1").arg(axisLabels[i]), this);
 		axisLabel->setMinimumWidth(15);
 		axisLabel->setAlignment(Qt::AlignCenter);
 		axisLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
@@ -627,7 +626,6 @@ void AppView::onRobotStatusChanged(RobotKuka::Status status)
 	setMoveAndIOButtonsEnabled(false);
 	setMoveAndIOButtonsChecked(false);
 	m_statusLabel->setText(RobotKuka::toString(status));
-	clearConnectionLabelText();
 	m_isReadyToMove = false;
 	// -----------------------------------
 
