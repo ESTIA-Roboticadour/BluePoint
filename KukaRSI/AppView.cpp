@@ -644,6 +644,7 @@ void AppView::onRobotStatusChanged(RobotKuka::Status status)
 		switchCancelBtnToConnectBtn();
 		m_disconnectButton->setEnabled(true);
 		m_startButton->setEnabled(true);
+		clearConnectionLabelText();
 		break;
 	case RobotKuka::Status::ReadyToMove:
 		m_isReadyToMove = true;

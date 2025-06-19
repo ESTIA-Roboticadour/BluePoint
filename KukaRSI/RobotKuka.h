@@ -241,7 +241,8 @@ private:
     inline static const double m_ZEROS[6] = { 0., 0., 0., 0., 0., 0. };
 	double m_currentPose[6]; // Positions X, Y, Z, A, B, C | Joints : J1, J2, J3, J4, J5, J6
 	double m_currentDelta[6]; // Positions dX, dY, dZ, dA, dB, dC | Joints : dJ1, dJ2, dJ3, dJ4, dJ5, dJ6
-    double m_deltaStepCartesian;
+    double m_deltaStepCartesianTranslation;
+    double m_deltaStepCartesianRotation;
     double m_deltaStepJoint;
     Axis m_currentAxis;
 	Joint m_currentJoint;

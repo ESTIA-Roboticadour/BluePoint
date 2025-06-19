@@ -21,8 +21,9 @@ RobotKuka::RobotKuka(QObject* parent) :
 	m_watchdogTimer(nullptr),
 	m_currentPose(),
 	m_currentDelta(),
-	m_deltaStepCartesian(0.5), // Default delta step cartesian (mm)
-	m_deltaStepJoint(0.5), // Default delta step joint (degrees)
+	m_deltaStepCartesianTranslation(0.5), // Default delta step cartesian (mm)
+	m_deltaStepCartesianRotation(0.25), // Default delta step cartesian (°)
+	m_deltaStepJoint(0.25), // Default delta step joint (degrees)
 	m_currentAxis(Axis::X), // Default axis
 	m_currentJoint(Joint::J1), // Default joint
 	m_isMovePositive(true), // Default to positive movement
@@ -318,7 +319,7 @@ void RobotKuka::stateAutomate()
 		break;
 
 	case RobotState::MoveCartesianLIN:
-		m_currentDelta[static_cast<int>(m_currentAxis)] = m_isMovePositive ? m_deltaStepCartesian : -m_deltaStepCartesian;
+		m_currentDelta[static_cast<int>(m_currentAxis)] = (m_currentAxis < 3 ? m_deltaStepCartesianTranslation : m_deltaStepCartesianRotation) * (m_isMovePositive ? 1. : -1.);
 		break;
 
 	case RobotState::MoveJoint:
