@@ -44,7 +44,7 @@ QString RsiTrame::build() const
 		"<Sen Type=\"ImFree\">\r\n"
 		"<EStr></EStr>\r\n";
 	trame += m_isCartesian ?
-		"<RKorr"
+		"<Corr"
 		" X=\"" + QString::number(m_pos[0], 'g', 6) + "\""
 		" Y=\"" + QString::number(m_pos[1], 'g', 6) + "\""
 		" Z=\"" + QString::number(m_pos[2], 'g', 6) + "\""
@@ -59,7 +59,7 @@ QString RsiTrame::build() const
 		" J6=\"0.0\""
 		" />\r\n"
 		:
-	"<RKorr"
+	"<Corr"
 		" X=\"0.0\""
 		" Y=\"0.0\""
 		" Z=\"0.0\""
@@ -75,7 +75,6 @@ QString RsiTrame::build() const
 		" />\r\n";
 
 	trame +=
-		"<DiO>125</DiO>\r\n"
 		"<IPOC>" + m_ipoc + "</IPOC>\r\n"
 		"</Sen>";
 

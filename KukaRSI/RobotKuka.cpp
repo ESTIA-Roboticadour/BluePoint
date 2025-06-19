@@ -74,6 +74,10 @@ void RobotKuka::disconnectFromRobot()
 {
 	if (!m_isConnected)
 		return;
+	if (m_watchdogTimer)
+		m_watchdogTimer->stop();
+
+	setRequestState(RobotState::None);
 
 	closeUdpClient();
 }
@@ -196,7 +200,7 @@ void RobotKuka::onWatchdogTimeout()
 	setStatus(Status::Error);
 	emit errorOccurred(QString("Communication lost with robot (%1:%2)").arg(m_robotAddress.toString()).arg(m_robotPort));
 	setRequestState(RobotState::None);
-	m_udpClient->close();
+	closeUdpClient();
 }
 
 void RobotKuka::abortConnection()
@@ -206,8 +210,11 @@ void RobotKuka::abortConnection()
 
 void RobotKuka::closeUdpClient()
 {
-	if (m_udpClient && m_udpClient->isOpened()) {
-		m_udpClient->close();
+	if (m_udpClient)
+	{
+		disconnect(m_udpClient, &UdpClient::datagramReceived, this, &RobotKuka::onDatagramReceived);
+		if (m_udpClient->isOpened())
+			m_udpClient->close();
 	}
 }
 
@@ -340,6 +347,7 @@ void RobotKuka::requestAutomate()
 
 void RobotKuka::stateAutomate()
 {
+	static int joggingAxisIndex;
 	switch (m_robotState)
 	{
 	case RobotState::None:
@@ -350,7 +358,8 @@ void RobotKuka::stateAutomate()
 		break;
 
 	case RobotState::MoveCartesianLIN:
-		m_currentDelta[static_cast<int>(m_joggingAxis)] = (m_joggingAxis < 3 ? m_deltaStepCartesianTranslation : m_deltaStepCartesianRotation) * (m_isMovePositive ? 1. : -1.);
+		joggingAxisIndex = static_cast<int>(m_joggingAxis);
+		m_currentDelta[joggingAxisIndex] = (joggingAxisIndex < 3 ? m_deltaStepCartesianTranslation : m_deltaStepCartesianRotation) * (m_isMovePositive ? 1. : -1.);
 		break;
 
 	case RobotState::MoveJoint:
