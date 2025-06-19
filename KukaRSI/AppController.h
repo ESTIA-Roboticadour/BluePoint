@@ -18,8 +18,7 @@ public:
 private slots:
 	// Inherited via WidgetControllerBase
 	void onViewDestroyed() override;
-	void onViewRequestNewPose();
-	void onViewRequestNewDelta();
+	void onViewRequestRefreshUI(bool isCartesian);
 
 	void onModelReleased();
 

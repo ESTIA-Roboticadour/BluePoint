@@ -182,6 +182,7 @@ public:
 
     // Pose & Delta
     void getCurrentPose(double currentPose[6]) const;
+    void getCurrentJoint(double currentPose[6]) const;
     void getCurrentDelta(double currentDelta[6]) const;
     void resetCurrentDelta();
 
@@ -201,8 +202,10 @@ private:
     void setRequestState(RobotState newState) { m_robotRequestState = newState; }
     void setRobotState(RobotState state);
     void parseReceivedData(const QString& data);
+    
     QString ipocFromTrame(const QString& trame);
-    void positionFromTrame(const QString& trame, double pos[6]);
+    void cartesianPositionFromTrame(const QString& trame, double pos[6]);
+    void jointPositionFromTrame(const QString& trame, double pos[6]);
 
     void requestAutomate();
     void stateAutomate();
@@ -239,13 +242,14 @@ private:
     const int WATCHDOG_TIMEOUT_MS = 100; // 20 ms
 
     inline static const double m_ZEROS[6] = { 0., 0., 0., 0., 0., 0. };
-	double m_currentPose[6]; // Positions X, Y, Z, A, B, C | Joints : J1, J2, J3, J4, J5, J6
+	double m_currentPose[6]; // Positions X, Y, Z, A, B, C
+    double m_currentJoint[6]; // Joints : J1, J2, J3, J4, J5, J6
 	double m_currentDelta[6]; // Positions dX, dY, dZ, dA, dB, dC | Joints : dJ1, dJ2, dJ3, dJ4, dJ5, dJ6
     double m_deltaStepCartesianTranslation;
     double m_deltaStepCartesianRotation;
     double m_deltaStepJoint;
-    Axis m_currentAxis;
-	Joint m_currentJoint;
+    Axis m_joggingAxis;
+	Joint m_joggingJoint;
     bool m_isMovePositive;
 	bool m_isMovingInRobotBase; // true = BASE, false = TOOL
 

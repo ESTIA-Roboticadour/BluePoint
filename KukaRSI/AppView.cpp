@@ -26,7 +26,8 @@ AppView::AppView(QWidget* parent) :
 {
 	setupUI();
 	m_uiTimer.setInterval(static_cast<int>(1000.0 / m_freshRateHz));
-	connect(&m_uiTimer, &QTimer::timeout, this, &AppView::refreshUI);
+	m_uiTimer.setTimerType(Qt::PreciseTimer);
+	connect(&m_uiTimer, &QTimer::timeout, this, &AppView::refreshUI, Qt::DirectConnection);
 }
 
 void AppView::setupUI()
@@ -189,6 +190,8 @@ void AppView::setupUI()
 
 	auto* positionGroup = createPoseGroup("Position", m_poseLabels, m_poseLineEdits);
 	auto* deltaGroup = createPoseGroup("Delta", m_deltaLabels, m_deltaLineEdits);
+	m_isJoggingCartesian = !m_isJoggingCartesian;	// Petite astuce Sioux pour actualis
+	setIsJoggingInCartesian(!m_isJoggingCartesian); //
 
 	posDeltaLayout->addWidget(positionGroup);
 	posDeltaLayout->addWidget(deltaGroup);
@@ -519,6 +522,7 @@ void AppView::setIsJoggingInCartesian(bool isCartesian)
 			m_deltaLabels[4]->setText("dJ5");
 			m_deltaLabels[5]->setText("dJ6");
 		}
+		emit requestRefreshUI(m_isJoggingCartesian);
 
 		emit isJoggingInCartesianChanged(m_isJoggingCartesian);
 	}
@@ -572,8 +576,7 @@ void AppView::synchronizeIO(bool inputs[16], bool outputs[16])
 
 void AppView::refreshUI()
 {
-	emit requestNewPose();
-	emit requestNewDelta();
+	emit requestRefreshUI(m_isJoggingCartesian);
 }
 
 void AppView::onConnectButtonClicked()
@@ -668,8 +671,7 @@ void AppView::onRobotStateChanged(RobotKuka::RobotState state)
 
 void AppView::onRobotConnected()
 {
-	emit requestNewPose();
-	emit requestNewDelta();
+	emit requestRefreshUI(m_isJoggingCartesian);
 }
 
 void AppView::onRobotDisconnected()

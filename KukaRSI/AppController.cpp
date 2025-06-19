@@ -24,18 +24,17 @@ void AppController::onViewDestroyed()
 	m_model->release();
 }
 
-void AppController::onViewRequestNewPose()
+void AppController::onViewRequestRefreshUI(bool isCartesian)
 {
-	double currentPose[6];
-	m_model->getCurrentPose(currentPose);
-	m_view->updatePose(currentPose);
-}
+	double tmp[6];
+	if (isCartesian)
+		m_model->getCurrentPose(tmp);
+	else
+		m_model->getCurrentJoint(tmp);
+	m_view->updatePose(tmp);
 
-void AppController::onViewRequestNewDelta()
-{
-	double currentDelta[6];
-	m_model->getCurrentDelta(currentDelta);
-	m_view->updateDelta(currentDelta);
+	m_model->getCurrentDelta(tmp);
+	m_view->updateDelta(tmp);
 }
 
 void AppController::onModelReleased()
@@ -61,8 +60,7 @@ void AppController::setupConnections()
 	connect(m_view, &AppView::inputToggled, m_model, &AppModel::onInputToggled);
 	connect(m_view, &AppView::outputToggled, m_model, &AppModel::onOutputToggled);
 
-	connect(m_view, &AppView::requestNewPose, this, &AppController::onViewRequestNewPose);
-	connect(m_view, &AppView::requestNewDelta, this, &AppController::onViewRequestNewDelta);
+	connect(m_view, &AppView::requestRefreshUI, this, &AppController::onViewRequestRefreshUI, Qt::DirectConnection);
 	connect(m_view, &AppView::isMovingInRobotBaseChanged, m_model, &AppModel::onIsInRobotBaseChanged);
 
 	// Connexions AppModel -> AppView ou autres
@@ -93,8 +91,7 @@ void AppController::removeConnections()
 	disconnect(m_view, &AppView::inputToggled, m_model, &AppModel::onInputToggled);
 	disconnect(m_view, &AppView::outputToggled, m_model, &AppModel::onOutputToggled);
 
-	disconnect(m_view, &AppView::requestNewPose, this, &AppController::onViewRequestNewPose);
-	disconnect(m_view, &AppView::requestNewDelta, this, &AppController::onViewRequestNewDelta);
+	disconnect(m_view, &AppView::requestRefreshUI, this, &AppController::onViewRequestRefreshUI);
 
 	// Connexions AppModel -> AppView ou autres
 	disconnect(m_model, &AppModel::robotStatusChanged, m_view, &AppView::onRobotStatusChanged);

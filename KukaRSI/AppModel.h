@@ -34,6 +34,7 @@ public:
     void release() override;
 
     void getCurrentPose(double currentPose[6]) const;
+    void getCurrentJoint(double currentJoint[6]) const;
     void getCurrentDelta(double currentDelta[6]) const;
 
 public slots:

@@ -82,8 +82,7 @@ signals:
     void inputToggled(RobotKuka::IOInput input, bool enabled);
     void outputToggled(RobotKuka::IOOutput output, bool enabled);
 
-    void requestNewPose();
-    void requestNewDelta();
+    void requestRefreshUI(bool isCartesian);
 
     void isJoggingInCartesianChanged(bool isCartesian);
 	void isMovingInRobotBaseChanged(bool isMovingInRobotBase);

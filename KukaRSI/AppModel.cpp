@@ -52,12 +52,20 @@ void AppModel::release()
 
 void AppModel::getCurrentPose(double currentPose[6]) const
 {
-	m_robot->getCurrentPose(currentPose);
+	if (m_robot)
+		m_robot->getCurrentPose(currentPose);
+}
+
+void AppModel::getCurrentJoint(double currentJoint[6]) const
+{
+	if (m_robot)
+		m_robot->getCurrentJoint(currentJoint);
 }
 
 void AppModel::getCurrentDelta(double currentDelta[6]) const
 {
-	m_robot->getCurrentDelta(currentDelta);
+	if (m_robot)
+		m_robot->getCurrentDelta(currentDelta);
 }
 
 void AppModel::setupConfig(const RobotConfig* config)

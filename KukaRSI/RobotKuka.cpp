@@ -3,6 +3,8 @@
 
 #include <cstring> // memcpy
 
+#define ARRAY_6_DOUBLE_SIZE    6 * sizeof(double)
+
 RobotKuka::RobotKuka(QObject* parent) :
 	QObject(parent),
 	m_status(Status::Ready),
@@ -20,19 +22,21 @@ RobotKuka::RobotKuka(QObject* parent) :
 	m_robotPort(0),
 	m_watchdogTimer(nullptr),
 	m_currentPose(),
+	m_currentJoint(),
 	m_currentDelta(),
 	m_deltaStepCartesianTranslation(0.5), // Default delta step cartesian (mm)
 	m_deltaStepCartesianRotation(0.25), // Default delta step cartesian (°)
-	m_deltaStepJoint(0.25), // Default delta step joint (degrees)
-	m_currentAxis(Axis::X), // Default axis
-	m_currentJoint(Joint::J1), // Default joint
+	m_deltaStepJoint(0.05), // Default delta step joint (degrees)
+	m_joggingAxis(Axis::X), // Default axis
+	m_joggingJoint(Joint::J1), // Default joint
 	m_isMovePositive(true), // Default to positive movement
 	m_isMovingInRobotBase(true), // Default to BASE mode
 	m_rsiTrame(),
 	m_lastIPOC()
 {
-	std::memcpy(m_currentPose, m_ZEROS, 6 * sizeof(double));
-	std::memcpy(m_currentDelta, m_ZEROS, 6 * sizeof(double));
+	std::memcpy(m_currentPose, m_ZEROS, ARRAY_6_DOUBLE_SIZE);
+	std::memcpy(m_currentJoint, m_ZEROS, ARRAY_6_DOUBLE_SIZE);
+	std::memcpy(m_currentDelta, m_ZEROS, ARRAY_6_DOUBLE_SIZE);
 }
 
 RobotKuka::~RobotKuka()
@@ -76,7 +80,7 @@ void RobotKuka::disconnectFromRobot()
 
 void RobotKuka::onUdpOpened(const QHostAddress& hostAddress, quint16 port)
 {
-	qInfo() << "UDP client opened at" << hostAddress.toString() << ":" << port;
+	qInfo() << QString("UDP client opened at %1:%2").arg(hostAddress.toString()).arg(port);
 	disconnect(m_udpClient, &UdpClient::opened, this, &RobotKuka::onUdpOpened);
 	setStatus(Status::WaitingRobotConnection);
 
@@ -227,18 +231,9 @@ void RobotKuka::setRobotState(RobotState state)
 
 void RobotKuka::parseReceivedData(const QString& data)
 {
-	//qDebug() << "RECV: " + data;
-
 	m_lastIPOC = ipocFromTrame(data);
-	positionFromTrame(data, m_currentPose);
-
-	// to implement
-	//m_currentPose[0] += 0.1;
-	//m_currentPose[1] += 0.1;
-	//m_currentPose[2] += 0.1;
-	//m_currentPose[3] += 0.1;
-	//m_currentPose[4] += 0.1;
-	//m_currentPose[5] += 0.1;
+	cartesianPositionFromTrame(data, m_currentPose);
+	jointPositionFromTrame(data, m_currentJoint);
 }
 
 QString RobotKuka::ipocFromTrame(const QString& trame)
@@ -251,13 +246,16 @@ QString RobotKuka::ipocFromTrame(const QString& trame)
 	return trame.mid(startIPOC, endIPOC - startIPOC);
 }
 
-void RobotKuka::positionFromTrame(const QString& trame, double pos[6])
+void RobotKuka::cartesianPositionFromTrame(const QString& trame, double pos[6])
 {
 	static const QString tag = "<RIst";
 	int start = trame.indexOf(tag);
 
 	if (start == -1)
+	{
+		qWarning() << "Cartesian position not found in trame. Missing tag: RIst";
 		return;
+	}
 
 	int end = trame.indexOf("/>", start);
 	if (end == -1)
@@ -275,6 +273,39 @@ void RobotKuka::positionFromTrame(const QString& trame, double pos[6])
 			int endIdx = rist.indexOf("\"", idx);
 			if (endIdx != -1) {
 				QString valueStr = rist.mid(idx, endIdx - idx);
+				pos[it.value()] = valueStr.toDouble();
+			}
+		}
+	}
+}
+
+void RobotKuka::jointPositionFromTrame(const QString& trame, double pos[6])
+{
+	static const QString tag = "<AIPos";
+	int start = trame.indexOf(tag);
+
+	if (start == -1)
+	{
+		qWarning() << "Joint position not found in trame. Missing tag: AIPos";
+		return;
+	}
+
+	int end = trame.indexOf("/>", start);
+	if (end == -1)
+		return;
+
+	QString aipos = trame.mid(start, end - start); // extrait la sous-chaîne "<AIPos ..."
+
+	QMap<QString, int> indexMap = { {"A1", 0}, {"A2", 1}, {"A3", 2}, {"A4", 3}, {"A5", 4}, {"A6", 5} };
+
+	for (auto it = indexMap.constBegin(); it != indexMap.constEnd(); ++it) {
+		QString key = it.key() + "=\"";
+		int idx = aipos.indexOf(key);
+		if (idx != -1) {
+			idx += key.length();
+			int endIdx = aipos.indexOf("\"", idx);
+			if (endIdx != -1) {
+				QString valueStr = aipos.mid(idx, endIdx - idx);
 				pos[it.value()] = valueStr.toDouble();
 			}
 		}
@@ -319,11 +350,11 @@ void RobotKuka::stateAutomate()
 		break;
 
 	case RobotState::MoveCartesianLIN:
-		m_currentDelta[static_cast<int>(m_currentAxis)] = (m_currentAxis < 3 ? m_deltaStepCartesianTranslation : m_deltaStepCartesianRotation) * (m_isMovePositive ? 1. : -1.);
+		m_currentDelta[static_cast<int>(m_joggingAxis)] = (m_joggingAxis < 3 ? m_deltaStepCartesianTranslation : m_deltaStepCartesianRotation) * (m_isMovePositive ? 1. : -1.);
 		break;
 
 	case RobotState::MoveJoint:
-		m_currentDelta[static_cast<int>(m_currentJoint)] = m_isMovePositive ? m_deltaStepJoint : -m_deltaStepJoint;
+		m_currentDelta[static_cast<int>(m_joggingJoint)] = m_isMovePositive ? m_deltaStepJoint : -m_deltaStepJoint;
 		break;
 
 	case RobotState::StopMove:
@@ -375,7 +406,7 @@ void RobotKuka::moveAxis(Axis axis, bool positive)
 {
 	if (isReadyToMove())
 	{
-		m_currentAxis = axis;
+		m_joggingAxis = axis;
 		m_isMovePositive = positive;
 		m_robotRequestState = RobotState::MoveCartesianLIN; // at the end
 	}
@@ -385,7 +416,7 @@ void RobotKuka::moveJoint(Joint joint, bool positive)
 {
 	if (isReadyToMove())
 	{
-		m_currentJoint = joint;
+		m_joggingJoint = joint;
 		m_isMovePositive = positive;
 		m_robotRequestState = RobotState::MoveJoint; // at the end
 	}
@@ -406,15 +437,20 @@ void RobotKuka::setOutput(IOOutput output, bool enabled)
 
 void RobotKuka::getCurrentPose(double currentPose[6]) const
 {
-	std::memcpy(currentPose, m_currentPose, 6 * sizeof(double));
+	std::memcpy(currentPose, m_currentPose, ARRAY_6_DOUBLE_SIZE);
+}
+
+void RobotKuka::getCurrentJoint(double currentJoint[6]) const
+{
+	std::memcpy(currentJoint, m_currentJoint, ARRAY_6_DOUBLE_SIZE);
 }
 
 void RobotKuka::getCurrentDelta(double currentDelta[6]) const
 {
-	std::memcpy(currentDelta, m_currentDelta, 6 * sizeof(double));
+	std::memcpy(currentDelta, m_currentDelta, ARRAY_6_DOUBLE_SIZE);
 }
 
 void RobotKuka::resetCurrentDelta()
 {
-	std::memcpy(m_currentDelta, m_ZEROS, 6 * sizeof(double));
+	std::memcpy(m_currentDelta, m_ZEROS, ARRAY_6_DOUBLE_SIZE);
 }
