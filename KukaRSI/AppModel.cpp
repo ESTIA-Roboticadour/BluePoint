@@ -14,7 +14,10 @@ AppModel::AppModel(const RobotConfig* config, QObject* parent) :
 	m_connectionGroup(GroupParameter("Connection", this)),
 	m_connectionTimeoutParameter(NumericalParameter("Connection Timeout (s)", 60, this)),
 	m_uiGroup(GroupParameter("UI", this)),
-	m_freshRateParameter(NumericalParameter("Fresh Rate (Hz)", 20, this))
+	m_freshRateParameter(NumericalParameter("Fresh Rate (Hz)", 20, this)),
+	m_cartesianTranslationStep(NumericalParameter("Cartesian Translation Step (mm)", 0.25, this)),
+	m_cartesianRotationStep(NumericalParameter("Cartesian Rotation Step (°)", 0.25, this)),
+	m_jointStep(NumericalParameter("Joint Step (°)", 0.025, this))
 {
 	setupConfig(config);
 	if (config && setupAddress(config))
@@ -75,11 +78,29 @@ void AppModel::setupConfig(const RobotConfig* config)
 	m_freshRateParameter.setMaximum(60);
 	m_connectionTimeoutParameter.setMaximum(300);
 
+	m_cartesianTranslationStep.setIncrement(0.001);
+	m_cartesianTranslationStep.setMinimum(0.001);
+	m_cartesianTranslationStep.setMaximum(0.5);
+	m_cartesianTranslationStep.setValue(0.25);
+
+	m_cartesianRotationStep.setIncrement(0.001);
+	m_cartesianRotationStep.setMinimum(0.001);
+	m_cartesianRotationStep.setMaximum(0.25);
+	m_cartesianRotationStep.setValue(0.125);
+
+	m_jointStep.setIncrement(0.001);
+	m_jointStep.setMinimum(0.001);
+	m_jointStep.setMaximum(0.05);
+	m_jointStep.setValue(0.01);
+
 	m_robotGroup.addParameter(&m_addressParameter);
 	m_robotGroup.addParameter(&m_portParameter);
 	m_robotGroup.addParameter(&m_speedParameter);
 	m_robotGroup.addParameter(&m_accelParameter);
 	m_robotGroup.addParameter(&m_toolParameter);
+	m_robotGroup.addParameter(&m_cartesianTranslationStep);
+	m_robotGroup.addParameter(&m_cartesianRotationStep);
+	m_robotGroup.addParameter(&m_jointStep);
 
 	m_connectionGroup.addParameter(&m_connectionTimeoutParameter);
 
@@ -107,6 +128,9 @@ void AppModel::setupConfig(const RobotConfig* config)
 	m_toolParameter.lock();
 
 	connect(&m_freshRateParameter, &NumericalParameter::valueChanged, this, &AppModel::freshRateChanged);
+	connect(&m_cartesianTranslationStep, &NumericalParameter::valueChanged, this, &AppModel::onCartesianTranslationStepChanged);
+	connect(&m_cartesianRotationStep, &NumericalParameter::valueChanged, this, &AppModel::onCartesianRotationStepChanged);
+	connect(&m_jointStep, &NumericalParameter::valueChanged, this, &AppModel::onJointStepChanged);
 }
 
 bool AppModel::setupAddress(const RobotConfig* config)
@@ -188,6 +212,24 @@ void AppModel::onRobotDisconnected()
 void AppModel::onRobotFailedToConnect()
 {
 	m_connectionTimeoutParameter.unlock();
+}
+
+void AppModel::onCartesianTranslationStepChanged(double value)
+{
+	if (m_robot)
+		m_robot->setCartesianTranslationStep(value);
+}
+
+void AppModel::onCartesianRotationStepChanged(double value)
+{
+	if (m_robot)
+		m_robot->setCartesianRotationStep(value);
+}
+
+void AppModel::onJointStepChanged(double value)
+{
+	if (m_robot)
+		m_robot->setJointStep(value);
 }
 
 const Config* AppModel::getConfig() const

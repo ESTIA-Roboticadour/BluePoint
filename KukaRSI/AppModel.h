@@ -51,6 +51,10 @@ private slots:
     void onRobotConnected();
     void onRobotDisconnected();
     void onRobotFailedToConnect();
+
+    void onCartesianTranslationStepChanged(double value);
+    void onCartesianRotationStepChanged(double value);
+    void onJointStepChanged(double value);
     
 private:
     void setupConfig(const RobotConfig* config);
@@ -84,4 +88,7 @@ private:
     NumericalParameter m_connectionTimeoutParameter;
     GroupParameter m_uiGroup;
     NumericalParameter m_freshRateParameter;
+    NumericalParameter m_cartesianTranslationStep;
+    NumericalParameter m_cartesianRotationStep;
+    NumericalParameter m_jointStep;
 };

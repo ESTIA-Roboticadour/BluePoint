@@ -186,6 +186,10 @@ public:
     void getCurrentDelta(double currentDelta[6]) const;
     void resetCurrentDelta();
 
+    void setCartesianTranslationStep(double step);
+    void setCartesianRotationStep(double step);
+    void setJointStep(double step);
+
 private slots:
     void onUdpOpened(const QHostAddress& hostAddress, quint16 port);
     void onUdpFailedToOpen(const QHostAddress& hostAddress, quint16 port);

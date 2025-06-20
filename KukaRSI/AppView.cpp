@@ -540,15 +540,7 @@ void AppView::setIsMovingInRobotBase(bool isMovingInRobotBase)
 void AppView::setConfig(const Config* config)
 {
 	if (config)
-	{
-		QList<ParameterBase*> params = config->getParameters();
-		QList<const ParameterBase*> constParams;
-		for (auto* param : params)
-		{
-			constParams.append(param);
-		}
-		m_parametersView->setParameters(constParams);
-	}
+		m_parametersView->setParameters(config->getParameters());
 }
 
 void AppView::updatePose(double positions[6])

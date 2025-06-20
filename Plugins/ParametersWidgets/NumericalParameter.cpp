@@ -134,7 +134,7 @@ double NumericalParameter::getMaximum() const
 	return m_maximum;
 }
 
-int NumericalParameter::getIncrement() const
+double NumericalParameter::getIncrement() const
 {
 	return m_increment;
 }

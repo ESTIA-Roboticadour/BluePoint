@@ -24,8 +24,8 @@ RobotKuka::RobotKuka(QObject* parent) :
 	m_currentPose(),
 	m_currentJoint(),
 	m_currentDelta(),
-	m_deltaStepCartesianTranslation(0.5), // Default delta step cartesian (mm)
-	m_deltaStepCartesianRotation(0.2), // Default delta step cartesian (°)
+	m_deltaStepCartesianTranslation(0.25), // Default delta step cartesian (mm)
+	m_deltaStepCartesianRotation(0.25), // Default delta step cartesian (°)
 	m_deltaStepJoint(0.025), // Default delta step joint (degrees)
 	m_joggingAxis(Axis::X), // Default axis
 	m_joggingJoint(Joint::J1), // Default joint
@@ -461,4 +461,34 @@ void RobotKuka::getCurrentDelta(double currentDelta[6]) const
 void RobotKuka::resetCurrentDelta()
 {
 	std::memcpy(m_currentDelta, m_ZEROS, ARRAY_6_DOUBLE_SIZE);
+}
+
+void RobotKuka::setCartesianTranslationStep(double step)
+{
+	if (step < 0.001)
+		step = 0.001;
+	else if (step > 0.5)
+		step = 0.5;
+
+	m_deltaStepCartesianTranslation = step;
+}
+
+void RobotKuka::setCartesianRotationStep(double step)
+{
+	if (step < 0.001)
+		step = 0.001;
+	else if (step > 0.25)
+		step = 0.25;
+
+	m_deltaStepCartesianRotation = step;
+}
+
+void RobotKuka::setJointStep(double step)
+{
+	if (step < 0.001)
+		step = 0.001;
+	else if (step > 0.05)
+		step = 0.05;
+
+	m_deltaStepJoint = step;
 }

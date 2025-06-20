@@ -48,12 +48,15 @@ public slots:
 
 private slots:
 	void onSliderValueChanged(int value);
-	void onSpinBoxValueChanged(double value);
+    void onSpinBoxEditFinished();
 
 private:
     static bool fuzzyCompare(double a, double b, const double epsilon = 1e-6) {
         return std::abs(a - b) < epsilon;
     }
+
+    static int countDecimals(double value, const int maxDecimals = 15);
+    int findBestPrecision() const;
 
 signals:
 	void nameChanged(const QString& name);
@@ -71,8 +74,7 @@ private:
     double m_value;
 	double m_minValue;
 	double m_maxValue;
-	double m_increment;
-	bool m_isSliderUpdating;
+    double m_increment;
     bool m_readOnly;
 };
 

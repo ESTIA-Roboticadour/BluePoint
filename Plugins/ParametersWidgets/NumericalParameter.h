@@ -22,7 +22,7 @@ public:
 	double getValue() const;
 	double getMinimum() const;
 	double getMaximum() const;
-	int	   getIncrement() const;
+    double getIncrement() const;
 
     ParameterBase* copy(QObject* parent = nullptr) const override;
 
