@@ -23,18 +23,14 @@
    <RECEIVE>
       <ELEMENTS>
          <ELEMENT TAG="DEF_EStr" TYPE="STRING" INDX="INTERNAL" />
-         <ELEMENT TAG="DeltaPos.X" TYPE="DOUBLE" INDX="1" HOLDON="1" />
-         <ELEMENT TAG="DeltaPos.Y" TYPE="DOUBLE" INDX="2" HOLDON="1" />
-         <ELEMENT TAG="DeltaPos.Z" TYPE="DOUBLE" INDX="3" HOLDON="1" />
-         <ELEMENT TAG="DeltaPos.A" TYPE="DOUBLE" INDX="4" HOLDON="1" />
-         <ELEMENT TAG="DeltaPos.B" TYPE="DOUBLE" INDX="5" HOLDON="1" />
-         <ELEMENT TAG="DeltaPos.C" TYPE="DOUBLE" INDX="6" HOLDON="1" />
-         <ELEMENT TAG="DeltaPos.J1" TYPE="DOUBLE" INDX="7" HOLDON="1" />
-         <ELEMENT TAG="DeltaPos.J2" TYPE="DOUBLE" INDX="8" HOLDON="1" />
-         <ELEMENT TAG="DeltaPos.J3" TYPE="DOUBLE" INDX="9" HOLDON="1" />
-         <ELEMENT TAG="DeltaPos.J4" TYPE="DOUBLE" INDX="10" HOLDON="1" />
-         <ELEMENT TAG="DeltaPos.J5" TYPE="DOUBLE" INDX="11" HOLDON="1" />
-         <ELEMENT TAG="DeltaPos.J6" TYPE="DOUBLE" INDX="12" HOLDON="1" />
+         <ELEMENT TAG="MoveType" TYPE="LONG" INDX="1" HOLDON="1" />
+         <ELEMENT TAG="RobotBase" TYPE="LONG" INDX="2" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.X" TYPE="DOUBLE" INDX="3" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.Y" TYPE="DOUBLE" INDX="4" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.Z" TYPE="DOUBLE" INDX="5" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.A" TYPE="DOUBLE" INDX="6" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.B" TYPE="DOUBLE" INDX="7" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.C" TYPE="DOUBLE" INDX="8" HOLDON="1" />
        </ELEMENTS>
    </RECEIVE>
 </ROOT>

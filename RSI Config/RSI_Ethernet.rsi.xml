@@ -1,61 +1,33 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <RSIObjects xsi:noNamespaceSchemaLocation="/Roboter/Config/System/Common/Schemes/RSIContext.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <RSIObject ObjType="POSCORR" ObjTypeID="27" ObjID="POSCORR1">
-    <Inputs>
-      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="1" />
-      <Input InIdx="2" OutObjID="ETHERNET1" OutIdx="2" />
-      <Input InIdx="3" OutObjID="ETHERNET1" OutIdx="3" />
-      <Input InIdx="4" OutObjID="ETHERNET1" OutIdx="4" />
-      <Input InIdx="5" OutObjID="ETHERNET1" OutIdx="5" />
-      <Input InIdx="6" OutObjID="ETHERNET1" OutIdx="6" />
-    </Inputs>
-    <Parameters>
-      <Parameter Name="LowerLimX" ParamID="1" ParamValue="-500" />
-      <Parameter Name="LowerLimY" ParamID="2" ParamValue="-500" />
-      <Parameter Name="LowerLimZ" ParamID="3" ParamValue="-500" />
-      <Parameter Name="UpperLimX" ParamID="4" ParamValue="500" />
-      <Parameter Name="UpperLimY" ParamID="5" ParamValue="500" />
-      <Parameter Name="UpperLimZ" ParamID="6" ParamValue="500" />
-      <Parameter Name="MaxRotAngle" ParamID="7" ParamValue="180" />
-      <Parameter Name="RefCorrSys" ParamID="1" ParamValue="1" IsRuntime="false" />
-    </Parameters>
-  </RSIObject>
-  <RSIObject ObjType="ETHERNET" ObjTypeID="64" ObjID="ETHERNET1">
-    <Parameters>
-      <Parameter Name="ConfigFile" ParamID="1" ParamValue="RSI_EthernetConfig.xml" IsRuntime="false" />
-      <Parameter Name="Timeout" ParamID="1" ParamValue="100" />
-      <Parameter Name="Flag" ParamID="4" ParamValue="1" />
-      <Parameter Name="Precision" ParamID="8" ParamValue="1" />
-    </Parameters>
-  </RSIObject>
   <RSIObject ObjType="POSCORRMON" ObjTypeID="81" ObjID="POSCORRMON1">
     <Parameters>
-      <Parameter Name="MaxTrans" ParamID="1" ParamValue="500" />
-      <Parameter Name="MaxRotAngle" ParamID="2" ParamValue="180" />
+      <Parameter Name="MaxTrans" ParamID="1" ParamValue="5000" />
+      <Parameter Name="MaxRotAngle" ParamID="2" ParamValue="3600" />
     </Parameters>
   </RSIObject>
   <RSIObject ObjType="AXISCORR" ObjTypeID="33" ObjID="AXISCORR1">
     <Inputs>
-      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="7" />
-      <Input InIdx="2" OutObjID="ETHERNET1" OutIdx="8" />
-      <Input InIdx="3" OutObjID="ETHERNET1" OutIdx="9" />
-      <Input InIdx="4" OutObjID="ETHERNET1" OutIdx="10" />
-      <Input InIdx="5" OutObjID="ETHERNET1" OutIdx="11" />
-      <Input InIdx="6" OutObjID="ETHERNET1" OutIdx="12" />
+      <Input InIdx="1" OutObjID="SIGNALSWITCH1" OutIdx="2" />
+      <Input InIdx="2" OutObjID="SIGNALSWITCH2" OutIdx="2" />
+      <Input InIdx="3" OutObjID="SIGNALSWITCH3" OutIdx="2" />
+      <Input InIdx="4" OutObjID="SIGNALSWITCH4" OutIdx="2" />
+      <Input InIdx="5" OutObjID="SIGNALSWITCH5" OutIdx="2" />
+      <Input InIdx="6" OutObjID="SIGNALSWITCH6" OutIdx="2" />
     </Inputs>
     <Parameters>
-      <Parameter Name="LowerLimA1" ParamID="1" ParamValue="-180" />
-      <Parameter Name="LowerLimA2" ParamID="2" ParamValue="-180" />
-      <Parameter Name="LowerLimA3" ParamID="3" ParamValue="-180" />
-      <Parameter Name="LowerLimA4" ParamID="4" ParamValue="-180" />
-      <Parameter Name="LowerLimA5" ParamID="5" ParamValue="-180" />
-      <Parameter Name="LowerLimA6" ParamID="6" ParamValue="-180" />
-      <Parameter Name="UpperLimA1" ParamID="13" ParamValue="180" />
-      <Parameter Name="UpperLimA2" ParamID="14" ParamValue="180" />
-      <Parameter Name="UpperLimA3" ParamID="15" ParamValue="180" />
-      <Parameter Name="UpperLimA4" ParamID="16" ParamValue="180" />
-      <Parameter Name="UpperLimA5" ParamID="17" ParamValue="180" />
-      <Parameter Name="UpperLimA6" ParamID="18" ParamValue="180" />
+      <Parameter Name="LowerLimA1" ParamID="1" ParamValue="-1800" />
+      <Parameter Name="LowerLimA2" ParamID="2" ParamValue="-1800" />
+      <Parameter Name="LowerLimA3" ParamID="3" ParamValue="-1800" />
+      <Parameter Name="LowerLimA4" ParamID="4" ParamValue="-1800" />
+      <Parameter Name="LowerLimA5" ParamID="5" ParamValue="-1800" />
+      <Parameter Name="LowerLimA6" ParamID="6" ParamValue="-1800" />
+      <Parameter Name="UpperLimA1" ParamID="13" ParamValue="1800" />
+      <Parameter Name="UpperLimA2" ParamID="14" ParamValue="1800" />
+      <Parameter Name="UpperLimA3" ParamID="15" ParamValue="1800" />
+      <Parameter Name="UpperLimA4" ParamID="16" ParamValue="1800" />
+      <Parameter Name="UpperLimA5" ParamID="17" ParamValue="1800" />
+      <Parameter Name="UpperLimA6" ParamID="18" ParamValue="1800" />
     </Parameters>
   </RSIObject>
   <RSIObject ObjType="AXISCORRMON" ObjTypeID="82" ObjID="AXISCORRMON1">
@@ -72,6 +44,160 @@
       <Parameter Name="MaxE4" ParamID="10" ParamValue="6.0" />
       <Parameter Name="MaxE5" ParamID="11" ParamValue="6.0" />
       <Parameter Name="MaxE6" ParamID="12" ParamValue="6.0" />
+    </Parameters>
+  </RSIObject>
+  <RSIObject ObjType="SOURCE" ObjTypeID="45" ObjID="SOURCE1">
+    <Parameters>
+      <Parameter Name="Type" ParamID="1" ParamValue="0" />
+      <Parameter Name="Offset" ParamID="2" ParamValue="0" />
+      <Parameter Name="Amplitude" ParamID="3" ParamValue="1" />
+      <Parameter Name="Period" ParamID="4" ParamValue="5" />
+    </Parameters>
+  </RSIObject>
+  <RSIObject ObjType="ETHERNET" ObjTypeID="64" ObjID="ETHERNET1">
+    <Parameters>
+      <Parameter Name="ConfigFile" ParamID="1" ParamValue="RSI_Ethernet.xml" IsRuntime="false" />
+      <Parameter Name="Timeout" ParamID="1" ParamValue="100" />
+      <Parameter Name="Flag" ParamID="4" ParamValue="1" />
+      <Parameter Name="Precision" ParamID="8" ParamValue="10" />
+    </Parameters>
+  </RSIObject>
+  <RSIObject ObjType="SIGNALSWITCH" ObjTypeID="59" ObjID="SIGNALSWITCH1">
+    <Inputs>
+      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="1" />
+      <Input InIdx="2" OutObjID="ETHERNET1" OutIdx="3" />
+      <Input InIdx="3" OutObjID="SOURCE1" OutIdx="1" />
+    </Inputs>
+  </RSIObject>
+  <RSIObject ObjType="SIGNALSWITCH" ObjTypeID="59" ObjID="SIGNALSWITCH2">
+    <Inputs>
+      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="1" />
+      <Input InIdx="2" OutObjID="ETHERNET1" OutIdx="4" />
+      <Input InIdx="3" OutObjID="SOURCE1" OutIdx="1" />
+    </Inputs>
+  </RSIObject>
+  <RSIObject ObjType="SIGNALSWITCH" ObjTypeID="59" ObjID="SIGNALSWITCH3">
+    <Inputs>
+      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="1" />
+      <Input InIdx="2" OutObjID="ETHERNET1" OutIdx="5" />
+      <Input InIdx="3" OutObjID="SOURCE1" OutIdx="1" />
+    </Inputs>
+  </RSIObject>
+  <RSIObject ObjType="SIGNALSWITCH" ObjTypeID="59" ObjID="SIGNALSWITCH4">
+    <Inputs>
+      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="1" />
+      <Input InIdx="2" OutObjID="ETHERNET1" OutIdx="6" />
+      <Input InIdx="3" OutObjID="SOURCE1" OutIdx="1" />
+    </Inputs>
+  </RSIObject>
+  <RSIObject ObjType="SIGNALSWITCH" ObjTypeID="59" ObjID="SIGNALSWITCH5">
+    <Inputs>
+      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="1" />
+      <Input InIdx="2" OutObjID="ETHERNET1" OutIdx="7" />
+      <Input InIdx="3" OutObjID="SOURCE1" OutIdx="1" />
+    </Inputs>
+  </RSIObject>
+  <RSIObject ObjType="SIGNALSWITCH" ObjTypeID="59" ObjID="SIGNALSWITCH6">
+    <Inputs>
+      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="1" />
+      <Input InIdx="2" OutObjID="ETHERNET1" OutIdx="8" />
+      <Input InIdx="3" OutObjID="SOURCE1" OutIdx="1" />
+    </Inputs>
+  </RSIObject>
+  <RSIObject ObjType="SIGNALSWITCH" ObjTypeID="59" ObjID="SIGNALSWITCH7">
+    <Inputs>
+      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="2" />
+      <Input InIdx="2" OutObjID="SIGNALSWITCH1" OutIdx="1" />
+      <Input InIdx="3" OutObjID="SOURCE1" OutIdx="1" />
+    </Inputs>
+  </RSIObject>
+  <RSIObject ObjType="SIGNALSWITCH" ObjTypeID="59" ObjID="SIGNALSWITCH8">
+    <Inputs>
+      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="2" />
+      <Input InIdx="2" OutObjID="SIGNALSWITCH2" OutIdx="1" />
+      <Input InIdx="3" OutObjID="SOURCE1" OutIdx="1" />
+    </Inputs>
+  </RSIObject>
+  <RSIObject ObjType="SIGNALSWITCH" ObjTypeID="59" ObjID="SIGNALSWITCH9">
+    <Inputs>
+      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="2" />
+      <Input InIdx="2" OutObjID="SIGNALSWITCH3" OutIdx="1" />
+      <Input InIdx="3" OutObjID="SOURCE1" OutIdx="1" />
+    </Inputs>
+  </RSIObject>
+  <RSIObject ObjType="SIGNALSWITCH" ObjTypeID="59" ObjID="SIGNALSWITCH10">
+    <Inputs>
+      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="2" />
+      <Input InIdx="2" OutObjID="SIGNALSWITCH4" OutIdx="1" />
+      <Input InIdx="3" OutObjID="SOURCE1" OutIdx="1" />
+    </Inputs>
+  </RSIObject>
+  <RSIObject ObjType="SIGNALSWITCH" ObjTypeID="59" ObjID="SIGNALSWITCH11">
+    <Inputs>
+      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="2" />
+      <Input InIdx="2" OutObjID="SIGNALSWITCH5" OutIdx="1" />
+      <Input InIdx="3" OutObjID="SOURCE1" OutIdx="1" />
+    </Inputs>
+  </RSIObject>
+  <RSIObject ObjType="SIGNALSWITCH" ObjTypeID="59" ObjID="SIGNALSWITCH12">
+    <Inputs>
+      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="2" />
+      <Input InIdx="2" OutObjID="SIGNALSWITCH6" OutIdx="1" />
+      <Input InIdx="3" OutObjID="SOURCE1" OutIdx="1" />
+    </Inputs>
+  </RSIObject>
+  <RSIObject ObjType="POSCORR" ObjTypeID="27" ObjID="POSCORR2">
+    <Inputs>
+      <Input InIdx="1" OutObjID="SIGNALSWITCH7" OutIdx="2" />
+      <Input InIdx="2" OutObjID="SIGNALSWITCH8" OutIdx="2" />
+      <Input InIdx="3" OutObjID="SIGNALSWITCH9" OutIdx="2" />
+      <Input InIdx="4" OutObjID="SIGNALSWITCH10" OutIdx="2" />
+      <Input InIdx="5" OutObjID="SIGNALSWITCH11" OutIdx="2" />
+      <Input InIdx="6" OutObjID="SIGNALSWITCH12" OutIdx="2" />
+    </Inputs>
+    <Parameters>
+      <Parameter Name="LowerLimX" ParamID="1" ParamValue="-5000" />
+      <Parameter Name="LowerLimY" ParamID="2" ParamValue="-5000" />
+      <Parameter Name="LowerLimZ" ParamID="3" ParamValue="-5000" />
+      <Parameter Name="UpperLimX" ParamID="4" ParamValue="5000" />
+      <Parameter Name="UpperLimY" ParamID="5" ParamValue="5000" />
+      <Parameter Name="UpperLimZ" ParamID="6" ParamValue="5000" />
+      <Parameter Name="MaxRotAngle" ParamID="7" ParamValue="3600" />
+      <Parameter Name="LastCorrStat" ParamID="8" ParamValue="0" />
+      <Parameter Name="LastCorrX" ParamID="9" ParamValue="0" />
+      <Parameter Name="LastCorrY" ParamID="10" ParamValue="0" />
+      <Parameter Name="LastCorrZ" ParamID="11" ParamValue="0" />
+      <Parameter Name="LastCorrA" ParamID="12" ParamValue="0" />
+      <Parameter Name="LastCorrB" ParamID="13" ParamValue="0" />
+      <Parameter Name="LastCorrC" ParamID="14" ParamValue="0" />
+      <Parameter Name="RefCorrSys" ParamID="1" ParamValue="3" IsRuntime="false" />
+    </Parameters>
+  </RSIObject>
+  <RSIObject ObjType="POSCORR" ObjTypeID="27" ObjID="POSCORR1">
+    <Inputs>
+      <Input InIdx="1" OutObjID="SIGNALSWITCH7" OutIdx="1" />
+      <Input InIdx="2" OutObjID="SIGNALSWITCH8" OutIdx="1" />
+      <Input InIdx="3" OutObjID="SIGNALSWITCH9" OutIdx="1" />
+      <Input InIdx="4" OutObjID="SIGNALSWITCH10" OutIdx="1" />
+      <Input InIdx="5" OutObjID="SIGNALSWITCH11" OutIdx="1" />
+      <Input InIdx="6" OutObjID="SIGNALSWITCH12" OutIdx="1" />
+    </Inputs>
+    <Parameters>
+      <Parameter Name="LowerLimX" ParamID="1" ParamValue="-5000" />
+      <Parameter Name="LowerLimY" ParamID="2" ParamValue="-5000" />
+      <Parameter Name="LowerLimZ" ParamID="3" ParamValue="-5000" />
+      <Parameter Name="UpperLimX" ParamID="4" ParamValue="5000" />
+      <Parameter Name="UpperLimY" ParamID="5" ParamValue="5000" />
+      <Parameter Name="UpperLimZ" ParamID="6" ParamValue="5000" />
+      <Parameter Name="MaxRotAngle" ParamID="7" ParamValue="3600" />
+      <Parameter Name="LastCorrStat" ParamID="8" ParamValue="0" />
+      <Parameter Name="LastCorrX" ParamID="9" ParamValue="0" />
+      <Parameter Name="LastCorrY" ParamID="10" ParamValue="0" />
+      <Parameter Name="LastCorrZ" ParamID="11" ParamValue="0" />
+      <Parameter Name="LastCorrA" ParamID="12" ParamValue="0" />
+      <Parameter Name="LastCorrB" ParamID="13" ParamValue="0" />
+      <Parameter Name="LastCorrC" ParamID="14" ParamValue="0" />
+      <Parameter Name="RefCorrSys" ParamID="1" ParamValue="1" IsRuntime="false" />
     </Parameters>
   </RSIObject>
 </RSIObjects>

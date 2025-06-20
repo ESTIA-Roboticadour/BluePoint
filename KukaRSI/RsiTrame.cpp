@@ -40,10 +40,11 @@ bool RsiTrame::isValid() const
 
 QString RsiTrame::build() const
 {
-	QString trame = 
+	return
 		"<Sen Type=\"ImFree\">\r\n"
-		"<EStr></EStr>\r\n";
-	trame += m_isCartesian ?
+		"<EStr></EStr>\r\n"
+		"<MoveType>" + QString(m_isCartesian ? "1" : "0") + "</MoveType>\r\n"		// 1 : CARTESIAN (POSCORR) | 0 : ARTICULAR (AXISCORR)
+		"<RobotBase>" + QString(m_isInRobotBase ? "1" : "0") + "</RobotBase>\r\n"	// 1 : BASE | 0 : TOOL
 		"<DeltaPos"
 		" X=\"" + QString::number(m_pos[0], 'g', 6) + "\""
 		" Y=\"" + QString::number(m_pos[1], 'g', 6) + "\""
@@ -51,32 +52,7 @@ QString RsiTrame::build() const
 		" A=\"" + QString::number(m_pos[3], 'g', 6) + "\""
 		" B=\"" + QString::number(m_pos[4], 'g', 6) + "\""
 		" C=\"" + QString::number(m_pos[5], 'g', 6) + "\""
-		" J1=\"0.0\""
-		" J2=\"0.0\""
-		" J3=\"0.0\""
-		" J4=\"0.0\""
-		" J5=\"0.0\""
-		" J6=\"0.0\""
 		" />\r\n"
-		:
-	"<DeltaPos"
-		" X=\"0.0\""
-		" Y=\"0.0\""
-		" Z=\"0.0\""
-		" A=\"0.0\""
-		" B=\"0.0\""
-		" C=\"0.0\""
-		" J1=\"" + QString::number(m_pos[0], 'g', 6) + "\""
-		" J2=\"" + QString::number(m_pos[1], 'g', 6) + "\""
-		" J3=\"" + QString::number(m_pos[2], 'g', 6) + "\""
-		" J4=\"" + QString::number(m_pos[3], 'g', 6) + "\""
-		" J5=\"" + QString::number(m_pos[4], 'g', 6) + "\""
-		" J6=\"" + QString::number(m_pos[5], 'g', 6) + "\""
-		" />\r\n";
-
-	trame +=
 		"<IPOC>" + m_ipoc + "</IPOC>\r\n"
 		"</Sen>";
-
-	return trame;
 }

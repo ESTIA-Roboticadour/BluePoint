@@ -387,7 +387,7 @@ void RobotKuka::sendTrame()
 	{
 		QString trame = m_rsiTrame.build();
 		m_udpClient->sendData(trame, m_robotAddress, m_robotPort);
-		//qDebug() << "SEND: " + trame;
+		qDebug() << trame;
 	}
 }
 
