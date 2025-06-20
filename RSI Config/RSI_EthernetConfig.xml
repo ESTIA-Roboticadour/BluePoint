@@ -18,27 +18,23 @@
          <ELEMENT TAG="DEF_RSol" TYPE="DOUBLE" INDX="INTERNAL" />
          <ELEMENT TAG="DEF_AIPos" TYPE="DOUBLE" INDX="INTERNAL" />
          <ELEMENT TAG="DEF_Delay" TYPE="LONG" INDX="INTERNAL" />
-         <ELEMENT TAG="DiL" TYPE="LONG" INDX="1" />
-         <ELEMENT TAG="Digout.o1" TYPE="BOOL" INDX="2" />
-         <ELEMENT TAG="Digout.o2" TYPE="BOOL" INDX="3" />
-         <ELEMENT TAG="Digout.o3" TYPE="BOOL" INDX="4" />
       </ELEMENTS>
    </SEND>
    <RECEIVE>
       <ELEMENTS>
          <ELEMENT TAG="DEF_EStr" TYPE="STRING" INDX="INTERNAL" />
-         <ELEMENT TAG="Corr.X" TYPE="DOUBLE" INDX="1" HOLDON="1" />
-         <ELEMENT TAG="Corr.Y" TYPE="DOUBLE" INDX="2" HOLDON="1" />
-         <ELEMENT TAG="Corr.Z" TYPE="DOUBLE" INDX="3" HOLDON="1" />
-         <ELEMENT TAG="Corr.A" TYPE="DOUBLE" INDX="4" HOLDON="1" />
-         <ELEMENT TAG="Corr.B" TYPE="DOUBLE" INDX="5" HOLDON="1" />
-         <ELEMENT TAG="Corr.C" TYPE="DOUBLE" INDX="6" HOLDON="1" />
-         <ELEMENT TAG="Corr.J1" TYPE="DOUBLE" INDX="7" HOLDON="1" />
-         <ELEMENT TAG="Corr.J2" TYPE="DOUBLE" INDX="8" HOLDON="1" />
-         <ELEMENT TAG="Corr.J3" TYPE="DOUBLE" INDX="9" HOLDON="1" />
-         <ELEMENT TAG="Corr.J4" TYPE="DOUBLE" INDX="10" HOLDON="1" />
-         <ELEMENT TAG="Corr.J5" TYPE="DOUBLE" INDX="11" HOLDON="1" />
-         <ELEMENT TAG="Corr.J6" TYPE="DOUBLE" INDX="12" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.X" TYPE="DOUBLE" INDX="1" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.Y" TYPE="DOUBLE" INDX="2" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.Z" TYPE="DOUBLE" INDX="3" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.A" TYPE="DOUBLE" INDX="4" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.B" TYPE="DOUBLE" INDX="5" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.C" TYPE="DOUBLE" INDX="6" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.J1" TYPE="DOUBLE" INDX="7" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.J2" TYPE="DOUBLE" INDX="8" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.J3" TYPE="DOUBLE" INDX="9" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.J4" TYPE="DOUBLE" INDX="10" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.J5" TYPE="DOUBLE" INDX="11" HOLDON="1" />
+         <ELEMENT TAG="DeltaPos.J6" TYPE="DOUBLE" INDX="12" HOLDON="1" />
        </ELEMENTS>
    </RECEIVE>
 </ROOT>
