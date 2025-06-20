@@ -22,6 +22,7 @@ AppView::AppView(QWidget* parent) :
 	m_freshRateHz(20),
 	m_isReadyToMove(false),
 	m_isJoggingCartesian(true),
+	m_isMovingInRobotBase(true),
 	m_isAzerty(true)
 {
 	setupUI();
@@ -139,7 +140,6 @@ void AppView::setupUI()
 	baseComboBox->setFixedWidth(80);
 	baseComboBox->addItems({ "BASE", "TOOL" });
 	baseComboBox->setCurrentIndex(0);
-	baseComboBox->setDisabled(true);
 	connect(baseComboBox, &QComboBox::currentIndexChanged, this, &AppView::onBaseComboBoxChanged);
 
 	baseLayout->addWidget(baseComboBox);
@@ -611,7 +611,6 @@ void AppView::onStopButtonClicked()
 void AppView::onBaseComboBoxChanged(int index)
 {
 	setIsMovingInRobotBase(index == 0); // 0 = BASE, 1 = TOOL
-	emit isMovingInRobotBaseChanged(m_isMovingInRobotBase);
 }
 
 void AppView::onMoveTabChanged(int index)
