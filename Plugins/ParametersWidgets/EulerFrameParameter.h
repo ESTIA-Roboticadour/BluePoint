@@ -9,8 +9,10 @@
 #include <QString>
 #include <QVector3D>
 #include <QList>
-#include <memory>
 #include <QMatrix3x3>
+
+#include <cmath>
+#include <memory>
 
 class PARAMETERS_WIDGETS_API EulerFrameParameter : public ParameterBase
 {
@@ -70,7 +72,7 @@ public:
     QVector3D getAngles() const;
 
     QMatrix3x3 toMatrix() const;
-    //void fromMatrix(const QMatrix3x3& matrix) const;
+    void fromMatrix(const QMatrix3x3& matrix);
 
     static QList<EulerFrameParameter::Convention> getConventions();
 
@@ -80,8 +82,11 @@ public slots:
     void setX(double x);
     void setY(double y);
     void setZ(double z);
+    // set 1st rotation angle in degrees
     void setA(double a);
+    // set 2nd rotation angle in degrees
     void setB(double b);
+    // set 3rd rotation angle in degrees
     void setC(double c);
 
     void setPosition(const QVector3D& position);
@@ -92,13 +97,13 @@ public slots:
     void setEulerFrame(double x, double y, double z, double a, double b, double c);
 
 private:
-    static double clampAngle(double deg) {
+    inline static double clampAngle(double deg) {
         if (deg < -180.0) return -180.0;
         if (deg > 180.0) return 180.0;
         return deg;
     }
 
-    static QMatrix3x3 makeMatrix(
+    inline static QMatrix3x3 makeMatrix(
         double m00, double m01, double m02,
         double m10, double m11, double m12,
         double m20, double m21, double m22)
@@ -109,6 +114,11 @@ private:
         mat(2,0) = m20; mat(2,1) = m21; mat(2,2) = m22;
         return mat;
     }
+
+    inline static double safeAcos(double x) { return std::acos(std::clamp(x, -1.0, 1.0)); }
+    inline static double safeAsin(double x) { return std::asin(std::clamp(x, -1.0, 1.0)); }
+    inline static double toRadians(double degrees) { return degrees * M_PI / 180.0; }
+    inline static double toDegrees(double radians) { return radians * 180.0 / M_PI; }
 
 signals:
     void conventionChanged(Convention convention);

@@ -53,7 +53,12 @@ QVector3D EulerFrameParameter::getAngles() const {
 }
 
 QMatrix3x3 EulerFrameParameter::toMatrix() const {
-    const double a = m_a, b = m_b, c = m_c;
+    // https://en.wikipedia.org/wiki/Euler_angles
+
+    const double a = toRadians(m_a);
+    const double b = toRadians(m_b);
+    const double c = toRadians(m_c);
+
     const double ca = std::cos(a), sa = std::sin(a);
     const double cb = std::cos(b), sb = std::sin(b);
     const double cc = std::cos(c), sc = std::sin(c);
@@ -103,6 +108,7 @@ QMatrix3x3 EulerFrameParameter::toMatrix() const {
             -cc*sb,             sb*sc,            cb
             );
 
+    // Tait-Bryan
     case Convention::XYZ:
         return makeMatrix(
             cb*cc,            -cb*sc,             sb,
@@ -151,30 +157,103 @@ QMatrix3x3 EulerFrameParameter::toMatrix() const {
     }
 }
 
+void EulerFrameParameter::fromMatrix(const QMatrix3x3 &matrix)
+{
+    // https://en.wikipedia.org/wiki/Euler_angles
+
+    double R11 = matrix(0, 0);
+    double R12 = matrix(0, 1);
+    double R13 = matrix(0, 2);
+    double R21 = matrix(1, 0);
+    double R22 = matrix(1, 1);
+    double R23 = matrix(1, 2);
+    double R31 = matrix(2, 0);
+    double R32 = matrix(2, 1);
+    double R33 = matrix(2, 2);
+
+    switch (m_convention)
+    {
+    // Proper Euler
+    case Convention::XYX:
+        setA(toDegrees(std::atan2(R21, -R31)));
+        setB(toDegrees(safeAcos(R11)));
+        setC(toDegrees(std::atan2(R12, R13)));
+        break;
+    case Convention::XZX:
+        setA(toDegrees(std::atan2(R31, R21)));
+        setB(toDegrees(safeAcos(R11)));
+        setC(toDegrees(std::atan2(R13, -R12)));
+        break;
+    case Convention::YXY:
+        setA(toDegrees(std::atan2(R12, R32)));
+        setB(toDegrees(safeAcos(R22)));
+        setC(toDegrees(std::atan2(R21, -R23)));
+        break;
+    case Convention::YZY:
+        setA(toDegrees(std::atan2(R32, -R12)));
+        setB(toDegrees(safeAcos(R22)));
+        setC(toDegrees(std::atan2(R23, R21)));
+        break;
+    case Convention::ZXZ:
+        setA(toDegrees(0.));
+        setB(toDegrees(0.));
+        setC(toDegrees(0.));
+        break;
+    case Convention::ZYZ:
+        setA(toDegrees(std::atan2(R23, R13)));
+        setB(toDegrees(std::atan2(std::sqrt(1 - R33*R33), R33)));
+        setC(toDegrees(std::atan2(R31, R32)));
+        break;
+    // Tait–Bryan
+    case Convention::XYZ:
+        setA(toDegrees(std::atan2(-R23, R33)));
+        setB(toDegrees(safeAsin(R13)));
+        setC(toDegrees(std::atan2(-R12, R11)));
+        break;
+    case Convention::XZY:
+        setA(toDegrees(std::atan2(R32, R22)));
+        setB(toDegrees(safeAsin(-R12)));
+        setC(toDegrees(std::atan2(R13, R11)));
+        break;
+    case Convention::YXZ:
+        setA(toDegrees(std::atan2(R13, R33)));
+        setB(toDegrees(safeAsin(-R23)));
+        setC(toDegrees(std::atan2(R21, R22)));
+        break;
+    case Convention::YZX:
+        setA(toDegrees(std::atan2(-R31, R11)));
+        setB(toDegrees(safeAsin(R21)));
+        setC(toDegrees(std::atan2(-R23, R22)));
+        break;
+    case Convention::ZXY:
+        setA(toDegrees(std::atan2(-R12, R22)));
+        setB(toDegrees(safeAsin(R32)));
+        setC(toDegrees(std::atan2(R32, R33)));
+        break;
+    case Convention::ZYX:
+        setA(toDegrees(std::atan2(R21, R11)));
+        setB(toDegrees(safeAsin(-R31)));
+        setC(toDegrees(std::atan2(R32, R33)));
+        break;
+    }
+}
+
 QList<EulerFrameParameter::Convention> EulerFrameParameter::getConventions()
 {
     return QList({
-        Convention::XYZ,
-        Convention::YZX,
-        Convention::ZXY,
-        Convention::XZY,
-        Convention::ZYX,
-        Convention::YXZ,
-        Convention::ZXZ,
-        Convention::XYX,
-        Convention::YZY,
-        Convention::ZYZ,
-        Convention::XZX,
-        Convention::YXY
-    }) ;
+        XYX, XZX, YXY, YZY, ZXZ, ZYZ, // Proper Euler
+        XYZ, XZY, YXZ, YZX, ZXY, ZYX  // Tait–Bryan
+    });
 }
 
 void EulerFrameParameter::setConvention(Convention convention)
 {
     if (getIsEditable() && m_convention != convention)
     {
+        QMatrix3x3 matrix = toMatrix();
         m_convention = convention;
-        // @TODO : mettre a jour les angles selon la nouvelle convention (toMatrix, fromMatrix)
+        fromMatrix(matrix);
+
         emit conventionChanged(m_convention);
         emit parameterChanged(this);
     }
