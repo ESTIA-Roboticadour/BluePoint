@@ -10,7 +10,7 @@
 #include <QVector3D>
 #include <QList>
 #include <memory>
-//#include <QMatrix3x3>
+#include <QMatrix3x3>
 
 class PARAMETERS_WIDGETS_API EulerFrameParameter : public ParameterBase
 {
@@ -18,25 +18,27 @@ class PARAMETERS_WIDGETS_API EulerFrameParameter : public ParameterBase
 
 public:
     enum Convention {
-        XYZ, YZX, ZXY, XZY, ZYX, YXZ,  // Tait–Bryan
-        ZXZ, XYX, YZY, ZYZ, XZX, YXY   // Proper Euler
+        XYX, XZX, YXY, YZY, ZXZ, ZYZ, // Proper Euler
+        XYZ, XZY, YXZ, YZX, ZXY, ZYX, // Tait–Bryan
     };
     Q_ENUM(Convention)
 
     inline static QString toQString(Convention convention) {
         switch (convention) {
-        case Convention::XYZ: return "XYZ";
-        case Convention::YZX: return "YZX";
-        case Convention::ZXY: return "ZXY";
-        case Convention::XZY: return "XZY";
-        case Convention::ZYX: return "ZYX";
-        case Convention::YXZ: return "YXZ";
-        case Convention::ZXZ: return "ZXZ";
+            // Proper Euler
         case Convention::XYX: return "XYX";
-        case Convention::YZY: return "YZY";
-        case Convention::ZYZ: return "ZYZ";
         case Convention::XZX: return "XZX";
         case Convention::YXY: return "YXY";
+        case Convention::YZY: return "YZY";
+        case Convention::ZXZ: return "ZXZ";
+        case Convention::ZYZ: return "ZYZ";
+            // Tait–Bryan
+        case Convention::XYZ: return "XYZ";
+        case Convention::XZY: return "XZY";
+        case Convention::YXZ: return "YXZ";
+        case Convention::YZX: return "YZX";
+        case Convention::ZXY: return "ZXY";
+        case Convention::ZYX: return "ZYX";
         default: return "";
         }
     }
@@ -67,7 +69,7 @@ public:
     QVector3D getPosition() const;
     QVector3D getAngles() const;
 
-    //QMatrix3x3 toMatrix() const;
+    QMatrix3x3 toMatrix() const;
     //void fromMatrix(const QMatrix3x3& matrix) const;
 
     static QList<EulerFrameParameter::Convention> getConventions();
@@ -88,6 +90,25 @@ public slots:
     void setAngles(double a, double b, double c);
     void setEulerFrame(const QVector3D& position, const QVector3D& angles);
     void setEulerFrame(double x, double y, double z, double a, double b, double c);
+
+private:
+    static double clampAngle(double deg) {
+        if (deg < -180.0) return -180.0;
+        if (deg > 180.0) return 180.0;
+        return deg;
+    }
+
+    static QMatrix3x3 makeMatrix(
+        double m00, double m01, double m02,
+        double m10, double m11, double m12,
+        double m20, double m21, double m22)
+    {
+        QMatrix3x3 mat;
+        mat(0,0) = m00; mat(0,1) = m01; mat(0,2) = m02;
+        mat(1,0) = m10; mat(1,1) = m11; mat(1,2) = m12;
+        mat(2,0) = m20; mat(2,1) = m21; mat(2,2) = m22;
+        return mat;
+    }
 
 signals:
     void conventionChanged(Convention convention);

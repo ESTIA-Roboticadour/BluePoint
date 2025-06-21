@@ -1,13 +1,6 @@
 #include "EulerFrameParameter.h"
 #include <QJsonValue>
 
-
-static double clampAngle(double deg) {
-    if (deg < -180.0) return -180.0;
-    if (deg > 180.0) return 180.0;
-    return deg;
-}
-
 EulerFrameParameter::EulerFrameParameter(const QString& name,
                                          Convention convention,
                                          QObject* parent) :
@@ -48,21 +41,7 @@ double EulerFrameParameter::getB() const { return m_b; }
 double EulerFrameParameter::getC() const { return m_c; }
 
 QString EulerFrameParameter::conventionString() const {
-    switch (m_convention) {
-    case Convention::XYZ: return "XYZ";
-    case Convention::YZX: return "YZX";
-    case Convention::ZXY: return "ZXY";
-    case Convention::XZY: return "XZY";
-    case Convention::ZYX: return "ZYX";
-    case Convention::YXZ: return "YXZ";
-    case Convention::ZXZ: return "ZXZ";
-    case Convention::XYX: return "XYX";
-    case Convention::YZY: return "YZY";
-    case Convention::ZYZ: return "ZYZ";
-    case Convention::XZX: return "XZX";
-    case Convention::YXY: return "YXY";
-    default: return "Unknown";
-    }
+    return toQString(m_convention);
 }
 
 QVector3D EulerFrameParameter::getPosition() const {
@@ -73,117 +52,105 @@ QVector3D EulerFrameParameter::getAngles() const {
     return QVector3D(m_a, m_b, m_c);
 }
 
-//QMatrix3x3 EulerFrameParameter::toMatrix() const {
-//    const double a = m_a, b = m_b, c = m_c;
-//    const double ca = std::cos(a), sa = std::sin(a);
-//    const double cb = std::cos(b), sb = std::sin(b);
-//    const double cc = std::cos(c), sc = std::sin(c);
-//
-//    QMatrix3x3 R;
-//
-//    switch (m_convention) {
-//        // Proper Euler angles
-//    case ZXZ:
-//        R = QMatrix3x3(
-//            cc * cb * cc - sc * ca * sc, -cc * cb * sc - sc * ca * cc, cc * sa,
-//            sc * cb * cc + cc * ca * sc, -sc * cb * sc + cc * ca * cc, sc * sa,
-//            -sa * sc, sa * cc, ca
-//            );
-//        R = QMatrix3x3(
-//            cc * cb * cc - sc * ca * sc, -cc * cb * sc - sc * ca * cc, cc * sa,
-//            sc * cb * cc + cc * ca * sc, -sc * cb * sc + cc * ca * cc, sc * sa,
-//            -sa * cb, sa * sb, ca
-//            );
-//        break;
-//    case XYX:
-//        R = QMatrix3x3(
-//            cb, sa * sb, -ca * sb,
-//            sa * sb, sa * sa * cb + ca * ca, ca * sa * (1 - cb),
-//            ca * sb, ca * sa * (1 - cb), ca * ca * cb + sa * sa
-//            );
-//        break;
-//    case YZY:
-//        R = QMatrix3x3(
-//            ca * cb * ca + sa * sa, ca * cb * sa - sa * ca, ca * sb,
-//            ca * cb * sa - sa * ca, sa * cb * sa + ca * ca, sa * sb,
-//            -ca * sb, -sa * sb, cb
-//            );
-//        break;
-//    case ZYZ:
-//        R = QMatrix3x3(
-//            ca * cb * ca - sa * sa, ca * cb * sa + sa * ca, -ca * sb,
-//            ca * cb * sa + sa * ca, sa * cb * sa - ca * ca, -sa * sb,
-//            sb * ca, sb * sa, cb
-//            );
-//        break;
-//    case XZX:
-//        R = QMatrix3x3(
-//            cb, -ca * sb, sa * sb,
-//            ca * sb, sa * sa + ca * ca * cb, -ca * sa * (1 - cb),
-//            -sa * sb, -ca * sa * (1 - cb), ca * ca + sa * sa * cb
-//            );
-//        break;
-//    case YXY:
-//        R = QMatrix3x3(
-//            ca * ca * cb + sa * sa, ca * sa * (1 - cb), -ca * sb,
-//            ca * sa * (1 - cb), sa * sa * cb + ca * ca, -sa * sb,
-//            ca * sb, sa * sb, cb
-//            );
-//        break;
-//
-//    // Tait–Bryan angles
-//    case XYZ:
-//        R = QMatrix3x3(
-//            cb * cc, -cb * sc, sb,
-//            sa * sb * cc + ca * sc, -sa * sb * sc + ca * cc, -sa * cb,
-//            -ca * sb * cc + sa * sc, ca * sb * sc + sa * cc, ca * cb
-//            );
-//        break;
-//    case YZX:
-//        R = QMatrix3x3(
-//            cb * cc, sc, -sb * cc,
-//            -sb * sa + cb * ca * sc, ca * cc, sa * sb + cb * sc * ca,
-//            cb * sa * sc + sb * ca, -sa * cc, cb * ca - sb * sc * sa
-//            );
-//        break;
-//    case ZXY:
-//        R = QMatrix3x3(
-//            cb * cc - sb * sa * sc, -cb * sc - sb * sa * cc, -sb * ca,
-//            ca * sc, ca * cc, -sa,
-//            sb * cc + cb * sa * sc, -sb * sc + cb * sa * cc, cb * ca
-//            );
-//        break;
-//    case XZY:
-//        R = QMatrix3x3(
-//            cb * cc, -sb * ca + cb * sa * sc, sb * sa + cb * ca * sc,
-//            -sc, cc * sa, cc * ca,
-//            -sb * cc, sb * sa * sc + cb * ca, -sb * ca * sc + cb * sa
-//            );
-//        break;
-//    case ZYX:
-//        R = QMatrix3x3(
-//            cb * cc, cb * sc, -sb,
-//            sc * sa * cb - ca * cc, cc * sa * cb + ca * sc, sa * sb,
-//            sc * ca * cb + sa * cc, cc * ca * cb - sa * sc, ca * sb
-//            );
-//        break;
-//    case YXZ:
-//        R = QMatrix3x3(
-//            cb * cc + sa * sb * sc, sc * ca, -sb * cc + sa * cb * sc,
-//            sb * sc + sa * cb * cc, ca * cc, cb * sc - sa * sb * cc,
-//            ca * sb, -sa, ca * cb
-//            );
-//        break;
-//
-//    default:
-//        R = QMatrix3x3(); // Identity
-//        break;
-//    }
-//
-//    return R;
-//}
-//
-//
+QMatrix3x3 EulerFrameParameter::toMatrix() const {
+    const double a = m_a, b = m_b, c = m_c;
+    const double ca = std::cos(a), sa = std::sin(a);
+    const double cb = std::cos(b), sb = std::sin(b);
+    const double cc = std::cos(c), sc = std::sin(c);
+
+    switch (m_convention)
+    {
+    // Proper Euler
+    case Convention::XYX:
+        return makeMatrix(
+             cb,    sb*sc,             cc*sb,
+             sa*sb, ca*cc - cb*sa*sc, -ca*sc - cb*cc*sa,
+            -ca*sb, cc*sa + ca*cb*sc,  ca*cb*cc - sa*sc
+            );
+
+    case Convention::XZX:
+        return makeMatrix(
+            cb,    -cc*sb,             sb*sc,
+            ca*sb,  ca*cb*cc - sa*sc, -cc*sa - ca*cb*sc,
+            sa*sb,  ca*sc + cb*cc*sa,  ca*cc - cb*sa*sc
+            );
+
+    case Convention::YXY:
+        return makeMatrix(
+             ca*cc - cb*sa*sc, sa*sb,  ca*sc + cb*cc*sa,
+             sb*sc,            cb,    -cc*sb,
+            -cc*sa - ca*cb*sc, ca*sb,  ca*cb*cc - sa*sc
+            );
+
+    case Convention::YZY:
+        return makeMatrix(
+             ca*cb*cc - sa*sc, -ca*sb, cc*sa + ca*cb*sc,
+             cc*sb,             cb,    sb*sc,
+            -ca*sc - cb*cc*sa,  sa*sb, ca*cc - cb*sa*sc
+            );
+
+    case Convention::ZXZ:
+        return makeMatrix(
+            ca*cc - cb*sa*sc, -ca*sc - cb*cc*sa,  sa*sb,
+            cc*sa + ca*cb*sc,  ca*cb*cc - sa*sc, -ca*sb,
+            sb*sc,             cc*sb,             cb
+            );
+
+    case Convention::ZYZ:
+        return makeMatrix(
+             ca*cb*cc - sa*sc, -cc*sa - ca*cb*sc, ca*sb,
+             ca*sc + cb*cc*sa,  ca*cc - cb*sa*sc, sa*sb,
+            -cc*sb,             sb*sc,            cb
+            );
+
+    case Convention::XYZ:
+        return makeMatrix(
+            cb*cc,            -cb*sc,             sb,
+            ca*sc + cc*sa*sb,  ca*cc - sa*sb*sc, -cb*sa,
+            sa*sc - ca*cc*sb,  cc*sa + ca*sb*sc,  ca*cb
+            );
+
+    // Tait–Bryan
+    case Convention::XZY:
+        return makeMatrix(
+            cb*cc,            -sb,    cb*sc,
+            sa*sc + ca*cc*sb,  ca*cb, ca*sb*sc - cc*sa,
+            cc*sa*sb - ca*sc,  cb*sa, ca*cc + sa*sb*sc
+            );
+
+    case Convention::YXZ:
+        return makeMatrix(
+            ca*cc + sa*sb*sc, cc*sa*sb - ca*sc,  cb*sa,
+            cb*sc,            cb*cc,            -sb,
+            ca*sb*sc - cc*sa, ca*cc*sb + sa*sc,  ca*cb
+            );
+
+    case Convention::YZX:
+        return makeMatrix(
+             ca*cb, sa*sc - ca*cc*sb,  cc*sa + ca*sb*sc,
+             sb,    cb*cc,            -cb*sc,
+            -cb*sa, ca*sc + cc*sa*sb,  ca*cc - sa*sb*sc
+            );
+
+    case Convention::ZXY:
+        return makeMatrix(
+             ca*cc - sa*sb*sc, -cb*sa, ca*sc + cc*sa*sb,
+             cc*sa + ca*sb*sc,  ca*cb, sa*sc - ca*cc*sb,
+            -cb*sc,             sb,    cb*cc
+            );
+
+    case Convention::ZYX:
+        return makeMatrix(
+             ca*cb, ca*sb*sc - cc*sa, sa*sc + ca*cc*sb,
+             cb*sa, ca*cc + sa*sb*sc, cc*sa*sb - ca*sc,
+            -sb,    cb*sc,            cb*cc
+            );
+
+    default:
+        return QMatrix3x3(); // Identity
+    }
+}
+
 QList<EulerFrameParameter::Convention> EulerFrameParameter::getConventions()
 {
     return QList({
