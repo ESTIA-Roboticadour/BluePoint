@@ -128,8 +128,8 @@ bool RobotConfig::setFromConfig(const Config* src, bool copyPath)
 		}
 		if (EulerFrameParameter* euler = qobject_cast<EulerFrameParameter*>(src->getParameter("Tool")))
 		{
-			m_toolParameter.setPosition(euler->getPosition());
-			m_toolParameter.setAngles(euler->getAngles());
+			m_toolParameter.setConvention(euler->getConvention());
+			m_toolParameter.setEulerFrame(euler->getPosition(), euler->getAngles());
 			numberOfParametersSet++;
 		}
 	}

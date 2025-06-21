@@ -7,6 +7,7 @@
 #include "NumericalParameter.h"
 #include "StringParameter.h"
 #include "EulerFrameParameter.h"
+#include "Matrix4x4Parameter.h"
 
 #include <QObject>
 #include <QHostAddress>
