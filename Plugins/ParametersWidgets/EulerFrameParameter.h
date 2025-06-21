@@ -86,6 +86,8 @@ public slots:
     void setPosition(double x, double y, double z);
     void setAngles(const QVector3D& angles);
     void setAngles(double a, double b, double c);
+    void setEulerFrame(const QVector3D& position, const QVector3D& angles);
+    void setEulerFrame(double x, double y, double z, double a, double b, double c);
 
 signals:
     void conventionChanged(Convention convention);

@@ -10,24 +10,24 @@ static double clampAngle(double deg) {
 
 EulerFrameParameter::EulerFrameParameter(const QString& name,
                                          Convention convention,
-                                         QObject* parent)
-    : ParameterBase(name, parent),
+                                         QObject* parent) :
+    ParameterBase(name, parent),
     m_convention(convention),
     m_x(0.0), m_y(0.0), m_z(0.0),
     m_a(0.0), m_b(0.0), m_c(0.0)
 {
 }
 
-EulerFrameParameter::EulerFrameParameter(const EulerFrameParameter& parameter, QObject* parent)
-    : ParameterBase(parameter.getName(), parent),
+EulerFrameParameter::EulerFrameParameter(const EulerFrameParameter& parameter, QObject* parent) :
+    ParameterBase(parameter.getName(), parent),
     m_convention(parameter.m_convention),
     m_x(parameter.m_x), m_y(parameter.m_y), m_z(parameter.m_z),
     m_a(parameter.m_a), m_b(parameter.m_b), m_c(parameter.m_c)
 {
 }
 
-EulerFrameParameter::EulerFrameParameter(const QString& name, const EulerFrameParameter& parameter, QObject* parent)
-    : ParameterBase(name, parent),
+EulerFrameParameter::EulerFrameParameter(const QString& name, const EulerFrameParameter& parameter, QObject* parent) :
+    ParameterBase(name, parent),
     m_convention(parameter.m_convention),
     m_x(parameter.m_x), m_y(parameter.m_y), m_z(parameter.m_z),
     m_a(parameter.m_a), m_b(parameter.m_b), m_c(parameter.m_c)
@@ -299,6 +299,26 @@ void EulerFrameParameter::setAngles(const QVector3D& angles)
 
 void EulerFrameParameter::setAngles(double a, double b, double c)
 {
+    setA(a);
+    setB(b);
+    setC(c);
+}
+
+void EulerFrameParameter::setEulerFrame(const QVector3D& position, const QVector3D& angles)
+{
+    setX(position.x());
+    setY(position.y());
+    setZ(position.z());
+    setA(angles.x());
+    setB(angles.y());
+    setC(angles.z());
+}
+
+void EulerFrameParameter::setEulerFrame(double x, double y, double z, double a, double b, double c)
+{
+    setX(x);
+    setY(y);
+    setZ(z);
     setA(a);
     setB(b);
     setC(c);

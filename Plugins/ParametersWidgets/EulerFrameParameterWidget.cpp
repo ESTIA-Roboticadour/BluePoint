@@ -35,7 +35,7 @@ EulerFrameParameterWidget::EulerFrameParameterWidget(bool readOnly, QWidget* par
 
         m_angleSpin[i] = new QDoubleSpinBox(this);
         m_angleSpin[i]->setRange(-180.0, 180.0);
-        m_angleSpin[i]->setDecimals(2);
+        m_angleSpin[i]->setDecimals(3);
         m_angleSpin[i]->setDisabled(m_readOnly);
 
         if (m_readOnly)
@@ -266,5 +266,12 @@ void EulerFrameParameterWidget::onSpinBoxValueChanged(int index, double value)
         currentValue = value;
         m_angleSlider[index]->setValue(static_cast<int>(value));
         m_isSliderUpdating = false;
+
+        if (index == 0)
+            emit aChanged(m_a);
+        else if (index == 1)
+            emit bChanged(m_b);
+        else
+            emit cChanged(m_c);
     }
 }

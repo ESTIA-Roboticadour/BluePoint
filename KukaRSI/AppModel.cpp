@@ -16,13 +16,16 @@ AppModel::AppModel(const RobotConfig* config, QObject* parent) :
 	m_uiGroup(GroupParameter("UI", this)),
 	m_freshRateParameter(NumericalParameter("Fresh Rate (Hz)", 20, this)),
 	m_cartesianTranslationStep(NumericalParameter("Cartesian Translation Step (mm)", 0.25, this)),
-	m_cartesianRotationStep(NumericalParameter("Cartesian Rotation Step (°)", 0.25, this)),
-	m_jointStep(NumericalParameter("Joint Step (°)", 0.025, this))
+	m_cartesianRotationStep(NumericalParameter("Cartesian Rotation Step (deg)", 0.25, this)),
+	m_jointStep(NumericalParameter("Joint Step (deg)", 0.025, this))
 {
 	setupConfig(config);
 	if (config && setupAddress(config))
 	{
 		m_robot = new RobotKuka(this);
+		m_robot->setCartesianTranslationStep(m_cartesianTranslationStep.getValue());
+		m_robot->setCartesianRotationStep(m_cartesianRotationStep.getValue());
+		m_robot->setJointStep(m_jointStep.getValue());
 
 		connect(m_robot, &RobotKuka::statusChanged, this, &AppModel::robotStatusChanged);
 		connect(m_robot, &RobotKuka::robotStateChanged, this, &AppModel::robotStateChanged);
