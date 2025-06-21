@@ -1,7 +1,9 @@
 #include "Matrix4x4ParameterWidget.h"
 
-#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QGridLayout>
 #include <QDoubleValidator>
+#include <QSizePolicy>
 
 Matrix4x4ParameterWidget::Matrix4x4ParameterWidget(bool readOnly, QWidget* parent) :
     ParameterWidget(parent),
@@ -9,7 +11,7 @@ Matrix4x4ParameterWidget::Matrix4x4ParameterWidget(bool readOnly, QWidget* paren
     m_matrix(),
     m_readOnly(readOnly),
     m_label(new QLabel("Matrix 4x4:", this)),
-    m_layout(new QGridLayout(this)),
+    m_layout(new QHBoxLayout(this)),
     m_button(nullptr)
 {
     setupUI();
@@ -18,18 +20,11 @@ Matrix4x4ParameterWidget::Matrix4x4ParameterWidget(bool readOnly, QWidget* paren
 
 void Matrix4x4ParameterWidget::setupUI()
 {
-    QHBoxLayout* hBox = new QHBoxLayout();
-    hBox->addWidget(m_label);
+    m_layout->addWidget(m_label);
+    m_label->setAlignment(Qt::AlignTop);
 
-    if (!m_readOnly)
-    {
-        m_button = new QPushButton("Normalize", this);
-        hBox->addWidget(m_button);
-        hBox->addStretch();
-        connect(m_button, &QPushButton::clicked, this, &Matrix4x4ParameterWidget::onButtonClicked);
-    }
-
-    m_layout->addLayout(hBox, 0, 0, 1, 4); // Label spanning 4 columns
+    QVBoxLayout* vBox = new QVBoxLayout();
+    QGridLayout* gridLayout = new QGridLayout();
 
     QDoubleValidator* validator = new QDoubleValidator(this);
     validator->setNotation(QDoubleValidator::StandardNotation);
@@ -40,7 +35,7 @@ void Matrix4x4ParameterWidget::setupUI()
         {
             QLineEdit* edit = new QLineEdit(this);
             edit->setValidator(validator);
-            m_layout->addWidget(edit, row + 1, col);
+            gridLayout->addWidget(edit, row + 1, col);
             m_lineEdits.append(edit);
 
             if (m_readOnly)
@@ -54,13 +49,22 @@ void Matrix4x4ParameterWidget::setupUI()
         }
     }
 
+    vBox->addLayout(gridLayout);
+
     for (int col = 0; col < 3; ++col)
     {
         int index = 3 * 4 + col;
         m_lineEdits[index]->setEnabled(false);
     }
 
-    setLayout(m_layout);
+    if (!m_readOnly)
+    {
+        m_button = new QPushButton("Normalize", this);
+        m_button->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+        vBox->addWidget(m_button);
+        connect(m_button, &QPushButton::clicked, this, &Matrix4x4ParameterWidget::onButtonClicked);
+    }
+    m_layout->addLayout(vBox);
 }
 
 QString Matrix4x4ParameterWidget::getName() const

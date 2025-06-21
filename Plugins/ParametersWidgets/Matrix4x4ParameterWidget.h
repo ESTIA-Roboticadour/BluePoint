@@ -10,7 +10,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QPushButton>
-#include <QGridLayout>
+#include <QHBoxLayout>
 #include <QVector>
 #include <QString>
 
@@ -54,7 +54,7 @@ private:
     bool m_readOnly;
     QVector<QLineEdit*> m_lineEdits;
     QLabel* m_label;
-    QGridLayout* m_layout;
+    QHBoxLayout* m_layout;
     QPushButton* m_button;
 };
 
