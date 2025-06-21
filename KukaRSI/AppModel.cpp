@@ -18,7 +18,7 @@ AppModel::AppModel(const RobotConfig* config, QObject* parent) :
 	m_freshRateParameter(NumericalParameter("Fresh Rate (Hz)", 20, this)),
 	m_cartesianTranslationStep(NumericalParameter("Cartesian Translation Step (mm)", 0.25, this)),
 	m_cartesianRotationStep(NumericalParameter("Cartesian Rotation Step (deg)", 0.25, this)),
-	m_jointStep(NumericalParameter("Joint Step (deg)", 0.025, this)),
+	m_jointStep(NumericalParameter("Joint Step (deg)", 0.025, this))
 {
 	setupConfig(config);
 	if (config && setupAddress(config))
