@@ -97,16 +97,11 @@ void AppView::setupUI()
 	connectionGroup->setLayout(m_connectionLayout);
 	rightLayout->addWidget(connectionGroup);
 
-	// Groupe "Control"
-	auto* controlGroup = new QGroupBox("Control", this);
-	controlGroup->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	auto* controlLayout = new QVBoxLayout();
-
-	// Ligne 1 : Start / Stop
-	auto* jobGroup = new QGroupBox("Job", this);
+	// Jogging : Start / Stop
+	auto* joggingGroup = new QGroupBox("Jogging", this);
 
 	auto* startStopLayout = new QHBoxLayout();
-	jobGroup->setLayout(startStopLayout);
+	joggingGroup->setLayout(startStopLayout);
 
 	m_startButton = new QPushButton("Start", this);
 	m_stopButton = new QPushButton("Stop", this);
@@ -116,9 +111,9 @@ void AppView::setupUI()
 	startStopLayout->addWidget(m_stopButton);
 	startStopLayout->addStretch();
 
-	controlLayout->addWidget(jobGroup);
+	rightLayout->addWidget(joggingGroup);
 
-	// Ligne 2 : Move & IO
+	// Move & IO
 	auto* moveIoContent = new QWidget();
 	moveIoContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
 
@@ -183,9 +178,9 @@ void AppView::setupUI()
 	createIOBtns(gridLayout);
 
 	moveIoLayout->addWidget(ioGroup);
-	controlLayout->addWidget(moveIoContent);
+	rightLayout->addWidget(moveIoContent);
 
-	// Ligne 3 : Position + Delta
+	// Position + Delta
 	auto* posDeltaLayout = new QHBoxLayout();
 
 	auto* positionGroup = createPoseGroup("Position", m_poseLabels, m_poseLineEdits);
@@ -196,10 +191,8 @@ void AppView::setupUI()
 	posDeltaLayout->addWidget(positionGroup);
 	posDeltaLayout->addWidget(deltaGroup);
 
-	controlLayout->addLayout(posDeltaLayout);
+	rightLayout->addLayout(posDeltaLayout);
 
-	controlGroup->setLayout(controlLayout);
-	rightLayout->addWidget(controlGroup);
 	rightLayout->addStretch();
 
 	mainLayout->addLayout(leftLayout);
