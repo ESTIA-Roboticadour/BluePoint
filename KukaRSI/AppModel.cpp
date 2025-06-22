@@ -1,5 +1,4 @@
 #include "AppModel.h"
-#include "EulerFrameParameter.h"
 
 AppModel::AppModel(const RobotConfig* config, QObject* parent) :
 	ModelBase(parent),
@@ -77,9 +76,13 @@ void AppModel::getCurrentDelta(double currentDelta[6]) const
 
 void AppModel::setupConfig(const RobotConfig* config)
 {
+	m_portParameter.setMinimum(1);
 	m_portParameter.setMaximum(65535);
+
 	m_freshRateParameter.setMinimum(1);
 	m_freshRateParameter.setMaximum(60);
+
+	m_connectionTimeoutParameter.setMinimum(1);
 	m_connectionTimeoutParameter.setMaximum(300);
 
 	m_cartesianTranslationStep.setIncrement(0.001);

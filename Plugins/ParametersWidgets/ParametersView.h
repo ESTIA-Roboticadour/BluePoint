@@ -11,6 +11,7 @@
 #include "ListParameterBase.h"
 #include "Matrix4x4Parameter.h"
 #include "EulerFrameParameter.h"
+#include "Vector3DParameter.h"
 #include "ParameterWidget.h"
 
 #include <QWidget>
@@ -71,6 +72,7 @@ private:
 	ParameterWidget* createListParameterWidget(const ListParameterBase* parameter);
     ParameterWidget* createMatrix4x4ParameterWidget(const Matrix4x4Parameter* parameter);
     ParameterWidget* createEulerFrameParameter(const EulerFrameParameter* parameter);
+    ParameterWidget* createVector3DParameter(const Vector3DParameter* parameter);
 	ParameterWidget* createUnknownParameterWidget(const ParameterBase* parameter);
 
 	void createGroupInfo(const QGroupBox* groupBox);

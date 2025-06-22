@@ -35,12 +35,12 @@ public:
     EulerFrameParameter::Convention getConvention() const;
     QVector3D getPosition() const;
     QVector3D getAngles() const;
-    double getX() const { return m_x; }
-    double getY() const { return m_y; }
-    double getZ() const { return m_z; }
-    double getA() const { return m_a; }
-    double getB() const { return m_b; }
-    double getC() const { return m_c; }
+    double getX() const { return m_posSpin[0]->value(); }
+    double getY() const { return m_posSpin[1]->value(); }
+    double getZ() const { return m_posSpin[2]->value(); }
+    double getA() const { return m_angleSpin[0]->value(); }
+    double getB() const { return m_angleSpin[1]->value(); }
+    double getC() const { return m_angleSpin[2]->value(); }
 
     void setFrom(const EulerFrameParameter* parameter);
     int getLabelWidth() const override;
@@ -80,12 +80,6 @@ signals:
 
 private:
     bool m_readOnly;
-    double m_x;
-    double m_y;
-    double m_z;
-    double m_a;
-    double m_b;
-    double m_c;
     EulerFrameParameter::Convention m_convention;
     QString m_name;
     QLabel* m_label;

@@ -7,12 +7,6 @@
 EulerFrameParameterWidget::EulerFrameParameterWidget(bool readOnly, QWidget* parent) :
     ParameterWidget(parent),
     m_readOnly(readOnly),
-    m_x(0.),
-    m_y(0.),
-    m_z(0.),
-    m_a(0.),
-    m_b(0.),
-    m_c(0.),
     m_name("Euler Frame"),
     m_label(new QLabel("Euler Frame:", this)),
     m_comboBox(new QComboBox(this)),
@@ -156,12 +150,12 @@ void EulerFrameParameterWidget::setConvention(EulerFrameParameter::Convention co
 
 QVector3D EulerFrameParameterWidget::getPosition() const
 {
-    return QVector3D(m_x, m_y, m_z);
+    return QVector3D(getX(), getY(), getZ());
 }
 
 QVector3D EulerFrameParameterWidget::getAngles() const
 {
-    return QVector3D(m_a, m_b, m_c);
+    return QVector3D(getA(), getB(), getC());
 }
 
 void EulerFrameParameterWidget::setPosition(const QVector3D& position)
@@ -259,19 +253,14 @@ void EulerFrameParameterWidget::onSliderValueChanged(int index, int value)
 
 void EulerFrameParameterWidget::onSpinBoxValueChanged(int index, double value)
 {
-    double& currentValue = index == 0 ? m_a : (index == 1 ? m_b : m_c);
-    if (currentValue != value)
-    {
-        m_isSliderUpdating = true;
-        currentValue = value;
-        m_angleSlider[index]->setValue(static_cast<int>(value));
-        m_isSliderUpdating = false;
+    m_isSliderUpdating = true;
+    m_angleSlider[index]->setValue(static_cast<int>(value));
+    m_isSliderUpdating = false;
 
-        if (index == 0)
-            emit aChanged(m_a);
-        else if (index == 1)
-            emit bChanged(m_b);
-        else
-            emit cChanged(m_c);
-    }
+    if (index == 0)
+        emit aChanged(value);
+    else if (index == 1)
+        emit bChanged(value);
+    else
+        emit cChanged(value);
 }

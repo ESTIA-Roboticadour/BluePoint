@@ -5,6 +5,7 @@
 #include "ListParameterWidget.h"
 #include "Matrix4x4ParameterWidget.h"
 #include "EulerFrameParameterWidget.h"
+#include "Vector3DParameterWidget.h"
 #include "UnknownParameterWidget.h"
 
 #include <QHBoxLayout>
@@ -200,6 +201,11 @@ QWidget* ParametersView::createParameterWidget(const ParameterBase* parameter)
     {
         return createEulerFrameParameter(eulerFrameParam);
     }
+    // Vector3D
+    if (auto vector3DParam = qobject_cast<const Vector3DParameter*>(parameter))
+    {
+        return createVector3DParameter(vector3DParam);
+    }
 	// Unknown
     return createUnknownParameterWidget(parameter);
 }
@@ -324,6 +330,30 @@ ParameterWidget* ParametersView::createEulerFrameParameter(const EulerFrameParam
     }
 
     return eulerWidget;
+}
+
+ParameterWidget* ParametersView::createVector3DParameter(const Vector3DParameter* parameter)
+{
+    Vector3DParameterWidget* widget = new Vector3DParameterWidget(m_isReadOnly, parameter->getCanBeNormalized());
+    widget->setFrom(parameter);
+
+    connect(parameter, &Vector3DParameter::xChanged, widget, &Vector3DParameterWidget::setX);
+    connect(parameter, &Vector3DParameter::yChanged, widget, &Vector3DParameterWidget::setY);
+    connect(parameter, &Vector3DParameter::zChanged, widget, &Vector3DParameterWidget::setZ);
+
+    if (!m_isReadOnly)
+    {
+        connect(parameter, &Vector3DParameter::canBeNormalizedChanged, widget, &Vector3DParameterWidget::setCanNormalize);
+
+        connect(widget, &Vector3DParameterWidget::xChanged, parameter, &Vector3DParameter::setX);
+        connect(widget, &Vector3DParameterWidget::yChanged, parameter, &Vector3DParameter::setY);
+        connect(widget, &Vector3DParameterWidget::zChanged, parameter, &Vector3DParameter::setZ);
+        connect(widget, &Vector3DParameterWidget::canNormalizeChanged, parameter, &Vector3DParameter::setCanBeNormalized);
+
+        connect(parameter, &ParameterBase::isEditableChanged, widget, &Vector3DParameterWidget::setEnabled);
+    }
+
+    return widget;
 }
 
 ParameterWidget* ParametersView::createUnknownParameterWidget(const ParameterBase* parameter)

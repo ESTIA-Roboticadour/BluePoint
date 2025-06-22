@@ -36,7 +36,9 @@ HEADERS += \
     StringParameterWidgetPlugin.h \
     ListParameterWidgetPlugin.h \
     ParametersViewPlugin.h \
-    UnknownParameterWidget.h
+    UnknownParameterWidget.h \
+    Vector3DParameter.h \
+    Vector3DParameterWidget.h
 
 SOURCES += \
     Config.cpp \
@@ -62,7 +64,9 @@ SOURCES += \
     StringParameterWidgetPlugin.cpp \
     ListParameterWidgetPlugin.cpp \
     ParametersViewPlugin.cpp \
-    UnknownParameterWidget.cpp
+    UnknownParameterWidget.cpp \
+    Vector3DParameter.cpp \
+    Vector3DParameterWidget.cpp
 
 #RESOURCES +=
 #LIBS        += -L. -lListParameterWidget -lParametersView -lBoolParameterWidget -lStringParameterWidget -lNumericalParameterWidget
