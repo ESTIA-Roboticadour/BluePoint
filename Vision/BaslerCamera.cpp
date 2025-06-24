@@ -185,13 +185,6 @@ void BaslerCamera::startGrabbing(Pylon::EGrabStrategy strat, Pylon::EGrabLoop lo
 			Pylon::CPylonImage           pyImg;
 			cv::Mat                      matRGB;
 
-#ifdef _DEBUG
-			std::chrono::steady_clock::time_point start;
-			std::chrono::steady_clock::time_point end;
-			double deltaMs;
-			int displayCounter = 0;
-#endif // _DEBUG
-
 			while (m_cam && m_cam->IsGrabbing())
 			{
 				try
@@ -202,10 +195,6 @@ void BaslerCamera::startGrabbing(Pylon::EGrabStrategy strat, Pylon::EGrabLoop lo
 						emit errorThrown("[BaslerCamera] Grab error 1", ptr->GetErrorDescription().c_str());
 						continue;
 					}
-
-#ifdef _DEBUG
-					start = std::chrono::steady_clock::now();
-#endif // _DEBUG
 
 					// BGR header sur buffer Pylon
 					conv.Convert(pyImg, ptr);
@@ -221,17 +210,6 @@ void BaslerCamera::startGrabbing(Pylon::EGrabStrategy strat, Pylon::EGrabLoop lo
 
 					// QImage
 					QImage image(matRGB.data, matRGB.cols, matRGB.rows, static_cast<int>(matRGB.step), QImage::Format_RGB888);
-
-#ifdef _DEBUG
-					end = std::chrono::steady_clock::now();
-					deltaMs = std::chrono::duration<double, std::milli>(end - start).count();
-					displayCounter++;
-					if (displayCounter == 1)
-					{
-						qDebug() << deltaMs;
-						displayCounter = 0;
-					}
-#endif // _DEBUG
 
 					// sauvegarde thread-safe
 					{
