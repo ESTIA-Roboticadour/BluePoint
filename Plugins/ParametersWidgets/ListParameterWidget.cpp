@@ -100,7 +100,7 @@ void ListParameterWidget::setOptions(const QStringList& keys)
 
 void ListParameterWidget::setCurrentIndex(int index)
 {
-    if (index != m_selectedIndex && index > 0 && index < m_options.size())
+    if (index != m_selectedIndex && index >= 0 && index < m_options.size())
 	{
         m_selectedIndex = index;
         if (m_comboBox)
