@@ -74,6 +74,12 @@ void AppModel::getCurrentDelta(double currentDelta[6]) const
 		m_robot->getCurrentDelta(currentDelta);
 }
 
+void AppModel::getCurrentIO(bool inputs[16], bool outputs[16])
+{
+	if (m_robot)
+		m_robot->getCurrentIO(inputs, outputs);
+}
+
 void AppModel::setupConfig(const RobotConfig* config)
 {
 	m_portParameter.setMinimum(1);
@@ -188,12 +194,10 @@ void AppModel::onArticularMovementReleased(RobotKuka::Joint joint)
 		m_robot->stopMove();
 }
 
-void AppModel::onInputToggled(RobotKuka::IOInput input, bool enabled)
-{
-}
-
 void AppModel::onOutputToggled(RobotKuka::IOOutput output, bool enabled)
 {
+	if (m_robot)
+		m_robot->setOutput(output, enabled);
 }
 
 void AppModel::onIsInRobotBaseChanged(bool isInRobotBase)

@@ -70,26 +70,26 @@ public:
     //Q_DECLARE_FLAGS(MovementFlags, MovementDirection)
     //Q_FLAG(MovementFlags)
 
-    enum IOInput
-    {
-        I01,
-        I02,
-        I03,
-        I04,
-        I05,
-        I06,
-        I07,
-        I08,
-        I09,
-        I10,
-        I11,
-        I12,
-        I13,
-        I14,
-        I15,
-        I16,
-    };
-    Q_ENUM(IOInput)
+    //enum IOInput
+    //{
+    //    I01,
+    //    I02,
+    //    I03,
+    //    I04,
+    //    I05,
+    //    I06,
+    //    I07,
+    //    I08,
+    //    I09,
+    //    I10,
+    //    I11,
+    //    I12,
+    //    I13,
+    //    I14,
+    //    I15,
+    //    I16,
+    //};
+    //Q_ENUM(IOInput)
 
     enum IOOutput
     {
@@ -177,8 +177,8 @@ public:
     void stopMove();
 
     // IO
-    void setInput(IOInput input, bool enabled);
     void setOutput(IOOutput output, bool enabled);
+    void getCurrentIO(bool inputs[16], bool outputs[16]);
 
     // Pose & Delta
     void getCurrentPose(double currentPose[6]) const;
@@ -207,9 +207,11 @@ private:
     void setRobotState(RobotState state);
     void parseReceivedData(const QString& data);
     
-    QString ipocFromTrame(const QString& trame);
+    void ipocFromTrame(const QString& trame, QString& ipoc);
     void cartesianPositionFromTrame(const QString& trame, double pos[6]);
     void jointPositionFromTrame(const QString& trame, double pos[6]);
+    void getDigitalInputsFromTrame(const QString& trame, bool digin[16]);
+    void getDigitalOutputsFromTrame(const QString& trame, bool digout[16]);
 
     void requestAutomate();
     void stateAutomate();
@@ -233,12 +235,12 @@ private:
     bool m_isConnected;
     bool m_disconnectRequest;
 
-    UdpClient* m_udpClient;
+    bool m_abortConnectionRequest;
+    bool m_initialDatagramReceived;
     quint16 m_connectionTimeout;
     quint16 m_connectionTimeRemaining;
     QTimer* m_connectionTimer;
-    bool m_abortConnectionRequest;
-    bool m_initialDatagramReceived;
+    UdpClient* m_udpClient;
 
     QHostAddress m_robotAddress;
     quint16 m_robotPort;
@@ -252,11 +254,23 @@ private:
     double m_deltaStepCartesianTranslation;
     double m_deltaStepCartesianRotation;
     double m_deltaStepJoint;
+    int m_joggingAxisIndex;
     Axis m_joggingAxis;
 	Joint m_joggingJoint;
     bool m_isMovePositive;
 	bool m_isMovingInRobotBase; // true = BASE, false = TOOL
+    bool m_digin[16]; // Digital inputs
+    bool m_digout[16]; // Digital inputs
+    bool m_requestDigout[16]; // Digital inputs
 
-    RsiTrame m_rsiTrame;
+	// Variables pour la gestion des trames
+    int m_startIndex;
+    int m_endIndex;
+    int m_iTrame;
+    ushort m_ioTrame; // Buffer pour les entrées/sorties numériques (16 bits)
+    ushort m_ioMask;
+    QString m_trameTagContent;
+    QString m_trameTagKey;
     QString m_lastIPOC;
+    RsiTrame m_rsiTrame;
 };

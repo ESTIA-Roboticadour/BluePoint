@@ -55,6 +55,10 @@
     </Parameters>
   </RSIObject>
   <RSIObject ObjType="ETHERNET" ObjTypeID="64" ObjID="ETHERNET1">
+    <Inputs>
+      <Input InIdx="1" OutObjID="DIGIN1" OutIdx="1" />
+      <Input InIdx="2" OutObjID="DIGOUT1" OutIdx="1" />
+    </Inputs>
     <Parameters>
       <Parameter Name="ConfigFile" ParamID="1" ParamValue="RSI_Ethernet.xml" IsRuntime="false" />
       <Parameter Name="Timeout" ParamID="1" ParamValue="100" />
@@ -198,6 +202,27 @@
       <Parameter Name="LastCorrB" ParamID="13" ParamValue="0" />
       <Parameter Name="LastCorrC" ParamID="14" ParamValue="0" />
       <Parameter Name="RefCorrSys" ParamID="1" ParamValue="1" IsRuntime="false" />
+    </Parameters>
+  </RSIObject>
+  <RSIObject ObjType="DIGIN" ObjTypeID="29" ObjID="DIGIN1">
+    <Parameters>
+      <Parameter Name="Index" ParamID="1" ParamValue="1" />
+      <Parameter Name="DataSize" ParamID="2" ParamValue="3" />
+    </Parameters>
+  </RSIObject>
+  <RSIObject ObjType="DIGOUT" ObjTypeID="43" ObjID="DIGOUT1">
+    <Parameters>
+      <Parameter Name="Index" ParamID="1" ParamValue="1" />
+      <Parameter Name="DataSize" ParamID="2" ParamValue="3" />
+    </Parameters>
+  </RSIObject>
+  <RSIObject ObjType="MAP2DIGOUT" ObjTypeID="14" ObjID="MAP2DIGOUT1">
+    <Inputs>
+      <Input InIdx="1" OutObjID="ETHERNET1" OutIdx="9" />
+    </Inputs>
+    <Parameters>
+      <Parameter Name="Index" ParamID="1" ParamValue="1" />
+      <Parameter Name="DataSize" ParamID="2" ParamValue="2" />
     </Parameters>
   </RSIObject>
 </RSIObjects>

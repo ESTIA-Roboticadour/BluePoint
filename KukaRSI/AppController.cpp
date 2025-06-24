@@ -26,15 +26,17 @@ void AppController::onViewDestroyed()
 
 void AppController::onViewRequestRefreshUI(bool isCartesian)
 {
-	double tmp[6];
 	if (isCartesian)
-		m_model->getCurrentPose(tmp);
+		m_model->getCurrentPose(m_tmpPose);
 	else
-		m_model->getCurrentJoint(tmp);
-	m_view->updatePose(tmp);
+		m_model->getCurrentJoint(m_tmpPose);
+	m_view->updatePose(m_tmpPose);
 
-	m_model->getCurrentDelta(tmp);
-	m_view->updateDelta(tmp);
+	m_model->getCurrentDelta(m_tmpPose);
+	m_view->updateDelta(m_tmpPose);
+
+	m_model->getCurrentIO(m_tmpInputs, m_tmpOutputs);
+	m_view->updateIO(m_tmpInputs, m_tmpOutputs);
 }
 
 void AppController::onModelReleased()
@@ -57,7 +59,6 @@ void AppController::setupConnections()
 	connect(m_view, &AppView::cartesianMovementReleased, m_model, &AppModel::onCartesianMovementReleased);
 	connect(m_view, &AppView::articularMovementPressed, m_model, &AppModel::onArticularMovementPressed);
 	connect(m_view, &AppView::articularMovementReleased, m_model, &AppModel::onArticularMovementReleased);
-	connect(m_view, &AppView::inputToggled, m_model, &AppModel::onInputToggled);
 	connect(m_view, &AppView::outputToggled, m_model, &AppModel::onOutputToggled);
 
 	connect(m_view, &AppView::requestRefreshUI, this, &AppController::onViewRequestRefreshUI, Qt::DirectConnection);
@@ -88,7 +89,6 @@ void AppController::removeConnections()
 	disconnect(m_view, &AppView::cartesianMovementReleased, m_model, &AppModel::onCartesianMovementReleased);
 	disconnect(m_view, &AppView::articularMovementPressed, m_model, &AppModel::onArticularMovementPressed);
 	disconnect(m_view, &AppView::articularMovementReleased, m_model, &AppModel::onArticularMovementReleased);
-	disconnect(m_view, &AppView::inputToggled, m_model, &AppModel::onInputToggled);
 	disconnect(m_view, &AppView::outputToggled, m_model, &AppModel::onOutputToggled);
 
 	disconnect(m_view, &AppView::requestRefreshUI, this, &AppController::onViewRequestRefreshUI);

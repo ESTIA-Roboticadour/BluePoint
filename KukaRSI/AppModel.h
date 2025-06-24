@@ -36,13 +36,13 @@ public:
     void getCurrentPose(double currentPose[6]) const;
     void getCurrentJoint(double currentJoint[6]) const;
     void getCurrentDelta(double currentDelta[6]) const;
+    void getCurrentIO(bool inputs[16], bool outputs[16]);
 
 public slots:
     void onCartesianMovementPressed(RobotKuka::Axis axis, bool positive);
     void onCartesianMovementReleased(RobotKuka::Axis axis);
     void onArticularMovementPressed(RobotKuka::Joint joint, bool positive);
     void onArticularMovementReleased(RobotKuka::Joint joint);
-    void onInputToggled(RobotKuka::IOInput input, bool enabled);
     void onOutputToggled(RobotKuka::IOOutput output, bool enabled);
     void onIsInRobotBaseChanged(bool isInRobotBase);
 

@@ -1,10 +1,12 @@
 #include "RsiTrame.h"
 #include <cstring> // memcpy
+#include <QDebug>
 
 RsiTrame::RsiTrame() :
 	m_pos(),
 	m_ipoc(),
-	m_isCartesian(true)
+	m_isCartesian(true),
+	m_digout(0)
 {
 	reset();
 }
@@ -19,6 +21,7 @@ void RsiTrame::reset()
 	m_pos[3] = 0.;
 	m_pos[4] = 0.;
 	m_pos[5] = 0.;
+	m_digout = 0;
 }
 
 void RsiTrame::setPose(bool isCartesian, double pos[6], bool isInRobotBase)
@@ -32,6 +35,22 @@ void RsiTrame::setIPOC(const QString& ipoc)
 {
 	m_ipoc = ipoc;
 }
+
+void RsiTrame::setOutputs(bool outputs[16])
+{
+	encodeBoolArrayToShort(outputs, m_digout);
+}
+
+void RsiTrame::encodeBoolArrayToShort(bool io[16], ushort& nIO)
+{
+	nIO = 0;
+	for (int i = 0; i < 16; i++)
+	{
+		if (io[i])
+			nIO += pow(2, i);
+	}
+}
+
 
 bool RsiTrame::isValid() const
 {
@@ -53,6 +72,8 @@ QString RsiTrame::build() const
 		" B=\"" + QString::number(m_pos[4], 'g', 6) + "\""
 		" C=\"" + QString::number(m_pos[5], 'g', 6) + "\""
 		" />\r\n"
+		"<Digout>" + QString::number(m_digout) + "</Digout>\r\n"
 		"<IPOC>" + m_ipoc + "</IPOC>\r\n"
 		"</Sen>";
+
 }

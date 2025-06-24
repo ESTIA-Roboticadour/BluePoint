@@ -31,5 +31,9 @@ private:
 private:
 	AppModel* m_model{ nullptr };
 	AppView* m_view{ nullptr };
+
+	double m_tmpPose[6];
+	bool m_tmpInputs[16];
+	bool m_tmpOutputs[16];
 };
 

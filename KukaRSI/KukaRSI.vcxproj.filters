@@ -163,18 +163,6 @@
     <ClCompile Include="UdpClient.cpp">
       <Filter>Services\UDP</Filter>
     </ClCompile>
-    <ClCompile Include="CartesianMoveTrame.cpp">
-      <Filter>Services\Trame</Filter>
-    </ClCompile>
-    <ClCompile Include="SetAccelTrame.cpp">
-      <Filter>Services\Trame</Filter>
-    </ClCompile>
-    <ClCompile Include="SetVelocityTrame.cpp">
-      <Filter>Services\Trame</Filter>
-    </ClCompile>
-    <ClCompile Include="TrameStack.cpp">
-      <Filter>Services\Trame</Filter>
-    </ClCompile>
     <ClCompile Include="RsiTrame.cpp">
       <Filter>Services\Trame</Filter>
     </ClCompile>
@@ -242,19 +230,7 @@
     <ClInclude Include="CallbackTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CartesianMoveTrame.h">
-      <Filter>Services\Trame</Filter>
-    </ClInclude>
-    <ClInclude Include="SetAccelTrame.h">
-      <Filter>Services\Trame</Filter>
-    </ClInclude>
-    <ClInclude Include="SetVelocityTrame.h">
-      <Filter>Services\Trame</Filter>
-    </ClInclude>
     <ClInclude Include="Trame.h">
-      <Filter>Services\Trame</Filter>
-    </ClInclude>
-    <ClInclude Include="TrameStack.h">
       <Filter>Services\Trame</Filter>
     </ClInclude>
     <ClInclude Include="RsiTrame.h">

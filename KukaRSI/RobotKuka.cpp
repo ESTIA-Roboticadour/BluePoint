@@ -27,16 +27,35 @@ RobotKuka::RobotKuka(QObject* parent) :
 	m_deltaStepCartesianTranslation(0.25), // Default delta step cartesian (mm)
 	m_deltaStepCartesianRotation(0.25), // Default delta step cartesian (°)
 	m_deltaStepJoint(0.025), // Default delta step joint (degrees)
+	m_joggingAxisIndex(0),
 	m_joggingAxis(Axis::X), // Default axis
 	m_joggingJoint(Joint::J1), // Default joint
 	m_isMovePositive(true), // Default to positive movement
 	m_isMovingInRobotBase(true), // Default to BASE mode
+	m_digin(), // Digital inputs
+	m_digout(), // Digital outputs
+	m_requestDigout(),
+	m_startIndex(0),
+	m_endIndex(0),
+	m_iTrame(0),
+	m_ioTrame(0),
+	m_ioMask(0),
 	m_rsiTrame(),
+	m_trameTagContent(),
+	m_trameTagKey(),
 	m_lastIPOC()
 {
+	for (int i = 0; i < 16; ++i) {
+		m_digin[i] = false;
+		m_digout[i] = false;
+		m_requestDigout[i] = false;
+	}
 	std::memcpy(m_currentPose, m_ZEROS, ARRAY_6_DOUBLE_SIZE);
 	std::memcpy(m_currentJoint, m_ZEROS, ARRAY_6_DOUBLE_SIZE);
 	std::memcpy(m_currentDelta, m_ZEROS, ARRAY_6_DOUBLE_SIZE);
+
+	m_trameTagContent.reserve(1024); // Reserve space for the trame content
+	m_trameTagKey.reserve(16); // Reserve space for the tag key
 }
 
 RobotKuka::~RobotKuka()
@@ -146,6 +165,7 @@ void RobotKuka::onInitialDatagramReceived(const QByteArray& data, const QHostAdd
 	m_robotAddress = QHostAddress(sender); // make sure it's a copy
 	m_robotPort = senderPort;
 	parseReceivedData(data);
+	std::memcpy(m_requestDigout, m_digout, 16 * sizeof(bool));
 	m_isConnected = true;
 	qInfo() << QString("Connection established from %1:%2").arg(m_robotAddress.toString()).arg(m_robotPort);
 	setStatus(Status::Connected);
@@ -230,7 +250,6 @@ void RobotKuka::setRobotState(RobotState state)
 {
 	if (m_robotState != state)
 	{
-		//qDebug() << "Robot state: " + toString(state);
 		m_robotState = state;
 		emit robotStateChanged(m_robotState);
 	}
@@ -238,49 +257,59 @@ void RobotKuka::setRobotState(RobotState state)
 
 void RobotKuka::parseReceivedData(const QString& data)
 {
-	m_lastIPOC = ipocFromTrame(data);
+	ipocFromTrame(data, m_lastIPOC);
 	cartesianPositionFromTrame(data, m_currentPose);
 	jointPositionFromTrame(data, m_currentJoint);
+	getDigitalInputsFromTrame(data, m_digin);
+	getDigitalOutputsFromTrame(data, m_digout);
 }
 
-QString RobotKuka::ipocFromTrame(const QString& trame)
+void RobotKuka::ipocFromTrame(const QString& trame, QString& ipoc)
 {
-	static const QString etiquette = "<IPOC>";
-	static int startIPOC;
-	static int endIPOC;
-	startIPOC = trame.lastIndexOf(etiquette) + etiquette.length();
-	endIPOC = trame.lastIndexOf("</IPOC");
-	return trame.mid(startIPOC, endIPOC - startIPOC);
+	static const QString tag = "<IPOC>";
+	m_startIndex = trame.lastIndexOf(tag);
+	if (m_startIndex == -1)
+	{
+		qWarning() << "IPOC not found in trame. Missing tag: IPOC";
+		return;
+	}
+	m_endIndex = trame.lastIndexOf("</IPOC>");
+	if (m_endIndex == -1)
+	{
+		qWarning() << "Malformed <IPOC> tag: missing '</IPOC>'";
+		return;
+	}
+	m_startIndex += tag.length();
+	ipoc = trame.mid(m_startIndex, m_endIndex - m_startIndex);
 }
 
 void RobotKuka::cartesianPositionFromTrame(const QString& trame, double pos[6])
 {
 	static const QString tag = "<RIst";
-	int start = trame.indexOf(tag);
-
-	if (start == -1)
+	const static QMap<QString, int> indexMap = { {"X", 0}, {"Y", 1}, {"Z", 2}, {"A", 3}, {"B", 4}, {"C", 5} };
+	m_startIndex = trame.indexOf(tag);
+	if (m_startIndex == -1)
 	{
 		qWarning() << "Cartesian position not found in trame. Missing tag: RIst";
 		return;
 	}
-
-	int end = trame.indexOf("/>", start);
-	if (end == -1)
+	m_endIndex = trame.indexOf("/>", m_startIndex);
+	if (m_endIndex == -1)
+	{
+		qWarning() << "Malformed <RIst> tag: missing '/>'";
 		return;
+	}
 
-	QString rist = trame.mid(start, end - start); // extrait la sous-chaîne "<RIst ..."
-
-	QMap<QString, int> indexMap = { {"X", 0}, {"Y", 1}, {"Z", 2}, {"A", 3}, {"B", 4}, {"C", 5} };
+	m_trameTagContent = trame.mid(m_startIndex, m_endIndex - m_startIndex); // extrait la sous-chaîne "<RIst ..."
 
 	for (auto it = indexMap.constBegin(); it != indexMap.constEnd(); ++it) {
-		QString key = it.key() + "=\"";
-		int idx = rist.indexOf(key);
-		if (idx != -1) {
-			idx += key.length();
-			int endIdx = rist.indexOf("\"", idx);
-			if (endIdx != -1) {
-				QString valueStr = rist.mid(idx, endIdx - idx);
-				pos[it.value()] = valueStr.toDouble();
+		m_trameTagKey = it.key() + "=\"";
+		m_startIndex = m_trameTagContent.indexOf(m_trameTagKey);
+		if (m_startIndex != -1) {
+			m_startIndex += m_trameTagKey.length();
+			m_endIndex = m_trameTagContent.indexOf("\"", m_startIndex);
+			if (m_endIndex != -1) {
+				pos[it.value()] = m_trameTagContent.mid(m_startIndex, m_endIndex - m_startIndex).toDouble();
 			}
 		}
 	}
@@ -289,33 +318,84 @@ void RobotKuka::cartesianPositionFromTrame(const QString& trame, double pos[6])
 void RobotKuka::jointPositionFromTrame(const QString& trame, double pos[6])
 {
 	static const QString tag = "<AIPos";
-	int start = trame.indexOf(tag);
-
-	if (start == -1)
+	m_startIndex = trame.indexOf(tag);
+	if (m_startIndex == -1)
 	{
 		qWarning() << "Joint position not found in trame. Missing tag: AIPos";
 		return;
 	}
-
-	int end = trame.indexOf("/>", start);
-	if (end == -1)
+	m_endIndex = trame.indexOf("/>", m_startIndex);
+	if (m_endIndex == -1)
+	{
+		qWarning() << "Malformed <AIPos> tag: missing '/>'";
 		return;
+	}
 
-	QString aipos = trame.mid(start, end - start); // extrait la sous-chaîne "<AIPos ..."
+	m_trameTagContent = trame.mid(m_startIndex, m_endIndex - m_startIndex); // extrait la sous-chaîne "<AIPos ..."
 
-	QMap<QString, int> indexMap = { {"A1", 0}, {"A2", 1}, {"A3", 2}, {"A4", 3}, {"A5", 4}, {"A6", 5} };
-
-	for (auto it = indexMap.constBegin(); it != indexMap.constEnd(); ++it) {
-		QString key = it.key() + "=\"";
-		int idx = aipos.indexOf(key);
-		if (idx != -1) {
-			idx += key.length();
-			int endIdx = aipos.indexOf("\"", idx);
-			if (endIdx != -1) {
-				QString valueStr = aipos.mid(idx, endIdx - idx);
-				pos[it.value()] = valueStr.toDouble();
-			}
+	for (m_iTrame = 0; m_iTrame < 6; ++m_iTrame)
+	{
+		m_trameTagKey = QString("A%1=\"").arg(m_iTrame + 1);
+		m_startIndex = m_trameTagKey.indexOf(m_trameTagKey);
+		if (m_startIndex != -1)
+		{
+			m_startIndex += m_trameTagKey.length();
+			m_endIndex = m_trameTagKey.indexOf('\"', m_startIndex);
+			if (m_endIndex != -1)
+				pos[m_iTrame] = m_trameTagKey.mid(m_startIndex, m_endIndex - m_startIndex).toDouble();
 		}
+	}
+}
+
+void RobotKuka::getDigitalInputsFromTrame(const QString& trame, bool digin[16])
+{
+	static const QString tag = "<Digin>";
+	m_startIndex = trame.lastIndexOf(tag);
+	if (m_startIndex == -1)
+	{
+		qWarning() << "Digital inputs not found in trame. Missing tag: Digin";
+		return;
+	}
+	m_endIndex = trame.lastIndexOf("</Digin>");
+	if (m_endIndex == -1)
+	{
+		qWarning() << "Malformed <Digin> tag: missing '</Digin>'";
+		return;
+	}
+	m_startIndex += tag.length();
+	m_ioTrame = trame.mid(m_startIndex, m_endIndex - m_startIndex).toShort();
+
+	m_ioMask = 0x0001; //  0000 0000 0000 0001 
+	for (m_iTrame = 0; m_iTrame < 16; m_iTrame++)
+	{
+		digin[m_iTrame++] = (bool)(m_ioTrame & m_ioMask);
+		m_ioMask = (ushort)(m_ioMask << 1);
+	}
+}
+
+void RobotKuka::getDigitalOutputsFromTrame(const QString& trame, bool digout[16])
+{
+	static const QString tag = "<Digout>";
+	m_startIndex = trame.lastIndexOf(tag);
+	if (m_startIndex == -1)
+	{
+		qWarning() << "Digital inputs not found in trame. Missing tag: Digout";
+		return;
+	}
+	m_endIndex = trame.lastIndexOf("</Digout>");
+	if (m_endIndex == -1)
+	{
+		qWarning() << "Malformed <Digout> tag: missing '</Digout>'";
+		return;
+	}
+	m_startIndex += tag.length();
+	m_ioTrame = trame.mid(m_startIndex, m_endIndex - m_startIndex).toUShort(); // extrait la sous-chaîne "<Digout ..."
+
+	m_ioMask = 0x0001;
+	for (m_iTrame = 0; m_iTrame < 16; m_iTrame++)
+	{
+		digout[m_iTrame] = (bool)(m_ioTrame & m_ioMask);
+		m_ioMask = (ushort)(m_ioMask << 1);
 	}
 }
 
@@ -347,7 +427,6 @@ void RobotKuka::requestAutomate()
 
 void RobotKuka::stateAutomate()
 {
-	static int joggingAxisIndex;
 	switch (m_robotState)
 	{
 	case RobotState::None:
@@ -358,8 +437,8 @@ void RobotKuka::stateAutomate()
 		break;
 
 	case RobotState::MoveCartesianLIN:
-		joggingAxisIndex = static_cast<int>(m_joggingAxis);
-		m_currentDelta[joggingAxisIndex] = (joggingAxisIndex < 3 ? m_deltaStepCartesianTranslation : m_deltaStepCartesianRotation) * (m_isMovePositive ? 1. : -1.);
+		m_joggingAxisIndex = static_cast<int>(m_joggingAxis);
+		m_currentDelta[m_joggingAxisIndex] = (m_joggingAxisIndex < 3 ? m_deltaStepCartesianTranslation : m_deltaStepCartesianRotation) * (m_isMovePositive ? 1. : -1.);
 		break;
 
 	case RobotState::MoveJoint:
@@ -378,6 +457,7 @@ void RobotKuka::stateAutomate()
 		m_robotState == RobotState::MoveCartesianLIN,
 		m_currentDelta,
 		m_isMovingInRobotBase);
+	m_rsiTrame.setOutputs(m_requestDigout);
 	m_rsiTrame.setIPOC(m_lastIPOC);
 }
 
@@ -435,12 +515,15 @@ void RobotKuka::stopMove()
 	m_robotRequestState = RobotState::StopMove;
 }
 
-void RobotKuka::setInput(IOInput input, bool enabled)
-{
-}
-
 void RobotKuka::setOutput(IOOutput output, bool enabled)
 {
+	m_requestDigout[output] = enabled;
+}
+
+void RobotKuka::getCurrentIO(bool inputs[16], bool outputs[16])
+{
+	std::memcpy(inputs, m_digin, 16 * sizeof(bool));
+	std::memcpy(outputs, m_digout, 16 * sizeof(bool));
 }
 
 void RobotKuka::getCurrentPose(double currentPose[6]) const

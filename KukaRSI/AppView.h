@@ -30,7 +30,7 @@ public:
 public slots:
     void updatePose(double positions[6]);
     void updateDelta(double positions[6]);
-    void synchronizeIO(bool inputs[16], bool outputs[16]);
+    void updateIO(bool inputs[16], bool outputs[16]);
 
     void onRobotStatusChanged(RobotKuka::Status status);
     void onRobotStateChanged(RobotKuka::RobotState state);
@@ -79,7 +79,6 @@ signals:
     void cartesianMovementReleased(RobotKuka::Axis axis);
     void articularMovementPressed(RobotKuka::Joint joint, bool positive);
     void articularMovementReleased(RobotKuka::Joint joint);
-    void inputToggled(RobotKuka::IOInput input, bool enabled);
     void outputToggled(RobotKuka::IOOutput output, bool enabled);
 
     void requestRefreshUI(bool isCartesian);

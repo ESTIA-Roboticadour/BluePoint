@@ -332,7 +332,6 @@ void AppView::createIOBtns(QGridLayout* layout)
 			ioWidget->setLayout(ioLayout);
 
 			layout->addWidget(ioWidget, row, col * 2); // *2 car on insère des QFrame entre
-			connect(inputBtn, &QPushButton::toggled, this, [this, index](bool checked) { emit inputToggled(static_cast<RobotKuka::IOInput>(index), checked); });
 			connect(outputBtn, &QPushButton::toggled, this, [this, index](bool checked) { emit outputToggled(static_cast<RobotKuka::IOOutput>(index), checked); });
 			
 			m_ioButtons[2 * index] = inputBtn;
@@ -550,7 +549,7 @@ void AppView::updateDelta(double positions[6])
 	}
 }
 
-void AppView::synchronizeIO(bool inputs[16], bool outputs[16])
+void AppView::updateIO(bool inputs[16], bool outputs[16])
 {
 	for (int i = 0; i < 16; i++)
 	{
