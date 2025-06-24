@@ -34,6 +34,7 @@ public:
     static void setLogFile(const QString& absolutePath);
     static void removeLogFile();
     static void setUILogEnabled(bool uiLogEnabled);
+    static void showConsoleOutput(bool enable);
 
 signals:
     void newEntry(const LogEntry& e);
@@ -46,6 +47,7 @@ private:
     static QMutex s_fileMutex;    // protège s_file
 
     static bool s_uiLogEnabled;
+    static bool s_showConsoleOutput;
 };
 
 #endif // LOGDISPATCHER_H

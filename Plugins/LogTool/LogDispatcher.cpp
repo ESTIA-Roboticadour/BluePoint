@@ -14,6 +14,7 @@
 QFile* LogDispatcher::s_file = nullptr;
 QMutex  LogDispatcher::s_fileMutex;
 bool LogDispatcher::s_uiLogEnabled = true;
+bool LogDispatcher::s_showConsoleOutput = true;
 
 // ------------------------------------------------------------------
 // Enregistrement du métatype LogEntry pour les connexions Queued
@@ -45,6 +46,11 @@ void LogDispatcher::removeLogFile()
 void LogDispatcher::setUILogEnabled(bool uiLogEnabled)
 {
     s_uiLogEnabled = uiLogEnabled;
+}
+
+void LogDispatcher::showConsoleOutput(bool enable)
+{
+    s_showConsoleOutput = enable;
 }
 
 void LogDispatcher::setLogFile(const QString& path)
@@ -90,17 +96,19 @@ void LogDispatcher::messageHandler(QtMsgType t, const QMessageLogContext& c, con
     if (s_uiLogEnabled)
     {
         QMetaObject::invokeMethod(&instance(), "newEntry", Qt::QueuedConnection, Q_ARG(LogEntry, e));
+    }
 
-        // 2) sortie standard (console)
-        if (t == QtDebugMsg || t == QtInfoMsg || t == QtWarningMsg || t == QtCriticalMsg) {
-            QString out = QString("[%1] %2 (%3:%4) %5\n")
-            .arg(levelStr(t))
-                .arg(c.category)
-                .arg(c.file)
-                .arg(c.line)
-                .arg(m);
-            OutputDebugStringW(reinterpret_cast<const wchar_t*>(out.utf16()));
-        }
+    // 2) sortie standard (console)
+    if (s_showConsoleOutput &&
+        ((t == QtDebugMsg || t == QtInfoMsg || t == QtWarningMsg || t == QtCriticalMsg)))
+    {
+        QString out = QString("[%1] %2 (%3:%4) %5\n")
+        .arg(levelStr(t))
+            .arg(c.category)
+            .arg(c.file)
+            .arg(c.line)
+            .arg(m);
+        OutputDebugStringW(reinterpret_cast<const wchar_t*>(out.utf16()));
     }
 
     // 3) sortie fichier éventuelle
