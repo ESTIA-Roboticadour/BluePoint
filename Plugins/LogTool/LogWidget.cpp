@@ -31,7 +31,8 @@ LogWidget::LogWidget(QWidget* parent) :
     m_view->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_view, &QTableView::customContextMenuRequested, this, &LogWidget::showContextMenu);
 
-    const int widths[] = { 80, 40, 60, 50, 120, 400 };          // Time, Lvl, Thread, Cat., File, Message
+    //const int widths[] = { 80, 40, 60, 50, 120, 400 };          // Time, Lvl, Thread, Cat., File, Message
+    const int widths[] = { 80, 40, 400 };          // Time, Lvl, Message
     for (int i = 0; i < LogModel::Count; ++i) {
         m_view->horizontalHeader()->resizeSection(i, widths[i]);
     }

@@ -18,7 +18,7 @@ class LOGTOOL_API LogModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    enum Column { Time, Level, Thread, Category, File, Message, Count };
+    enum Column { Time, Level, /*Thread, Category, File,*/ Message, Count };
 
     explicit LogModel(QObject* parent = nullptr);
 

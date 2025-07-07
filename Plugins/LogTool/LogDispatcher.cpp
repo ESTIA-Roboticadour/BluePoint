@@ -10,6 +10,7 @@
 #include <QMetaType>
 
 #include <windows.h>
+#include <cstdio>           // fprintf  en C++
 
 QFile* LogDispatcher::s_file = nullptr;
 QMutex  LogDispatcher::s_fileMutex;
@@ -84,12 +85,13 @@ static constexpr const char* levelStr(QtMsgType t)
 
 void LogDispatcher::messageHandler(QtMsgType t, const QMessageLogContext& c, const QString& m)
 {
+    Q_UNUSED(c);
     LogEntry e{ QDateTime::currentDateTime(),
                 t,
-                QString::fromLatin1(c.category),
-                QString::fromLatin1(c.file),
-                c.line,
-                tidHex(),
+                //QString::fromLatin1(c.category),
+                //QString::fromLatin1(c.file),
+                //c.line,
+                //tidHex(),
                 m };
 
     // 1) diffusion dans le thread GUI
@@ -102,11 +104,14 @@ void LogDispatcher::messageHandler(QtMsgType t, const QMessageLogContext& c, con
     if (s_showConsoleOutput &&
         ((t == QtDebugMsg || t == QtInfoMsg || t == QtWarningMsg || t == QtCriticalMsg)))
     {
-        QString out = QString("[%1] %2 (%3:%4) %5\n")
-        .arg(levelStr(t))
-            .arg(c.category)
-            .arg(c.file)
-            .arg(c.line)
+        //QString out = QString("[%1] %2 (%3:%4) %5\n")
+        //.arg(levelStr(t))
+        //    .arg(c.category)
+        //    .arg(c.file)
+        //    .arg(c.line)
+        //    .arg(m);
+        QString out = QString("[%1] %2\n")
+            .arg(levelStr(t))
             .arg(m);
         OutputDebugStringW(reinterpret_cast<const wchar_t*>(out.utf16()));
     }
@@ -116,10 +121,10 @@ void LogDispatcher::messageHandler(QtMsgType t, const QMessageLogContext& c, con
     if (s_file) {
         QTextStream ts(s_file);
         ts << e.ts.toString(Qt::ISODateWithMs) << ' '
-            << e.threadId << ' '
+            //<< e.threadId << ' '
             << levelStr(e.type) << ' '
-            << e.category << ' '
-            << e.file << ':' << e.line << ' '
+            //<< e.category << ' '
+            //<< e.file << ':' << e.line << ' '
             << e.msg << '\n';
         ts.flush();
     }

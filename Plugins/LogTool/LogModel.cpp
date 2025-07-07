@@ -6,7 +6,7 @@
 #include <QString>
 
 static constexpr const char* kHeaderTitles[] = {
-    "Time", "Lvl", "Thread", "Cat.", "File:Line", "Message"
+    "Time", "Lvl", /*"Thread", "Cat.", "File:Line",*/ "Message"
 };
 
 static constexpr const char* levelStr(QtMsgType t)
@@ -59,10 +59,9 @@ QVariant LogModel::data(const QModelIndex& idx, int role) const
         switch (idx.column()) {
         case Time:     return e.ts.toString("HH:mm:ss.zzz");
         case Level:    return levelStr(e.type);
-        case Thread:   return e.threadId;
-        case Category: return e.category;
-        case File:     return QFileInfo(e.file).fileName()
-            + ':' + QString::number(e.line);
+        //case Thread:   return e.threadId;
+        //case Category: return e.category;
+        //case File:     return QFileInfo(e.file).fileName() + ':' + QString::number(e.line);
         case Message:  return dequote(e.msg);
         }
     }

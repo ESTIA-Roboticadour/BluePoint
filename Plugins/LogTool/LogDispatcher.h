@@ -15,10 +15,10 @@ struct LogEntry
 {
     QDateTime ts;          // horodatage
     QtMsgType type;
-    QString   category;
-    QString   file;
-    int       line;
-    QString   threadId;    // hex string
+    //QString   category;
+    //QString   file;
+    //int       line;
+    //QString   threadId;    // hex string
     QString   msg;
 };
 
