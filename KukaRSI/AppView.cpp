@@ -130,14 +130,15 @@ void AppView::setupUI()
 	// ComboBox base
 	auto* baseLayout = new QHBoxLayout();
 	auto* baseLabel = new QLabel("Base:");
-	baseLayout->addWidget(baseLabel);
 	QComboBox* baseComboBox = new QComboBox();
 	baseComboBox->setFixedWidth(80);
 	baseComboBox->addItems({ "BASE", "TOOL" });
 	baseComboBox->setCurrentIndex(0);
 	connect(baseComboBox, &QComboBox::currentIndexChanged, this, &AppView::onBaseComboBoxChanged);
 
+	baseLayout->addWidget(baseLabel);
 	baseLayout->addWidget(baseComboBox);
+
 	moveLayout->addLayout(baseLayout);
 	baseLayout->addStretch();
 
@@ -611,6 +612,7 @@ void AppView::onRobotStatusChanged(RobotKuka::Status status)
 	m_stopButton->setEnabled(false);
 	setMoveAndIOButtonsEnabled(false);
 	setMoveAndIOButtonsChecked(false);
+	m_gotoButton->setEnabled(false);
 	m_statusLabel->setText(RobotKuka::toString(status));
 	m_isReadyToMove = false;
 	// -----------------------------------
@@ -637,6 +639,7 @@ void AppView::onRobotStatusChanged(RobotKuka::Status status)
 		m_disconnectButton->setEnabled(true);
 		m_stopButton->setEnabled(true);
 		setMoveAndIOButtonsEnabled(true);
+		m_gotoButton->setEnabled(true);
 		break;
 	case RobotKuka::Status::Error:
 		switchCancelBtnToConnectBtn();

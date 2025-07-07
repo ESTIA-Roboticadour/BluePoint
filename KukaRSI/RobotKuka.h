@@ -1,14 +1,20 @@
 #pragma once
+#include "IRobot.h"
 #include "RobotConfig.h"
 #include "UdpClient.h"
+#include "NativeUdpSocket.h"
 #include "RsiTrame.h"
+#include "RobotThread.h"
 
 #include <QObject>
 #include <QHostAddress>
 #include <QTimer>
+#include <QByteArray>
 #include <memory>
 
-class RobotKuka : public QObject
+#define RSI_TRAME_BUFFER_SIZE 1024 // Size of the RSI trame buffer
+
+class RobotKuka : public IRobot
 {
     Q_OBJECT
 
@@ -190,10 +196,12 @@ public:
     void setCartesianRotationStep(double step);
     void setJointStep(double step);
 
+    void controlLoop() override;
+
 private slots:
     void onUdpOpened(const QHostAddress& hostAddress, quint16 port);
     void onUdpFailedToOpen(const QHostAddress& hostAddress, quint16 port);
-    void onUdpClosed();
+    void onUdpClientClosed();
 
     void onInitialDatagramReceived(const QByteArray& data, const QHostAddress& sender, quint16 senderPort);
     void onConnectionTimeoutTick();
@@ -241,6 +249,8 @@ private:
     quint16 m_connectionTimeRemaining;
     QTimer* m_connectionTimer;
     UdpClient* m_udpClient;
+    //NativeUdpSocket* m_nativeUdpSocketPtr;
+	RobotThread m_robotThread;
 
     QHostAddress m_robotAddress;
     quint16 m_robotPort;
@@ -273,4 +283,5 @@ private:
     QString m_trameTagKey;
     QString m_lastIPOC;
     RsiTrame m_rsiTrame;
+	QByteArray m_trameBuffer; // Buffer pour la trame RSI
 };

@@ -11,6 +11,7 @@ public:
 	void setPose(bool isCartesian, double pos[6], bool isInRobotBase);
 	void setIPOC(const QString& ipoc);
 
+	ushort getOutputs();
 	void setOutputs(bool outputs[16]);
 
 	// Inherited via Trame

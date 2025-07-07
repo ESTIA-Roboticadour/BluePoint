@@ -36,6 +36,11 @@ void RsiTrame::setIPOC(const QString& ipoc)
 	m_ipoc = ipoc;
 }
 
+ushort RsiTrame::getOutputs()
+{
+	return m_digout;
+}
+
 void RsiTrame::setOutputs(bool outputs[16])
 {
 	encodeBoolArrayToShort(outputs, m_digout);
@@ -50,7 +55,6 @@ void RsiTrame::encodeBoolArrayToShort(bool io[16], ushort& nIO)
 			nIO += pow(2, i);
 	}
 }
-
 
 bool RsiTrame::isValid() const
 {
@@ -71,7 +75,7 @@ QString RsiTrame::build() const
 		" A=\"" + QString::number(m_pos[3], 'g', 6) + "\""
 		" B=\"" + QString::number(m_pos[4], 'g', 6) + "\""
 		" C=\"" + QString::number(m_pos[5], 'g', 6) + "\""
-		" />\r\n"
+		"/>\r\n"
 		"<Digout>" + QString::number(m_digout) + "</Digout>\r\n"
 		"<IPOC>" + m_ipoc + "</IPOC>\r\n"
 		"</Sen>";

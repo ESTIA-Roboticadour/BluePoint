@@ -225,4 +225,29 @@
       <Parameter Name="DataSize" ParamID="2" ParamValue="2" />
     </Parameters>
   </RSIObject>
+  <RSIObject ObjType="MONITOR" ObjTypeID="55" ObjID="MONITOR1">
+    <Inputs>
+      <Input InIdx="1" OutObjID="SIGNALSWITCH1" OutIdx="2" />
+      <Input InIdx="2" OutObjID="SIGNALSWITCH2" OutIdx="2" />
+      <Input InIdx="3" OutObjID="SIGNALSWITCH3" OutIdx="2" />
+      <Input InIdx="4" OutObjID="SIGNALSWITCH7" OutIdx="1" />
+      <Input InIdx="5" OutObjID="SIGNALSWITCH8" OutIdx="1" />
+      <Input InIdx="6" OutObjID="SIGNALSWITCH9" OutIdx="1" />
+      <Input InIdx="7" OutObjID="SIGNALSWITCH7" OutIdx="2" />
+      <Input InIdx="8" OutObjID="SIGNALSWITCH8" OutIdx="2" />
+      <Input InIdx="9" OutObjID="SIGNALSWITCH9" OutIdx="2" />
+    </Inputs>
+    <Parameters>
+      <Parameter Name="Refresh" ParamID="1" ParamValue="1" />
+      <Parameter Name="Timeout" ParamID="2" ParamValue="50" />
+      <Parameter Name="ReqTimeZero" ParamID="3" ParamValue="1" />
+      <Parameter Name="IP" ParamID="1" ParamValue="192.168.0.1" IsRuntime="false" />
+      <Parameter Name="Channel" ParamID="2" ParamValue="1" IsRuntime="false" />
+    </Parameters>
+  </RSIObject>
+  <RSIObject ObjType="AXISACT" ObjTypeID="32" ObjID="AXISACT1">
+    <Parameters>
+      <Parameter Name="Type" ParamID="1" ParamValue="0" />
+    </Parameters>
+  </RSIObject>
 </RSIObjects>

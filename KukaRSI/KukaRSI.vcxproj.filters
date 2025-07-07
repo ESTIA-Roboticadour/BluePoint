@@ -93,6 +93,9 @@
     <Filter Include="Services\Trame">
       <UniqueIdentifier>{3fea317d-c97f-4674-aa8f-800473fb0115}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Features\Goto">
+      <UniqueIdentifier>{3883e2cf-578a-4877-8694-1c1afe43d4c1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="MainWindow.qrc">
@@ -166,6 +169,12 @@
     <ClCompile Include="RsiTrame.cpp">
       <Filter>Services\Trame</Filter>
     </ClCompile>
+    <ClCompile Include="NativeUdpSocket.cpp">
+      <Filter>Services\UDP</Filter>
+    </ClCompile>
+    <ClCompile Include="RobotThread.cpp">
+      <Filter>Services\Robot</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ModelBase.h">
@@ -216,6 +225,9 @@
     <QtMoc Include="UdpClient.h">
       <Filter>Services\UDP</Filter>
     </QtMoc>
+    <QtMoc Include="IRobot.h">
+      <Filter>Services\Robot</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ViewFactory.h">
@@ -235,6 +247,12 @@
     </ClInclude>
     <ClInclude Include="RsiTrame.h">
       <Filter>Services\Trame</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeUdpSocket.h">
+      <Filter>Services\UDP</Filter>
+    </ClInclude>
+    <ClInclude Include="RobotThread.h">
+      <Filter>Services\Robot</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

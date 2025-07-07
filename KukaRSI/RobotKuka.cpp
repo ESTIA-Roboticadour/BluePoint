@@ -1,18 +1,21 @@
 #include "RobotKuka.h"
-#include <memory>
 
+#include <QCoreApplication>
 #include <cstring> // memcpy
+#include <windows.h> // For THREAD_PRIORITY_HIGHEST
 
 #define ARRAY_6_DOUBLE_SIZE    6 * sizeof(double)
 
 RobotKuka::RobotKuka(QObject* parent) :
-	QObject(parent),
+	IRobot(parent),
 	m_status(Status::Ready),
 	m_robotRequestState(RobotState::None),
 	m_robotState(RobotState::None),
 	m_isConnected(false),
 	m_disconnectRequest(false),
 	m_udpClient(nullptr),
+	//m_nativeUdpSocketPtr(nullptr),
+	m_robotThread(this),
 	m_connectionTimeout(5),
 	m_connectionTimeRemaining(5),
 	m_connectionTimer(nullptr),
@@ -41,6 +44,7 @@ RobotKuka::RobotKuka(QObject* parent) :
 	m_ioTrame(0),
 	m_ioMask(0),
 	m_rsiTrame(),
+	m_trameBuffer(),
 	m_trameTagContent(),
 	m_trameTagKey(),
 	m_lastIPOC()
@@ -54,8 +58,13 @@ RobotKuka::RobotKuka(QObject* parent) :
 	std::memcpy(m_currentJoint, m_ZEROS, ARRAY_6_DOUBLE_SIZE);
 	std::memcpy(m_currentDelta, m_ZEROS, ARRAY_6_DOUBLE_SIZE);
 
-	m_trameTagContent.reserve(1024); // Reserve space for the trame content
+	m_trameTagContent.reserve(RSI_TRAME_BUFFER_SIZE); // Reserve space for the trame content
 	m_trameTagKey.reserve(16); // Reserve space for the tag key
+
+	m_trameBuffer.reserve(RSI_TRAME_BUFFER_SIZE);
+
+	m_robotThread.setPriorityClass(HIGH_PRIORITY_CLASS);
+	// Do NOT call m_robotThread.setPriority or setAffinity here!
 }
 
 RobotKuka::~RobotKuka()
@@ -83,7 +92,7 @@ void RobotKuka::connectToRobot(const QHostAddress& hostAddress, quint16 port, qu
 		m_udpClient = new UdpClient(hostAddress, port, this);
 		connect(m_udpClient, &UdpClient::opened, this, &RobotKuka::onUdpOpened);
 		connect(m_udpClient, &UdpClient::failedToOpen, this, &RobotKuka::onUdpFailedToOpen);
-		connect(m_udpClient, &UdpClient::closed, this, &RobotKuka::onUdpClosed);
+		connect(m_udpClient, &UdpClient::closed, this, &RobotKuka::onUdpClientClosed);
 		m_connectionTimeout = timeout;
 		m_udpClient->open();
 	}
@@ -95,6 +104,10 @@ void RobotKuka::disconnectFromRobot()
 		return;
 	if (m_watchdogTimer)
 		m_watchdogTimer->stop();
+
+	qDebug() << "stop thread";
+	m_robotThread.stop();
+	qDebug() << "thread stopped";
 
 	setRequestState(RobotState::None);
 
@@ -131,7 +144,7 @@ void RobotKuka::onUdpFailedToOpen(const QHostAddress& hostAddress, quint16 port)
 	emit errorOccurred(errorMessage);
 }
 
-void RobotKuka::onUdpClosed()
+void RobotKuka::onUdpClientClosed()
 {
 	delete m_udpClient;
 	m_udpClient = nullptr;
@@ -151,6 +164,9 @@ void RobotKuka::onInitialDatagramReceived(const QByteArray& data, const QHostAdd
 	m_connectionTimer = nullptr;
 
 	disconnect(m_udpClient, &UdpClient::datagramReceived, this, &RobotKuka::onInitialDatagramReceived);
+	//qDebug() << "disconnect auto read";
+	//m_udpClient->disconnectAutoRead();
+	//qDebug() << "auto read disconnected";
 
 	// Démarre le watchdog
 	if (!m_watchdogTimer)
@@ -164,13 +180,27 @@ void RobotKuka::onInitialDatagramReceived(const QByteArray& data, const QHostAdd
 
 	m_robotAddress = QHostAddress(sender); // make sure it's a copy
 	m_robotPort = senderPort;
+
+	//m_nativeUdpSocketPtr = new NativeUdpSocket(listenerAddress.toString().toStdString(), listenerPort, m_robotAddress.toString().toStdString(), m_robotPort);
+	//m_nativeUdpSocketPtr->bind();
+
 	parseReceivedData(data);
+	m_rsiTrame.reset();
+	m_rsiTrame.setOutputs(m_digout);
+	m_rsiTrame.setIPOC(m_lastIPOC);
+	sendTrame();
+
 	std::memcpy(m_requestDigout, m_digout, 16 * sizeof(bool));
+
 	m_isConnected = true;
 	qInfo() << QString("Connection established from %1:%2").arg(m_robotAddress.toString()).arg(m_robotPort);
 	setStatus(Status::Connected);
 	connect(m_udpClient, &UdpClient::datagramReceived, this, &RobotKuka::onDatagramReceived, Qt::DirectConnection);
 	emit connected();
+
+	//m_robotThread.start();
+	//m_robotThread.setPriority(THREAD_PRIORITY_HIGHEST); // OK here
+	//m_robotThread.setAffinity(coreIndex); // If needed, also here
 
 	m_watchdogTimer->start();
 }
@@ -217,6 +247,7 @@ void RobotKuka::onDatagramReceived(const QByteArray& data, const QHostAddress& s
 
 void RobotKuka::onWatchdogTimeout()
 {
+	m_robotThread.stop();
 	setStatus(Status::Error);
 	emit errorOccurred(QString("Communication lost with robot (%1:%2)").arg(m_robotAddress.toString()).arg(m_robotPort));
 	setRequestState(RobotState::None);
@@ -232,10 +263,15 @@ void RobotKuka::closeUdpClient()
 {
 	if (m_udpClient)
 	{
-		disconnect(m_udpClient, &UdpClient::datagramReceived, this, &RobotKuka::onDatagramReceived);
 		if (m_udpClient->isOpened())
 			m_udpClient->close();
 	}
+	//if (m_nativeUdpSocketPtr)
+	//{
+	//	onUdpDisconnected();
+	//	delete m_nativeUdpSocketPtr;
+	//	m_nativeUdpSocketPtr = nullptr;
+	//}
 }
 
 void RobotKuka::setStatus(Status status)
@@ -252,6 +288,54 @@ void RobotKuka::setRobotState(RobotState state)
 	{
 		m_robotState = state;
 		emit robotStateChanged(m_robotState);
+	}
+}
+
+void RobotKuka::controlLoop()
+{
+	if (!m_isConnected)
+		return;
+
+	// 1. Wait up to 4ms for data
+	//if (m_nativeUdpSocketPtr && m_nativeUdpSocketPtr->waitForData(4)) {
+	//	int len = m_nativeUdpSocketPtr->recvFrom(m_trameBuffer, RSI_TRAME_BUFFER_SIZE);
+	//	if (len > 0) {
+	//		parseReceivedData(QString::fromUtf8(m_trameBuffer, len));
+	//	}
+	//	else {
+	//		QTimer::singleShot(0, m_watchdogTimer, [this]() {
+	//			qWarning() << "Failed to receive data from robot.";
+	//			});
+	//		return;
+	//	}
+	//}
+	//else {
+	//	// No data received within 4ms
+	//	QTimer::singleShot(0, m_watchdogTimer, [this]() {
+	//		qWarning() << "No data received from robot (timeout).";
+	//		});
+	//	return;
+	//}
+
+	if (m_udpClient->readData(m_trameBuffer))
+	{
+		parseReceivedData(m_trameBuffer);
+
+		m_rsiTrame.reset();
+		resetCurrentDelta();
+
+		QTimer::singleShot(0, m_watchdogTimer, [this]() {
+			m_watchdogTimer->start(); // Reset watchdog
+			});
+
+		// 2. Apply the state transition if needed (RequestAutomate)
+		requestAutomate();
+
+		// 3. Apply the state (StateAutomate)
+		stateAutomate();
+
+		// 4. Send response
+		sendTrame();
 	}
 }
 
@@ -318,6 +402,7 @@ void RobotKuka::cartesianPositionFromTrame(const QString& trame, double pos[6])
 void RobotKuka::jointPositionFromTrame(const QString& trame, double pos[6])
 {
 	static const QString tag = "<AIPos";
+	const static QMap<QString, int> indexMap = { {"A1", 0}, {"A2", 1}, {"A3", 2}, {"A4", 3}, {"A5", 4}, {"A6", 5} };
 	m_startIndex = trame.indexOf(tag);
 	if (m_startIndex == -1)
 	{
@@ -333,19 +418,50 @@ void RobotKuka::jointPositionFromTrame(const QString& trame, double pos[6])
 
 	m_trameTagContent = trame.mid(m_startIndex, m_endIndex - m_startIndex); // extrait la sous-chaîne "<AIPos ..."
 
-	for (m_iTrame = 0; m_iTrame < 6; ++m_iTrame)
-	{
-		m_trameTagKey = QString("A%1=\"").arg(m_iTrame + 1);
-		m_startIndex = m_trameTagKey.indexOf(m_trameTagKey);
-		if (m_startIndex != -1)
-		{
+	for (auto it = indexMap.constBegin(); it != indexMap.constEnd(); ++it) {
+		m_trameTagKey = it.key() + "=\"";
+		m_startIndex = m_trameTagContent.indexOf(m_trameTagKey);
+		if (m_startIndex != -1) {
 			m_startIndex += m_trameTagKey.length();
-			m_endIndex = m_trameTagKey.indexOf('\"', m_startIndex);
-			if (m_endIndex != -1)
-				pos[m_iTrame] = m_trameTagKey.mid(m_startIndex, m_endIndex - m_startIndex).toDouble();
+			m_endIndex = m_trameTagContent.indexOf("\"", m_startIndex);
+			if (m_endIndex != -1) {
+				pos[it.value()] = m_trameTagContent.mid(m_startIndex, m_endIndex - m_startIndex).toDouble();
+			}
 		}
 	}
 }
+
+//void RobotKuka::jointPositionFromTrame(const QString& trame, double pos[6])
+//{
+//	static const QString tag = "<AIPos";
+//	m_startIndex = trame.indexOf(tag);
+//	if (m_startIndex == -1)
+//	{
+//		qWarning() << "Joint position not found in trame. Missing tag: AIPos";
+//		return;
+//	}
+//	m_endIndex = trame.indexOf("/>", m_startIndex);
+//	if (m_endIndex == -1)
+//	{
+//		qWarning() << "Malformed <AIPos> tag: missing '/>'";
+//		return;
+//	}
+//
+//	m_trameTagContent = trame.mid(m_startIndex, m_endIndex - m_startIndex); // extrait la sous-chaîne "<AIPos ..."
+//
+//	for (m_iTrame = 0; m_iTrame < 6; ++m_iTrame)
+//	{
+//		m_trameTagKey = QString("A%1=\"").arg(m_iTrame + 1);
+//		m_startIndex = trame.indexOf(m_trameTagKey);
+//		if (m_startIndex != -1)
+//		{
+//			m_startIndex += m_trameTagKey.length();
+//			m_endIndex = trame.indexOf('\"', m_startIndex);
+//			if (m_endIndex != -1)
+//				pos[m_iTrame] = m_trameTagKey.mid(m_startIndex, m_endIndex - m_startIndex).toDouble();
+//		}
+//	}
+//}
 
 void RobotKuka::getDigitalInputsFromTrame(const QString& trame, bool digin[16])
 {
@@ -467,7 +583,14 @@ void RobotKuka::sendTrame()
 	{
 		QString trame = m_rsiTrame.build();
 		m_udpClient->sendData(trame, m_robotAddress, m_robotPort);
+		qDebug() << trame.replace("\r\n", " ");
 	}
+
+	//if (m_nativeUdpSocketPtr)
+	//{
+	//	QByteArray data = m_rsiTrame.build().toUtf8();
+	//	m_nativeUdpSocketPtr->sendTo(data.constData(), data.size());
+	//}
 }
 
 void RobotKuka::start()
