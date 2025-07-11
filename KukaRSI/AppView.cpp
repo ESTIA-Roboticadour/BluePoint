@@ -1,6 +1,7 @@
 #include "AppView.h"
 #include "TransparentScrollArea.h"
 #include "Helper.h"
+#include "ViewFactory.h"
 
 #include <QHBoxLayout>
 #include <QComboBox>
@@ -24,12 +25,61 @@ AppView::AppView(QWidget* parent) :
 	m_isJoggingCartesian(true),
 	m_isMovingInRobotBase(true),
 	m_previousJoggingTabsSelected(-1),
-	m_previousBaseSelected(-1)
+	m_previousBaseSelected(-1),
+	m_gotoConfig(this),
+	m_movementGroupParameter("Movement", this),
+	m_positionGroupParameter("Position", this),
+	m_movementTypesParameter("Type", this),
+	m_movementAbsoluteRelativeParameter("Absolute/Relative", this),
+	m_movementBaseParameter("Base", this),
+	m_eulerFrameParameter("Euler Frame", EulerFrameParameter::Convention::ZYX, this),
+	m_numParam("Numerical Parameter"),
+	m_numParamMin("Min Numerical Parameter"),
+	m_numParamMax("Max Numerical Parameter"),
+	m_boolParam("Boolean Parameter"),
+	m_stringParam("String Parameter", "", StringParameter::Kind::DirectoryPath)
 {
 	setupUI();
 	m_uiTimer.setInterval(static_cast<int>(1000.0 / m_freshRateHz));
 	m_uiTimer.setTimerType(Qt::PreciseTimer);
 	connect(&m_uiTimer, &QTimer::timeout, this, &AppView::refreshUI, Qt::DirectConnection);
+
+	// create goto config
+	m_movementTypesParameter.addItem("Cartesian", "Cartesian");
+	m_movementTypesParameter.addItem("Articular", "Articular");
+
+	m_movementAbsoluteRelativeParameter.addItem("Absolute", "Absolute");
+	m_movementAbsoluteRelativeParameter.addItem("Relative", "Relative");
+
+	m_movementBaseParameter.addItem("Base", "Base");
+	m_movementBaseParameter.addItem("Tool", "Tool");
+
+	m_movementGroupParameter.addParameter(&m_movementTypesParameter);
+	m_movementGroupParameter.addParameter(&m_movementAbsoluteRelativeParameter);
+	m_movementGroupParameter.addParameter(&m_movementBaseParameter);
+
+	m_positionGroupParameter.addParameter(&m_eulerFrameParameter);
+
+	m_gotoConfig.addParameter(&m_movementGroupParameter);
+	m_gotoConfig.addParameter(&m_positionGroupParameter);
+
+	m_gotoConfig.addParameter(&m_numParamMin);
+	m_gotoConfig.addParameter(&m_numParamMax);
+	m_gotoConfig.addParameter(&m_numParam);
+	m_gotoConfig.addParameter(&m_boolParam);
+	m_gotoConfig.addParameter(&m_stringParam);
+
+	m_numParamMin.setMinimum(-100.);
+	m_numParamMin.setMaximum(50.);
+	m_numParamMin.setValue(m_numParam.getMinimum());
+
+	m_numParamMax.setMinimum(50.);
+	m_numParamMax.setMaximum(200.);
+	m_numParamMax.setValue(m_numParam.getMaximum());
+
+	connect(&m_numParamMin, &NumericalParameter::valueChanged, this, &AppView::onMinChanged);
+	connect(&m_numParamMax, &NumericalParameter::valueChanged, this, &AppView::onMaxChanged);
+	connect(&m_numParam, &NumericalParameter::valueChanged, this, &AppView::onNumChanged);
 }
 
 void AppView::setupUI()
@@ -140,9 +190,9 @@ void AppView::setupUI()
 
 	baseLayout->addWidget(baseLabel);
 	baseLayout->addWidget(m_robotBaseComboBox);
+	baseLayout->addStretch();
 
 	moveLayout->addLayout(baseLayout);
-	baseLayout->addStretch();
 
 	// Onglets cartésien/articulaire
 	m_joggingTab = new QTabWidget(this);
@@ -159,6 +209,14 @@ void AppView::setupUI()
 	m_previousJoggingTabsSelected = 0;
 
 	connect(m_joggingTab, &QTabWidget::currentChanged, this, &AppView::onMoveTabChanged, Qt::UniqueConnection);
+
+	// Goto Button
+	m_gotoButton = new QPushButton("GO TO");
+	m_gotoButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+
+	connect(m_gotoButton, &QPushButton::clicked, this, &AppView::onGotoButtonClicked);
+
+	moveLayout->addWidget(m_gotoButton);
 
 	// Layout cartésien : boutons de déplacement
 	auto* cartesianLayout = new QGridLayout(cartesianWidget);
@@ -526,6 +584,22 @@ void AppView::refreshUI()
 	emit refreshUiRequest(m_isJoggingCartesian);
 }
 
+void AppView::onMinChanged(double value)
+{
+	m_numParam.setMinimum(value);
+}
+
+void AppView::onMaxChanged(double value)
+{
+	m_numParam.setMaximum(value);
+}
+
+void AppView::onNumChanged(double value)
+{
+	m_boolParam.setValue(value > 50.);
+	m_boolParam.setIsEditable(value > 50.);
+}
+
 void AppView::onConnectButtonClicked()
 {
 	emit connectButtonClicked();
@@ -580,6 +654,17 @@ void AppView::onMoveTabChanged(int index)
 		emit joggingArticularRequest();
 }
 
+void AppView::onGotoButtonClicked()
+{
+	if (m_gotoWindow)
+		m_gotoWindow->show();
+	else
+	{
+		m_gotoWindow = ViewFactory::createGotoWindow(this);
+		m_gotoWindow->setConfig(&m_gotoConfig);
+		m_gotoWindow->show();
+	}
+}
 
 void AppView::setIsJoggingInCartesian(bool isCartesian)
 {
@@ -645,7 +730,6 @@ void AppView::setIsMovingInRobotBase(bool isMovingInRobotBase)
 		connect(m_robotBaseComboBox, &QComboBox::currentIndexChanged, this, &AppView::onBaseComboBoxChanged, Qt::UniqueConnection);
 	}
 }
-
 
 void AppView::onRobotStatusChanged(RobotKuka::Status status)
 {

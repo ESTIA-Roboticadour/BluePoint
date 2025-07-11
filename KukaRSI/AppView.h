@@ -1,8 +1,15 @@
-    #pragma once
+#pragma once
 #include "TransparentScrollArea.h"
 #include "ParametersView.h"
 #include "Config.h"
 #include "RobotKuka.h"
+#include "GotoWindow.h"
+#include "GroupParameter.h"
+#include "ListParameter.h"
+#include "EulerFrameParameter.h"
+#include "NumericalParameter.h"
+#include "BoolParameter.h"
+#include "StringParameter.h"
 
 #include <QWidget>
 #include <QPushButton>
@@ -51,8 +58,13 @@ private slots:
 	void onStopButtonClicked();
     void onBaseComboBoxChanged(int index);
     void onMoveTabChanged(int index);
+    void onGotoButtonClicked();
 
     void refreshUI();
+
+    void onMinChanged(double value);
+    void onMaxChanged(double value);
+    void onNumChanged(double value);
 
 private:
     void setupUI();
@@ -103,6 +115,7 @@ private:
     QLabel* m_connectionLabel{ nullptr };
     QComboBox* m_robotBaseComboBox;
     QTabWidget* m_joggingTab;
+    QPushButton* m_gotoButton;
     QList<QLabel*> m_poseLabels;
     QList<QLabel*> m_deltaLabels;
     QList<QLineEdit*> m_poseLineEdits;
@@ -110,6 +123,7 @@ private:
     QList<QPushButton*> m_axisButtons;
     QList<QPushButton*> m_jointButtons;
     QList<QPushButton*> m_ioButtons;
+    GotoWindow* m_gotoWindow{ nullptr };
 
     QTimer m_uiTimer;
     double m_freshRateHz;
@@ -118,4 +132,17 @@ private:
     bool m_isMovingInRobotBase;
     int  m_previousJoggingTabsSelected;
     int m_previousBaseSelected;
+
+    Config m_gotoConfig;
+    GroupParameter m_movementGroupParameter;
+    GroupParameter m_positionGroupParameter;
+    ListParameter<QString> m_movementTypesParameter;
+    ListParameter<QString> m_movementAbsoluteRelativeParameter;
+    ListParameter<QString> m_movementBaseParameter;
+	EulerFrameParameter m_eulerFrameParameter;
+    NumericalParameter m_numParamMin;
+    NumericalParameter m_numParamMax;
+    NumericalParameter m_numParam;
+	BoolParameter m_boolParam;
+	StringParameter m_stringParam;
 };

@@ -120,6 +120,7 @@
     <ClCompile Include="ConfigurationController.cpp" />
     <ClCompile Include="ConfigurationModel.cpp" />
     <ClCompile Include="ConfigurationView.cpp" />
+    <ClCompile Include="GotoWindow.cpp" />
     <ClCompile Include="Helper.cpp" />
     <ClCompile Include="MainController.cpp" />
     <ClCompile Include="MainModel.cpp" />
@@ -160,6 +161,7 @@
     <QtMoc Include="ConfigurationView.h" />
     <QtMoc Include="AppView.h" />
     <ClInclude Include="CallbackTypes.h" />
+    <QtMoc Include="GotoWindow.h" />
     <ClInclude Include="Helper.h" />
     <QtMoc Include="RobotConfig.h" />
     <QtMoc Include="RobotKuka.h" />

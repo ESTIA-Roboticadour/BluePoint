@@ -37,3 +37,9 @@ AppView* ViewFactory::createAppView(const RobotConfig* config, QWidget* parent)
 	AppController* controller = new AppController(model, view);
 	return view;
 }
+
+GotoWindow* ViewFactory::createGotoWindow(QWidget* parent)
+{
+	GotoWindow* window = new GotoWindow(parent);
+	return window;
+}

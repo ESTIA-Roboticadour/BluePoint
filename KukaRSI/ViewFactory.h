@@ -5,6 +5,7 @@
 #include "RobotConfig.h"
 #include "ConfigurationView.h"
 #include "AppView.h"
+#include "GotoWindow.h"
 
 class ViewFactory
 {
@@ -13,4 +14,5 @@ public:
 	static ConfigurationView* createConfigurationView(const QString& title, Config* config, QWidget* parent = nullptr, const ConfigValidatorCallback& validator = {});
 	static ConfigurationView* createConfigurationView(const QString& title, Config* config, bool isReadOnly, QWidget* parent = nullptr, const ConfigValidatorCallback& validator = {});
 	static AppView* createAppView(const RobotConfig* config, QWidget* parent=nullptr);
+	static GotoWindow* createGotoWindow(QWidget* parent=nullptr);
 };

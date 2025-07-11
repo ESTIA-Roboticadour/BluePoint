@@ -93,8 +93,11 @@
     <Filter Include="Services\Trame">
       <UniqueIdentifier>{3fea317d-c97f-4674-aa8f-800473fb0115}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Features\Goto">
-      <UniqueIdentifier>{3883e2cf-578a-4877-8694-1c1afe43d4c1}</UniqueIdentifier>
+    <Filter Include="Features\GotoView">
+      <UniqueIdentifier>{ccbfde4a-450e-4594-bc5b-45375dd47994}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features\GotoView\Views">
+      <UniqueIdentifier>{91e57c5a-7073-4629-a987-feea8e89520d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -175,6 +178,9 @@
     <ClCompile Include="RobotThread.cpp">
       <Filter>Services\Robot</Filter>
     </ClCompile>
+    <ClCompile Include="GotoWindow.cpp">
+      <Filter>Features\GotoView\Views</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ModelBase.h">
@@ -227,6 +233,9 @@
     </QtMoc>
     <QtMoc Include="IRobot.h">
       <Filter>Services\Robot</Filter>
+    </QtMoc>
+    <QtMoc Include="GotoWindow.h">
+      <Filter>Features\GotoView\Views</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
