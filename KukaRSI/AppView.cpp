@@ -23,7 +23,8 @@ AppView::AppView(QWidget* parent) :
 	m_isReadyToMove(false),
 	m_isJoggingCartesian(true),
 	m_isMovingInRobotBase(true),
-	m_isAzerty(true)
+	m_previousJoggingTabsSelected(-1),
+	m_previousBaseSelected(-1)
 {
 	setupUI();
 	m_uiTimer.setInterval(static_cast<int>(1000.0 / m_freshRateHz));
@@ -130,32 +131,34 @@ void AppView::setupUI()
 	// ComboBox base
 	auto* baseLayout = new QHBoxLayout();
 	auto* baseLabel = new QLabel("Base:");
-	QComboBox* baseComboBox = new QComboBox();
-	baseComboBox->setFixedWidth(80);
-	baseComboBox->addItems({ "BASE", "TOOL" });
-	baseComboBox->setCurrentIndex(0);
-	connect(baseComboBox, &QComboBox::currentIndexChanged, this, &AppView::onBaseComboBoxChanged);
+	m_robotBaseComboBox = new QComboBox();
+	m_robotBaseComboBox->setFixedWidth(80);
+	m_robotBaseComboBox->addItems({ "BASE", "TOOL" });
+	m_robotBaseComboBox->setCurrentIndex(0);
+	m_previousBaseSelected = 0;
+	connect(m_robotBaseComboBox, &QComboBox::currentIndexChanged, this, &AppView::onBaseComboBoxChanged, Qt::UniqueConnection);
 
 	baseLayout->addWidget(baseLabel);
-	baseLayout->addWidget(baseComboBox);
+	baseLayout->addWidget(m_robotBaseComboBox);
 
 	moveLayout->addLayout(baseLayout);
 	baseLayout->addStretch();
 
 	// Onglets cartésien/articulaire
-	auto* modeTabs = new QTabWidget(this);
-	modeTabs->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+	m_joggingTab = new QTabWidget(this);
+	m_joggingTab->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
 	auto* cartesianWidget = new QWidget();
 	auto* articularWidget = new QWidget();
-	modeTabs->setAttribute(Qt::WA_TranslucentBackground);
+	m_joggingTab->setAttribute(Qt::WA_TranslucentBackground);
 	cartesianWidget->setAttribute(Qt::WA_TranslucentBackground);
 	articularWidget->setAttribute(Qt::WA_TranslucentBackground);
 
-	modeTabs->addTab(cartesianWidget, "Cartesian");
-	modeTabs->addTab(articularWidget, "Articular");
-	moveLayout->addWidget(modeTabs);
+	m_joggingTab->addTab(cartesianWidget, "Cartesian");
+	m_joggingTab->addTab(articularWidget, "Articular");
+	moveLayout->addWidget(m_joggingTab);
+	m_previousJoggingTabsSelected = 0;
 
-	connect(modeTabs, &QTabWidget::currentChanged, this, &AppView::onMoveTabChanged);
+	connect(m_joggingTab, &QTabWidget::currentChanged, this, &AppView::onMoveTabChanged, Qt::UniqueConnection);
 
 	// Layout cartésien : boutons de déplacement
 	auto* cartesianLayout = new QGridLayout(cartesianWidget);
@@ -186,6 +189,7 @@ void AppView::setupUI()
 
 	auto* positionGroup = createPoseGroup("Position", m_poseLabels, m_poseLineEdits);
 	auto* deltaGroup = createPoseGroup("Delta", m_deltaLabels, m_deltaLineEdits);
+
 	m_isJoggingCartesian = !m_isJoggingCartesian;	// Petite astuce Sioux pour actualis
 	setIsJoggingInCartesian(!m_isJoggingCartesian); //
 
@@ -333,7 +337,7 @@ void AppView::createIOBtns(QGridLayout* layout)
 			ioWidget->setLayout(ioLayout);
 
 			layout->addWidget(ioWidget, row, col * 2); // *2 car on insère des QFrame entre
-			connect(outputBtn, &QPushButton::toggled, this, [this, index](bool checked) { emit outputToggled(static_cast<RobotKuka::IOOutput>(index), checked); });
+			connect(outputBtn, &QPushButton::clicked, this, [this, index, outputBtn]() { emit outputClicked(static_cast<RobotKuka::IOOutput>(index), outputBtn->isChecked()); });
 			
 			m_ioButtons[2 * index] = inputBtn;
 			m_ioButtons[2 * index + 1] = outputBtn;
@@ -478,58 +482,6 @@ void AppView::setTimerIntervale(double freshRateHz)
 	}
 }
 
-void AppView::setIsJoggingInCartesian(bool isCartesian)
-{
-	if (m_isJoggingCartesian != isCartesian)
-	{
-		m_isJoggingCartesian = isCartesian;
-		if (m_isJoggingCartesian)
-		{
-			m_poseLabels[0]->setText("X");
-			m_poseLabels[1]->setText("Y");
-			m_poseLabels[2]->setText("Z");
-			m_poseLabels[3]->setText("A");
-			m_poseLabels[4]->setText("B");
-			m_poseLabels[5]->setText("C");
-
-			m_deltaLabels[0]->setText("dX");
-			m_deltaLabels[1]->setText("dY");
-			m_deltaLabels[2]->setText("dZ");
-			m_deltaLabels[3]->setText("dA");
-			m_deltaLabels[4]->setText("dB");
-			m_deltaLabels[5]->setText("dC");
-		}
-		else
-		{
-			m_poseLabels[0]->setText("J1");
-			m_poseLabels[1]->setText("J2");
-			m_poseLabels[2]->setText("J3");
-			m_poseLabels[3]->setText("J4");
-			m_poseLabels[4]->setText("J5");
-			m_poseLabels[5]->setText("J6");
-
-			m_deltaLabels[0]->setText("dJ1");
-			m_deltaLabels[1]->setText("dJ2");
-			m_deltaLabels[2]->setText("dJ3");
-			m_deltaLabels[3]->setText("dJ4");
-			m_deltaLabels[4]->setText("dJ5");
-			m_deltaLabels[5]->setText("dJ6");
-		}
-		emit requestRefreshUI(m_isJoggingCartesian);
-
-		emit isJoggingInCartesianChanged(m_isJoggingCartesian);
-	}
-}
-
-void AppView::setIsMovingInRobotBase(bool isMovingInRobotBase)
-{
-	if (m_isMovingInRobotBase != isMovingInRobotBase)
-	{
-		m_isMovingInRobotBase = isMovingInRobotBase;
-		emit isMovingInRobotBaseChanged(m_isMovingInRobotBase);
-	}
-}
-
 void AppView::setConfig(const Config* config)
 {
 	if (config)
@@ -559,9 +511,19 @@ void AppView::updateIO(bool inputs[16], bool outputs[16])
 	}
 }
 
+void AppView::updateJoggingMode(bool isJoggingCartesian)
+{
+	setIsJoggingInCartesian(isJoggingCartesian);
+}
+
+void AppView::updateIsInRobotBase(bool isInRobotBase)
+{
+	setIsMovingInRobotBase(isInRobotBase);
+}
+
 void AppView::refreshUI()
 {
-	emit requestRefreshUI(m_isJoggingCartesian);
+	emit refreshUiRequest(m_isJoggingCartesian);
 }
 
 void AppView::onConnectButtonClicked()
@@ -595,13 +557,95 @@ void AppView::onStopButtonClicked()
 
 void AppView::onBaseComboBoxChanged(int index)
 {
-	setIsMovingInRobotBase(index == 0); // 0 = BASE, 1 = TOOL
+	disconnect(m_robotBaseComboBox, &QComboBox::currentIndexChanged, this, &AppView::onBaseComboBoxChanged);
+	m_robotBaseComboBox->setCurrentIndex(m_previousBaseSelected);
+	m_robotBaseComboBox->setEnabled(false);
+	
+	// 0 = BASE, 1 = TOOL
+	if (index == 0)
+		emit joggingInRobotBaseRequest();
+	else
+		emit joggingInRobotToolRequest();
 }
 
 void AppView::onMoveTabChanged(int index)
 {
-	setIsJoggingInCartesian(index == 0);
+	disconnect(m_joggingTab, &QTabWidget::currentChanged, this, &AppView::onMoveTabChanged);
+	m_joggingTab->setCurrentIndex(m_previousJoggingTabsSelected);
+	m_joggingTab->setEnabled(false);
+
+	if (index == 0)
+		emit joggingCartesianRequest();
+	else
+		emit joggingArticularRequest();
 }
+
+
+void AppView::setIsJoggingInCartesian(bool isCartesian)
+{
+	if (m_isJoggingCartesian != isCartesian)
+	{
+		m_isJoggingCartesian = isCartesian;
+		m_previousJoggingTabsSelected = m_isJoggingCartesian ? 0 : 1;
+		m_joggingTab->setCurrentIndex(m_previousJoggingTabsSelected);
+		m_joggingTab->setEnabled(true);
+
+		if (m_isJoggingCartesian)
+		{
+			m_poseLabels[0]->setText("X");
+			m_poseLabels[1]->setText("Y");
+			m_poseLabels[2]->setText("Z");
+			m_poseLabels[3]->setText("A");
+			m_poseLabels[4]->setText("B");
+			m_poseLabels[5]->setText("C");
+
+			m_deltaLabels[0]->setText("dX");
+			m_deltaLabels[1]->setText("dY");
+			m_deltaLabels[2]->setText("dZ");
+			m_deltaLabels[3]->setText("dA");
+			m_deltaLabels[4]->setText("dB");
+			m_deltaLabels[5]->setText("dC");
+		}
+		else
+		{
+			m_poseLabels[0]->setText("J1");
+			m_poseLabels[1]->setText("J2");
+			m_poseLabels[2]->setText("J3");
+			m_poseLabels[3]->setText("J4");
+			m_poseLabels[4]->setText("J5");
+			m_poseLabels[5]->setText("J6");
+
+			m_deltaLabels[0]->setText("dJ1");
+			m_deltaLabels[1]->setText("dJ2");
+			m_deltaLabels[2]->setText("dJ3");
+			m_deltaLabels[3]->setText("dJ4");
+			m_deltaLabels[4]->setText("dJ5");
+			m_deltaLabels[5]->setText("dJ6");
+		}
+
+		m_robotBaseComboBox->setEnabled(m_isJoggingCartesian);
+
+		// reconnect event
+		connect(m_joggingTab, &QTabWidget::currentChanged, this, &AppView::onMoveTabChanged, Qt::UniqueConnection);
+
+		emit refreshUiRequest(m_isJoggingCartesian);
+	}
+}
+
+void AppView::setIsMovingInRobotBase(bool isMovingInRobotBase)
+{
+	if (m_isMovingInRobotBase != isMovingInRobotBase)
+	{
+		m_isMovingInRobotBase = isMovingInRobotBase;
+		m_previousBaseSelected = isMovingInRobotBase ? 0 : 1;
+		m_robotBaseComboBox->setCurrentIndex(m_previousBaseSelected);
+		m_robotBaseComboBox->setDisabled(m_isJoggingCartesian);
+
+		// reconnect
+		connect(m_robotBaseComboBox, &QComboBox::currentIndexChanged, this, &AppView::onBaseComboBoxChanged, Qt::UniqueConnection);
+	}
+}
+
 
 void AppView::onRobotStatusChanged(RobotKuka::Status status)
 {
@@ -611,8 +655,6 @@ void AppView::onRobotStatusChanged(RobotKuka::Status status)
 	m_startButton->setEnabled(false);
 	m_stopButton->setEnabled(false);
 	setMoveAndIOButtonsEnabled(false);
-	setMoveAndIOButtonsChecked(false);
-	m_gotoButton->setEnabled(false);
 	m_statusLabel->setText(RobotKuka::toString(status));
 	m_isReadyToMove = false;
 	// -----------------------------------
@@ -622,6 +664,7 @@ void AppView::onRobotStatusChanged(RobotKuka::Status status)
 	case RobotKuka::Status::Ready:
 		switchCancelBtnToConnectBtn();
 		m_connectButton->setEnabled(true);
+		clearConnectionLabelText();
 		break;
 	case RobotKuka::Status::WaitingRobotConnection:
 		setConnectionLabelText("Waiting for robot");
@@ -639,7 +682,6 @@ void AppView::onRobotStatusChanged(RobotKuka::Status status)
 		m_disconnectButton->setEnabled(true);
 		m_stopButton->setEnabled(true);
 		setMoveAndIOButtonsEnabled(true);
-		m_gotoButton->setEnabled(true);
 		break;
 	case RobotKuka::Status::Error:
 		switchCancelBtnToConnectBtn();
@@ -657,7 +699,7 @@ void AppView::onRobotStateChanged(RobotKuka::RobotState state)
 
 void AppView::onRobotConnected()
 {
-	emit requestRefreshUI(m_isJoggingCartesian);
+	emit refreshUiRequest(m_isJoggingCartesian);
 }
 
 void AppView::onRobotDisconnected()
@@ -668,6 +710,7 @@ void AppView::onRobotDisconnected()
 		{
 			m_poseLineEdits[i]->clear();
 			m_deltaLineEdits[i]->clear();
+			setMoveAndIOButtonsChecked(false);
 		}
 		});
 }

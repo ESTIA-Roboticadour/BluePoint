@@ -9,9 +9,11 @@
 #include <QGroupBox>
 #include <QGridLayout>
 #include <QVBoxLayout>
-#include <QMap>
 #include <QLineEdit>
 #include <QLabel>
+#include <QComboBox>
+#include <QTabWidget>
+#include <QMap>
 #include <QTimer>
 #include <QKeyEvent>
 #include <QSet>
@@ -24,13 +26,13 @@ public:
     explicit AppView(QWidget* parent = nullptr);
 
     void setConfig(const Config* config);
-	bool getJoggingMode() const { return m_isJoggingCartesian; }
-	bool getIsMovingInRobotBase() const { return m_isMovingInRobotBase; }
 
 public slots:
     void updatePose(double positions[6]);
     void updateDelta(double positions[6]);
     void updateIO(bool inputs[16], bool outputs[16]);
+    void updateJoggingMode(bool isJoggingCartesian);
+    void updateIsInRobotBase(bool isInRobotBase);
 
     void onRobotStatusChanged(RobotKuka::Status status);
     void onRobotStateChanged(RobotKuka::RobotState state);
@@ -79,12 +81,15 @@ signals:
     void cartesianMovementReleased(RobotKuka::Axis axis);
     void articularMovementPressed(RobotKuka::Joint joint, bool positive);
     void articularMovementReleased(RobotKuka::Joint joint);
-    void outputToggled(RobotKuka::IOOutput output, bool enabled);
+    void outputClicked(RobotKuka::IOOutput output, bool checked);
 
-    void requestRefreshUI(bool isCartesian);
+    void refreshUiRequest(bool isCartesian);
 
-    void isJoggingInCartesianChanged(bool isCartesian);
-	void isMovingInRobotBaseChanged(bool isMovingInRobotBase);
+    void joggingCartesianRequest();
+    void joggingArticularRequest();
+
+    void joggingInRobotBaseRequest();
+    void joggingInRobotToolRequest();
 
 private:
     QPushButton* m_connectButton{ nullptr };
@@ -96,6 +101,8 @@ private:
     QLabel* m_statusLabel{ nullptr };
     QLabel* m_robotStateLabel{ nullptr };
     QLabel* m_connectionLabel{ nullptr };
+    QComboBox* m_robotBaseComboBox;
+    QTabWidget* m_joggingTab;
     QList<QLabel*> m_poseLabels;
     QList<QLabel*> m_deltaLabels;
     QList<QLineEdit*> m_poseLineEdits;
@@ -109,6 +116,6 @@ private:
     bool m_isReadyToMove;
     bool m_isJoggingCartesian;
     bool m_isMovingInRobotBase;
-
-    bool m_isAzerty;
+    int  m_previousJoggingTabsSelected;
+    int m_previousBaseSelected;
 };

@@ -23,6 +23,8 @@ AppModel::AppModel(const RobotConfig* config, QObject* parent) :
 	if (config && setupAddress(config))
 	{
 		m_robot = new RobotKuka(this);
+		m_robot->setAcceleration(m_accelParameter.getValue());
+		m_robot->setVelocity(m_speedParameter.getValue());
 		m_robot->setCartesianTranslationStep(m_cartesianTranslationStep.getValue());
 		m_robot->setCartesianRotationStep(m_cartesianRotationStep.getValue());
 		m_robot->setJointStep(m_jointStep.getValue());
@@ -78,6 +80,16 @@ void AppModel::getCurrentIO(bool inputs[16], bool outputs[16])
 {
 	if (m_robot)
 		m_robot->getCurrentIO(inputs, outputs);
+}
+
+void AppModel::isJoggingCartesian(bool& isJoggingCartesian) const
+{
+	isJoggingCartesian = m_robot ? m_robot->getRSIMode() == RobotKuka::RSIMode::JoggingCartesian : true;
+}
+
+void AppModel::isMovingInRobotBase(bool& isInRobotBase) const
+{
+	isInRobotBase = m_robot ? m_robot->getIsMovingInRobotBase() : true;
 }
 
 void AppModel::setupConfig(const RobotConfig* config)
@@ -194,16 +206,34 @@ void AppModel::onArticularMovementReleased(RobotKuka::Joint joint)
 		m_robot->stopMove();
 }
 
-void AppModel::onOutputToggled(RobotKuka::IOOutput output, bool enabled)
+void AppModel::onOutputClicked(RobotKuka::IOOutput output, bool checked)
 {
 	if (m_robot)
-		m_robot->setOutput(output, enabled);
+		m_robot->setOutput(output, checked);
 }
 
-void AppModel::onIsInRobotBaseChanged(bool isInRobotBase)
+void AppModel::onJoggingCartesianRequested()
 {
 	if (m_robot)
-		m_robot->setRobotBase(isInRobotBase);
+		m_robot->requestJoggingCartesian();
+}
+
+void AppModel::onJoggingArticularRequested()
+{
+	if (m_robot)
+		m_robot->requestJoggingArticular();
+}
+
+void AppModel::onJoggingInRobotBaseRequested()
+{
+	if (m_robot)
+		m_robot->setIsMovingInRobotBase(true); // Set robot base mode
+}
+
+void AppModel::onJoggingInRobotToolRequest()
+{
+	if (m_robot)
+		m_robot->setIsMovingInRobotBase(false); // Set robot tool mode
 }
 
 void AppModel::onRobotConnected()

@@ -20,6 +20,7 @@
          <ELEMENT TAG="DEF_Delay" TYPE="LONG" INDX="INTERNAL" />
          <ELEMENT TAG="Digin" TYPE="LONG" INDX="1" />
          <ELEMENT TAG="Digout" TYPE="LONG" INDX="2" />
+         <ELEMENT TAG="Mode" TYPE="LONG" INDX="3" />
       </ELEMENTS>
    </SEND>
    <RECEIVE>
@@ -34,6 +35,10 @@
          <ELEMENT TAG="DeltaPos.B" TYPE="DOUBLE" INDX="7" HOLDON="1" />
          <ELEMENT TAG="DeltaPos.C" TYPE="DOUBLE" INDX="8" HOLDON="1" />
          <ELEMENT TAG="Digout" TYPE="LONG" INDX="9" HOLDON="1" />
+         <ELEMENT TAG="Stop" TYPE="BOOL" INDX="10" HOLDON="1" />
+         <ELEMENT TAG="Mode" TYPE="LONG" INDX="11" HOLDON="1" />
+         <ELEMENT TAG="Accel" TYPE="DOUBLE" INDX="12" HOLDON="1" />
+         <ELEMENT TAG="Speed" TYPE="DOUBLE" INDX="13" HOLDON="1" />
        </ELEMENTS>
    </RECEIVE>
 </ROOT>

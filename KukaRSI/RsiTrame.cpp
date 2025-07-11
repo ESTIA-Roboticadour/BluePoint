@@ -13,7 +13,9 @@ RsiTrame::RsiTrame() :
 
 void RsiTrame::reset()
 {
+	m_changeMode = false;
 	m_isCartesian = true;
+	m_mode = 0; // None
 	m_ipoc.clear();
 	m_pos[0] = 0.;
 	m_pos[1] = 0.;
@@ -22,6 +24,8 @@ void RsiTrame::reset()
 	m_pos[4] = 0.;
 	m_pos[5] = 0.;
 	m_digout = 0;
+	m_velocity = 0.;
+	m_acceleration = 0.;
 }
 
 void RsiTrame::setPose(bool isCartesian, double pos[6], bool isInRobotBase)
@@ -44,6 +48,34 @@ ushort RsiTrame::getOutputs()
 void RsiTrame::setOutputs(bool outputs[16])
 {
 	encodeBoolArrayToShort(outputs, m_digout);
+}
+
+void RsiTrame::setChangeMode(bool changeMode)
+{
+	m_changeMode = changeMode;
+}
+
+void RsiTrame::setMode(ushort mode)
+{
+	m_mode = mode;
+}
+
+void RsiTrame::setVelocity(double velocity)
+{
+	if (velocity < 0.0)
+		velocity = 0.0;
+	else if (velocity > 100.0)
+		velocity = 100.0;
+	m_velocity = velocity;
+}
+
+void RsiTrame::setAcceleration(double acceleration)
+{
+	if (acceleration < 0.0)
+		acceleration = 0.0;
+	else if (acceleration > 100.0)
+		acceleration = 100.0;
+	m_acceleration = acceleration;
 }
 
 void RsiTrame::encodeBoolArrayToShort(bool io[16], ushort& nIO)
@@ -77,7 +109,10 @@ QString RsiTrame::build() const
 		" C=\"" + QString::number(m_pos[5], 'g', 6) + "\""
 		"/>\r\n"
 		"<Digout>" + QString::number(m_digout) + "</Digout>\r\n"
+		"<Stop>" + QString(m_changeMode ? "1" : "0") + "</Stop>\r\n"
+		"<Mode>" + QString::number(m_mode) + "</Mode>\r\n"
+		"<Accel>" + QString::number(m_acceleration, 'g', 3) + "</Accel>\r\n"
+		"<Speed>" + QString::number(m_velocity, 'g', 3) + "</Speed>\r\n"
 		"<IPOC>" + m_ipoc + "</IPOC>\r\n"
 		"</Sen>";
-
 }

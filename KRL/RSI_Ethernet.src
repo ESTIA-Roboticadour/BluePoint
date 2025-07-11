@@ -1,0 +1,169 @@
+&ACCESS RVP
+&REL 2
+&PARAM EDITMASK = *
+&PARAM TEMPLATE = C:\KRC\Roboter\Template\vorgabe
+DEF RSI_Ethernet( )
+; =============================================
+; 
+; RSI EXAMPLE: ETHERNET communication
+; Realtime UDP data exchange with server application
+;
+; =============================================
+
+; Declaration of KRL variables
+DECL INT ret  ; Return value for RSI commands
+DECL INT CONTID ; ContainerID
+DECL INT MODE
+DECL REAL Accel
+DECL REAL Speed
+DECL REAL DeltaPos[6]
+DECL POS NewPos
+DECL AXIS NewAxis
+
+; Initialisation of System Variables
+$SEN_PINT[1] = 1
+$SEN_PREA[1] = 50
+$SEN_PREA[2] = 10
+$SEN_PREA[3] = 0
+$SEN_PREA[4] = 0
+$SEN_PREA[5] = 0
+$SEN_PREA[6] = 0
+$SEN_PREA[7] = 0
+$SEN_PREA[8] = 0
+
+$ACC_AXIS[1]=50
+$ACC_AXIS[2]=50
+$ACC_AXIS[3]=50
+$ACC_AXIS[4]=50
+$ACC_AXIS[5]=50
+$ACC_AXIS[6]=50
+
+$VEL_AXIS[1]=10
+$VEL_AXIS[2]=10
+$VEL_AXIS[3]=10
+$VEL_AXIS[4]=10
+$VEL_AXIS[5]=10
+$VEL_AXIS[6]=10
+
+$OV_PRO = 100
+
+; Assigning System Variables
+
+MODE = $SEN_PINT[1]
+Accel = $SEN_PREA[1]
+Speed = $SEN_PREA[2]
+DeltaPos[1] = $SEN_PREA[3]
+DeltaPos[2] = $SEN_PREA[4]
+DeltaPos[3] = $SEN_PREA[5]
+DeltaPos[4] = $SEN_PREA[6]
+DeltaPos[5] = $SEN_PREA[7]
+DeltaPos[6] = $SEN_PREA[8]
+
+;FOLD INI
+  ;FOLD BASISTECH INI
+    GLOBAL INTERRUPT DECL 3 WHEN $STOPMESS==TRUE DO IR_STOPM ( )
+    INTERRUPT ON 3 
+    BAS (#INITMOV,0 )
+  ;ENDFOLD (BASISTECH INI)
+  ;FOLD USER INI
+    ;Make your modifications here
+
+  ;ENDFOLD (USER INI)
+;ENDFOLD (INI)
+
+; Move to start position
+PTP {A1 0, A2 -90, A3 90, A4 0, A5 90, A6 0}
+
+; Create RSI Context 
+ret = RSI_CREATE("RSI_Ethernet.rsi",CONTID,TRUE)
+IF (ret <> RSIOK) THEN
+  HALT
+ENDIF
+
+WHILE (MODE > 0) 
+  ; Start RSI execution
+  ret = RSI_ON(#RELATIVE)
+  IF (ret <> RSIOK) THEN
+    HALT
+  ENDIF
+  
+  ; Sensor guided movement
+  RSI_MOVECORR()
+  
+  ; Assign values from RSI
+  MODE = $SEN_PINT[1]   ; Mode
+  Accel = $SEN_PREA[1]  ; Accel en %
+  Speed = $SEN_PREA[2]  ; Speed en %
+  DeltaPos[1] = $SEN_PREA[3]
+  DeltaPos[2] = $SEN_PREA[4]
+  DeltaPos[3] = $SEN_PREA[5]
+  DeltaPos[4] = $SEN_PREA[6]
+  DeltaPos[5] = $SEN_PREA[7]
+  DeltaPos[6] = $SEN_PREA[8]
+  
+  ; Turn off RSI 
+  ret = RSI_OFF()
+  IF (ret <> RSIOK) THEN
+    HALT
+  ENDIF
+   
+  SWITCH MODE
+      CASE 1 ; : Jogging Cartesian
+
+      CASE 2 ; : Jogging Articular
+    
+      CASE 3 ; : GOTO PTP Cartesian ABSOLUTE
+      
+        $VEL_AXIS[1] = Speed
+        $VEL_AXIS[2] = Speed
+        $VEL_AXIS[3] = Speed
+        $VEL_AXIS[4] = Speed
+        $VEL_AXIS[5] = Speed
+        $VEL_AXIS[6] = Speed
+         
+        $ACC_AXIS[1] = Accel
+        $ACC_AXIS[2] = Accel
+        $ACC_AXIS[3] = Accel
+        $ACC_AXIS[4] = Accel
+        $ACC_AXIS[5] = Accel
+        $ACC_AXIS[6] = Accel
+         
+        NewPos.X = DeltaPos[1]
+        NewPos.Y = DeltaPos[2]
+        NewPos.Z = DeltaPos[3]
+        NewPos.A = DeltaPos[4]
+        NewPos.B = DeltaPos[5]
+        NewPos.C = DeltaPos[6]
+         
+        PTP NewPos
+      
+      CASE 4 ; : GOTO PTP ARTICULAR ABSOLUTE
+         
+        $VEL_AXIS[1] = Speed
+        $VEL_AXIS[2] = Speed
+        $VEL_AXIS[3] = Speed
+        $VEL_AXIS[4] = Speed
+        $VEL_AXIS[5] = Speed
+        $VEL_AXIS[6] = Speed
+         
+        $ACC_AXIS[1] = Accel
+        $ACC_AXIS[2] = Accel
+        $ACC_AXIS[3] = Accel
+        $ACC_AXIS[4] = Accel
+        $ACC_AXIS[5] = Accel
+        $ACC_AXIS[6] = Accel
+      
+        NewAxis.A1 = DeltaPos[1]
+        NewAxis.A2 = DeltaPos[2]
+        NewAxis.A3 = DeltaPos[3]
+        NewAxis.A4 = DeltaPos[4]
+        NewAxis.A5 = DeltaPos[5]
+        NewAxis.A6 = DeltaPos[6]
+         
+        PTP NewAxis
+    ENDSWITCH
+ENDWHILE
+
+PTP {A1 0, A2 -90, A3 90, A4 0, A5 90, A6 0}
+
+END

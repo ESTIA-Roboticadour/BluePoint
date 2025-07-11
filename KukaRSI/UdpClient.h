@@ -22,7 +22,7 @@ public:
 	bool isOpened() const { return m_opened; }
 
 	// Envoi de données
-	void sendData(const QString& message, const QHostAddress& targetAddress, quint16 targetPort);
+	void sendData(const QByteArray& data, const QHostAddress& targetAddress, quint16 targetPort);
 
 	bool readData(QByteArray& dataReceived) const;
 	void disconnectAutoRead() const;
@@ -49,4 +49,7 @@ private:
 	quint16 m_port;
 	QHostAddress m_address;
 	QUdpSocket* m_udpSocket;
+	QNetworkDatagram m_datagram;
+
+	int m_datagramsCount = 0;
 };

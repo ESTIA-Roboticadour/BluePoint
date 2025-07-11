@@ -37,14 +37,20 @@ public:
     void getCurrentJoint(double currentJoint[6]) const;
     void getCurrentDelta(double currentDelta[6]) const;
     void getCurrentIO(bool inputs[16], bool outputs[16]);
+	void isJoggingCartesian(bool& isJoggingCartesian) const;
+	void isMovingInRobotBase(bool& isInRobotBase) const;
 
 public slots:
     void onCartesianMovementPressed(RobotKuka::Axis axis, bool positive);
     void onCartesianMovementReleased(RobotKuka::Axis axis);
     void onArticularMovementPressed(RobotKuka::Joint joint, bool positive);
     void onArticularMovementReleased(RobotKuka::Joint joint);
-    void onOutputToggled(RobotKuka::IOOutput output, bool enabled);
-    void onIsInRobotBaseChanged(bool isInRobotBase);
+    void onOutputClicked(RobotKuka::IOOutput output, bool checked);
+
+    void onJoggingCartesianRequested();
+	void onJoggingArticularRequested();
+    void onJoggingInRobotBaseRequested();
+    void onJoggingInRobotToolRequest();
 
 private slots:
     void onErrorOccurred(const QString& message);

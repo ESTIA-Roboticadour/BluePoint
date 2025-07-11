@@ -8,7 +8,7 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    //LogDispatcher::setUILogEnabled(false);
+    LogDispatcher::setUILogEnabled(false);
     LogDispatcher::setLogFile(Helper::makePathAbsolute("KukaRSI.log"));
     ViewFactory::createMainWindow()->showMaximized();
     int status = app.exec();

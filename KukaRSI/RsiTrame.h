@@ -14,6 +14,11 @@ public:
 	ushort getOutputs();
 	void setOutputs(bool outputs[16]);
 
+	void setChangeMode(bool changeMode);
+	void setMode(ushort mode);
+	void setVelocity(double velocity);
+	void setAcceleration(double acceleration);
+
 	// Inherited via Trame
 	bool isValid() const override;
 	QString build() const override;
@@ -26,9 +31,13 @@ private:
 	void encodeBoolArrayToShort(bool io[16], ushort& nIO);
 
 private:
+	bool m_changeMode;
 	bool m_isCartesian;
 	bool m_isInRobotBase;
+	ushort m_digout;
+	ushort m_mode;
 	double m_pos[6];
 	QString m_ipoc;
-	ushort m_digout;
+	double m_velocity;
+	double m_acceleration;
 };

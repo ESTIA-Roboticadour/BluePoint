@@ -1,5 +1,5 @@
 #include "RobotKuka.h"
-
+#include "AppStore.h"
 #include <QCoreApplication>
 #include <cstring> // memcpy
 #include <windows.h> // For THREAD_PRIORITY_HIGHEST
@@ -24,12 +24,17 @@ RobotKuka::RobotKuka(QObject* parent) :
 	m_robotAddress(),
 	m_robotPort(0),
 	m_watchdogTimer(nullptr),
+	m_changeModeRequest(false),
+	m_rsiMode(RSIMode::JoggingCartesian), // Synchro avec la vue et le RSI
+	m_rsiModeRequest(RSIMode::JoggingCartesian),
 	m_currentPose(),
 	m_currentJoint(),
 	m_currentDelta(),
 	m_deltaStepCartesianTranslation(0.25), // Default delta step cartesian (mm)
 	m_deltaStepCartesianRotation(0.25), // Default delta step cartesian (°)
 	m_deltaStepJoint(0.025), // Default delta step joint (degrees)
+	m_velocity(10.0), // Default velocity (percentage)
+	m_acceleration(50.0), // Default acceleration (percentage)
 	m_joggingAxisIndex(0),
 	m_joggingAxis(Axis::X), // Default axis
 	m_joggingJoint(Joint::J1), // Default joint
@@ -44,6 +49,7 @@ RobotKuka::RobotKuka(QObject* parent) :
 	m_ioTrame(0),
 	m_ioMask(0),
 	m_rsiTrame(),
+	m_trameToSend(),
 	m_trameBuffer(),
 	m_trameTagContent(),
 	m_trameTagKey(),
@@ -54,6 +60,7 @@ RobotKuka::RobotKuka(QObject* parent) :
 		m_digout[i] = false;
 		m_requestDigout[i] = false;
 	}
+
 	std::memcpy(m_currentPose, m_ZEROS, ARRAY_6_DOUBLE_SIZE);
 	std::memcpy(m_currentJoint, m_ZEROS, ARRAY_6_DOUBLE_SIZE);
 	std::memcpy(m_currentDelta, m_ZEROS, ARRAY_6_DOUBLE_SIZE);
@@ -61,9 +68,10 @@ RobotKuka::RobotKuka(QObject* parent) :
 	m_trameTagContent.reserve(RSI_TRAME_BUFFER_SIZE); // Reserve space for the trame content
 	m_trameTagKey.reserve(16); // Reserve space for the tag key
 
+	m_trameToSend.reserve(RSI_TRAME_BUFFER_SIZE); // Reserve space for the trame to send
 	m_trameBuffer.reserve(RSI_TRAME_BUFFER_SIZE);
 
-	m_robotThread.setPriorityClass(HIGH_PRIORITY_CLASS);
+	//m_robotThread.setPriorityClass(HIGH_PRIORITY_CLASS);
 	// Do NOT call m_robotThread.setPriority or setAffinity here!
 }
 
@@ -75,7 +83,17 @@ RobotKuka::~RobotKuka()
 	}
 }
 
-void RobotKuka::setRobotBase(bool isInRobotBase)
+void RobotKuka::requestJoggingCartesian()
+{
+	m_rsiModeRequest = RSIMode::JoggingCartesian;
+}
+
+void RobotKuka::requestJoggingArticular()
+{
+	m_rsiModeRequest = RSIMode::JoggingArticular;
+}
+
+void RobotKuka::setIsMovingInRobotBase(bool isInRobotBase)
 {
 	m_isMovingInRobotBase = isInRobotBase;
 }
@@ -158,6 +176,9 @@ void RobotKuka::onInitialDatagramReceived(const QByteArray& data, const QHostAdd
 	if (m_initialDatagramReceived)
 		return;
 
+	AppStore::captureDataReceivedEmitted();
+	AppStore::addToTmpStr("emitted=\"" + QString::number(AppStore::dataReceivedEmitted()) + "\" delayEmitted=\"" + QString::number(AppStore::delay_Received_to_Emitted()) + "\" ");
+
 	m_initialDatagramReceived = true;
 	m_connectionTimer->stop();
 	m_connectionTimer->deleteLater();
@@ -188,6 +209,10 @@ void RobotKuka::onInitialDatagramReceived(const QByteArray& data, const QHostAdd
 	m_rsiTrame.reset();
 	m_rsiTrame.setOutputs(m_digout);
 	m_rsiTrame.setIPOC(m_lastIPOC);
+	m_rsiTrame.setChangeMode(false);
+	m_rsiTrame.setMode(static_cast<ushort>(m_rsiMode)); // Set the RSI mode
+	m_rsiTrame.setVelocity(m_velocity);
+	m_rsiTrame.setAcceleration(m_acceleration);
 	sendTrame();
 
 	std::memcpy(m_requestDigout, m_digout, 16 * sizeof(bool));
@@ -227,6 +252,9 @@ void RobotKuka::onDatagramReceived(const QByteArray& data, const QHostAddress& s
 {
 	if (!m_isConnected)
 		return;
+
+	AppStore::captureDataReceivedEmitted();
+	AppStore::addToTmpStr("emitted=\"" + QString::number(AppStore::dataReceivedEmitted()) + "\" delayEmitted=\"" + QString::number(AppStore::delay_Received_to_Emitted()) + "\" ");
 
 	m_rsiTrame.reset();
 	resetCurrentDelta();
@@ -341,7 +369,9 @@ void RobotKuka::controlLoop()
 
 void RobotKuka::parseReceivedData(const QString& data)
 {
+	//qDebug() << data;
 	ipocFromTrame(data, m_lastIPOC);
+	rsiModeFromTrame(data, m_rsiMode);
 	cartesianPositionFromTrame(data, m_currentPose);
 	jointPositionFromTrame(data, m_currentJoint);
 	getDigitalInputsFromTrame(data, m_digin);
@@ -365,6 +395,26 @@ void RobotKuka::ipocFromTrame(const QString& trame, QString& ipoc)
 	}
 	m_startIndex += tag.length();
 	ipoc = trame.mid(m_startIndex, m_endIndex - m_startIndex);
+}
+
+void RobotKuka::rsiModeFromTrame(const QString& trame, RSIMode& rsiMode)
+{
+	static const QString tag = "<Mode>";
+	m_startIndex = trame.lastIndexOf(tag);
+	if (m_startIndex == -1)
+	{
+		qWarning() << "Mode not found in trame. Missing tag: Mode";
+		return;
+	}
+	m_endIndex = trame.lastIndexOf("</Mode>");
+	if (m_endIndex == -1)
+	{
+		qWarning() << "Malformed <Mode> tag: missing '</Mode>'";
+		return;
+	}
+	m_startIndex += tag.length();
+	rsiMode = static_cast<RSIMode>(trame.mid(m_startIndex, m_endIndex - m_startIndex).toUShort());
+	qDebug() << "rcv " << rsiMode;
 }
 
 void RobotKuka::cartesianPositionFromTrame(const QString& trame, double pos[6])
@@ -506,6 +556,7 @@ void RobotKuka::getDigitalOutputsFromTrame(const QString& trame, bool digout[16]
 	}
 	m_startIndex += tag.length();
 	m_ioTrame = trame.mid(m_startIndex, m_endIndex - m_startIndex).toUShort(); // extrait la sous-chaîne "<Digout ..."
+	//qDebug() << "rcv " + QString::number(m_ioTrame);
 
 	m_ioMask = 0x0001;
 	for (m_iTrame = 0; m_iTrame < 16; m_iTrame++)
@@ -524,10 +575,10 @@ void RobotKuka::requestAutomate()
 		case RobotState::None:
 			setRobotState(m_robotRequestState);
 			break;
-		case RobotState::MoveCartesianLIN:
+		case RobotState::JoggingCartesian:
 			setRobotState(m_robotRequestState);
 			break;
-		case RobotState::MoveJoint:
+		case RobotState::JoggingArticular:
 			setRobotState(m_robotRequestState);
 			break;
 		case RobotState::StopMove:
@@ -552,12 +603,12 @@ void RobotKuka::stateAutomate()
 	case RobotState::DoNothing:
 		break;
 
-	case RobotState::MoveCartesianLIN:
+	case RobotState::JoggingCartesian:
 		m_joggingAxisIndex = static_cast<int>(m_joggingAxis);
 		m_currentDelta[m_joggingAxisIndex] = (m_joggingAxisIndex < 3 ? m_deltaStepCartesianTranslation : m_deltaStepCartesianRotation) * (m_isMovePositive ? 1. : -1.);
 		break;
 
-	case RobotState::MoveJoint:
+	case RobotState::JoggingArticular:
 		m_currentDelta[static_cast<int>(m_joggingJoint)] = m_isMovePositive ? m_deltaStepJoint : -m_deltaStepJoint;
 		break;
 
@@ -570,10 +621,18 @@ void RobotKuka::stateAutomate()
 	}
 
 	m_rsiTrame.setPose(
-		m_robotState == RobotState::MoveCartesianLIN,
+		m_robotState == RobotState::JoggingCartesian,
 		m_currentDelta,
 		m_isMovingInRobotBase);
 	m_rsiTrame.setOutputs(m_requestDigout);
+	m_rsiTrame.setChangeMode(/*m_changeModeRequest*/ m_rsiModeRequest != m_rsiMode);
+	//qDebug() << m_rsiModeRequest << m_rsiMode << (m_rsiModeRequest != m_rsiMode);
+
+	qDebug() << "sen " << m_rsiModeRequest << (m_rsiModeRequest != m_rsiMode);
+
+	m_rsiTrame.setMode(static_cast<ushort>(m_rsiModeRequest));
+	m_rsiTrame.setVelocity(m_velocity);
+	m_rsiTrame.setAcceleration(m_acceleration);
 	m_rsiTrame.setIPOC(m_lastIPOC);
 }
 
@@ -581,9 +640,11 @@ void RobotKuka::sendTrame()
 {
 	if (m_udpClient)
 	{
-		QString trame = m_rsiTrame.build();
-		m_udpClient->sendData(trame, m_robotAddress, m_robotPort);
-		qDebug() << trame.replace("\r\n", " ");
+		m_trameToSend = m_rsiTrame.build();
+		m_udpClient->sendData(m_trameToSend.toUtf8(), m_robotAddress, m_robotPort);
+		
+		//qDebug() << "sen " + QString::number(m_rsiTrame.getOutputs());
+		//qDebug() << m_trameToSend.replace("\r\n", " ");
 	}
 
 	//if (m_nativeUdpSocketPtr)
@@ -619,7 +680,7 @@ void RobotKuka::moveAxis(Axis axis, bool positive)
 	{
 		m_joggingAxis = axis;
 		m_isMovePositive = positive;
-		m_robotRequestState = RobotState::MoveCartesianLIN; // at the end
+		m_robotRequestState = RobotState::JoggingCartesian; // at the end
 	}
 }
 
@@ -629,7 +690,7 @@ void RobotKuka::moveJoint(Joint joint, bool positive)
 	{
 		m_joggingJoint = joint;
 		m_isMovePositive = positive;
-		m_robotRequestState = RobotState::MoveJoint; // at the end
+		m_robotRequestState = RobotState::JoggingArticular; // at the end
 	}
 }
 
@@ -697,4 +758,22 @@ void RobotKuka::setJointStep(double step)
 		step = 0.05;
 
 	m_deltaStepJoint = step;
+}
+
+void RobotKuka::setVelocity(double velocity)
+{
+	if (velocity < 0.0)
+		velocity = 0.0;
+	else if (velocity > 100.0)
+		velocity = 100.0;
+	m_velocity = velocity;
+}
+
+void RobotKuka::setAcceleration(double acceleration)
+{
+	if (acceleration < 0.0)
+		acceleration = 0.0;
+	else if (acceleration > 100.0)
+		acceleration = 100.0;
+	m_acceleration = acceleration;
 }

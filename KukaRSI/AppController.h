@@ -35,5 +35,6 @@ private:
 	double m_tmpPose[6];
 	bool m_tmpInputs[16];
 	bool m_tmpOutputs[16];
+	bool m_tmpIsJoggingCartesian;
+	bool m_tmpIsMovingInRobotBase;
 };
-

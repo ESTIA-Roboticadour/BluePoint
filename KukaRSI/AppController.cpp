@@ -37,6 +37,12 @@ void AppController::onViewRequestRefreshUI(bool isCartesian)
 
 	m_model->getCurrentIO(m_tmpInputs, m_tmpOutputs);
 	m_view->updateIO(m_tmpInputs, m_tmpOutputs);
+
+	m_model->isJoggingCartesian(m_tmpIsJoggingCartesian);
+	m_view->updateJoggingMode(m_tmpIsJoggingCartesian);
+
+	m_model->isMovingInRobotBase(m_tmpIsMovingInRobotBase);
+	m_view->updateIsInRobotBase(m_tmpIsMovingInRobotBase);
 }
 
 void AppController::onModelReleased()
@@ -59,10 +65,15 @@ void AppController::setupConnections()
 	connect(m_view, &AppView::cartesianMovementReleased, m_model, &AppModel::onCartesianMovementReleased);
 	connect(m_view, &AppView::articularMovementPressed, m_model, &AppModel::onArticularMovementPressed);
 	connect(m_view, &AppView::articularMovementReleased, m_model, &AppModel::onArticularMovementReleased);
-	connect(m_view, &AppView::outputToggled, m_model, &AppModel::onOutputToggled);
+	
+	connect(m_view, &AppView::outputClicked, m_model, &AppModel::onOutputClicked);
 
-	connect(m_view, &AppView::requestRefreshUI, this, &AppController::onViewRequestRefreshUI, Qt::DirectConnection);
-	connect(m_view, &AppView::isMovingInRobotBaseChanged, m_model, &AppModel::onIsInRobotBaseChanged);
+	connect(m_view, &AppView::joggingCartesianRequest, m_model, &AppModel::onJoggingCartesianRequested);
+	connect(m_view, &AppView::joggingArticularRequest, m_model, &AppModel::onJoggingArticularRequested);
+	connect(m_view, &AppView::joggingInRobotBaseRequest, m_model, &AppModel::onJoggingInRobotBaseRequested);
+	connect(m_view, &AppView::joggingInRobotToolRequest, m_model, &AppModel::onJoggingInRobotToolRequest);
+
+	connect(m_view, &AppView::refreshUiRequest, this, &AppController::onViewRequestRefreshUI, Qt::DirectConnection);
 
 	// Connexions AppModel -> AppView ou autres
 	connect(m_model, &AppModel::robotStatusChanged, m_view, &AppView::onRobotStatusChanged);
@@ -89,9 +100,15 @@ void AppController::removeConnections()
 	disconnect(m_view, &AppView::cartesianMovementReleased, m_model, &AppModel::onCartesianMovementReleased);
 	disconnect(m_view, &AppView::articularMovementPressed, m_model, &AppModel::onArticularMovementPressed);
 	disconnect(m_view, &AppView::articularMovementReleased, m_model, &AppModel::onArticularMovementReleased);
-	disconnect(m_view, &AppView::outputToggled, m_model, &AppModel::onOutputToggled);
+	
+	disconnect(m_view, &AppView::outputClicked, m_model, &AppModel::onOutputClicked);
 
-	disconnect(m_view, &AppView::requestRefreshUI, this, &AppController::onViewRequestRefreshUI);
+	disconnect(m_view, &AppView::joggingCartesianRequest, m_model, &AppModel::onJoggingCartesianRequested);
+	disconnect(m_view, &AppView::joggingArticularRequest, m_model, &AppModel::onJoggingArticularRequested);
+	disconnect(m_view, &AppView::joggingInRobotBaseRequest, m_model, &AppModel::onJoggingInRobotBaseRequested);
+	disconnect(m_view, &AppView::joggingInRobotToolRequest, m_model, &AppModel::onJoggingInRobotToolRequest);
+
+	disconnect(m_view, &AppView::refreshUiRequest, this, &AppController::onViewRequestRefreshUI);
 
 	// Connexions AppModel -> AppView ou autres
 	disconnect(m_model, &AppModel::robotStatusChanged, m_view, &AppView::onRobotStatusChanged);

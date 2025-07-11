@@ -10,6 +10,8 @@
 #include <QHostAddress>
 #include <QTimer>
 #include <QByteArray>
+#include <QStack>
+#include <QPair>
 #include <memory>
 
 #define RSI_TRAME_BUFFER_SIZE 1024 // Size of the RSI trame buffer
@@ -35,11 +37,19 @@ public:
     {
         None,
         DoNothing,
-        MoveCartesianLIN,
-        MoveJoint,
+        JoggingCartesian,
+        JoggingArticular,
         StopMove
     };
     Q_ENUM(RobotState)
+
+	enum class RSIMode
+	{
+		None,
+        JoggingCartesian, // 1 for Cartesian mode
+		JoggingArticular, // 2 for Articular mode
+	};
+    Q_ENUM(RSIMode)
 
     enum Axis
     {
@@ -134,8 +144,8 @@ public:
         switch (behaviour) {
         case RobotState::None: return "None";
         case RobotState::DoNothing: return "Do Nothing";
-        case RobotState::MoveCartesianLIN: return "Move Cartesian LIN";
-        case RobotState::MoveJoint: return "Move Joint";
+        case RobotState::JoggingCartesian: return "Move Cartesian LIN";
+        case RobotState::JoggingArticular: return "Move Joint";
         case RobotState::StopMove: return "Stop Move";
         default: return "";
         }
@@ -161,7 +171,12 @@ public:
 
 	Status getStatus() const { return m_status; };
     RobotState getRobotState() const { return m_robotState; }
-    void setRobotBase(bool isInRobotBase);
+	RSIMode getRSIMode() const { return m_rsiMode; }
+	bool getIsMovingInRobotBase() const { return m_isMovingInRobotBase; }
+
+    void requestJoggingCartesian();
+    void requestJoggingArticular();
+    void setIsMovingInRobotBase(bool isInRobotBase);
 
     // Connexion / déconnexion
     
@@ -174,19 +189,23 @@ public:
     void abortConnection();
 
     // Démarrage / arrêt
+
     void start();
     void stop();
 
     // Déplacement manuel
+
     void moveAxis(Axis axis, bool positive);
     void moveJoint(Joint joint, bool positive);
     void stopMove();
 
     // IO
+
     void setOutput(IOOutput output, bool enabled);
     void getCurrentIO(bool inputs[16], bool outputs[16]);
 
     // Pose & Delta
+
     void getCurrentPose(double currentPose[6]) const;
     void getCurrentJoint(double currentPose[6]) const;
     void getCurrentDelta(double currentDelta[6]) const;
@@ -195,6 +214,9 @@ public:
     void setCartesianTranslationStep(double step);
     void setCartesianRotationStep(double step);
     void setJointStep(double step);
+
+	void setVelocity(double velocity);
+	void setAcceleration(double acceleration);
 
     void controlLoop() override;
 
@@ -216,6 +238,7 @@ private:
     void parseReceivedData(const QString& data);
     
     void ipocFromTrame(const QString& trame, QString& ipoc);
+    void rsiModeFromTrame(const QString& trame, RSIMode& rsiMode);
     void cartesianPositionFromTrame(const QString& trame, double pos[6]);
     void jointPositionFromTrame(const QString& trame, double pos[6]);
     void getDigitalInputsFromTrame(const QString& trame, bool digin[16]);
@@ -257,6 +280,9 @@ private:
     QTimer* m_watchdogTimer;
     const int WATCHDOG_TIMEOUT_MS = 100; // 20 ms
 
+	bool m_changeModeRequest;
+    RSIMode m_rsiMode;
+    RSIMode m_rsiModeRequest;
     inline static const double m_ZEROS[6] = { 0., 0., 0., 0., 0., 0. };
 	double m_currentPose[6]; // Positions X, Y, Z, A, B, C
     double m_currentJoint[6]; // Joints : J1, J2, J3, J4, J5, J6
@@ -264,6 +290,8 @@ private:
     double m_deltaStepCartesianTranslation;
     double m_deltaStepCartesianRotation;
     double m_deltaStepJoint;
+	double m_velocity;      // 0.0 to 100.0 (percentage)
+	double m_acceleration;  // 0.0 to 100.0 (percentage)
     int m_joggingAxisIndex;
     Axis m_joggingAxis;
 	Joint m_joggingJoint;
@@ -283,5 +311,6 @@ private:
     QString m_trameTagKey;
     QString m_lastIPOC;
     RsiTrame m_rsiTrame;
+    QString m_trameToSend;
 	QByteArray m_trameBuffer; // Buffer pour la trame RSI
 };

@@ -18,7 +18,6 @@ void AppStore::setRobotConfig(RobotConfig* robotConfig)
 	}
 }
 
-
 void AppStore::deleteAll()
 {
 	deleteObject(s_robotConfig);
